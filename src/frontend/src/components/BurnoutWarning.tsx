@@ -1,0 +1,61 @@
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { AlertCircle, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+
+interface BurnoutWarningProps {
+  burnoutIndex: number;
+  onDismiss: () => void;
+}
+
+export function BurnoutWarning({ burnoutIndex, onDismiss }: BurnoutWarningProps) {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
+
+  const handleDismiss = () => {
+    setIsVisible(false);
+    setTimeout(onDismiss, 300);
+  };
+
+  return (
+    <div
+      className={`fixed bottom-6 right-6 z-50 max-w-md transition-all duration-300 ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+      }`}
+    >
+      <Card className="border-amber-500/50 bg-amber-500/5 shadow-lg">
+        <CardContent className="pt-6">
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-500/10 shrink-0">
+              <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+            </div>
+            <div className="flex-1">
+              <h4 className="font-bold mb-1">Focus Check-In</h4>
+              <p className="text-sm text-muted-foreground mb-2">
+                Your burnout index is at <strong>{burnoutIndex.toFixed(1)}</strong>. You might be
+                experiencing cognitive fatigue.
+              </p>
+              <p className="text-sm text-muted-foreground mb-3">
+                Consider taking a short desk recovery break to reset your focus.
+              </p>
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline" onClick={handleDismiss}>
+                  I'll keep working
+                </Button>
+                <Button size="sm" asChild>
+                  <a href="/desk-recovery">Take a break</a>
+                </Button>
+              </div>
+            </div>
+            <Button size="sm" variant="ghost" onClick={handleDismiss} className="shrink-0">
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

@@ -1,0 +1,355 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Focus Guardian Frontend Implementation Plan",
+  "requirements": [
+    {
+      "id": "REQ-7",
+      "summary": "Build application categorization interface for managing productive and distracting applications",
+      "acceptanceCriteria": [
+        "Users can view categorized applications",
+        "Users can add new applications and assign categories",
+        "Users can edit existing application categories",
+        "Default productive and distracting apps are pre-populated"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/types/index.ts",
+          "operation": "create",
+          "description": "Define TypeScript interfaces for application categorization, including Application interface with name and category fields, and types for productive/distracting categories"
+        },
+        {
+          "path": "frontend/src/components/AppCategorizationManager.tsx",
+          "operation": "create",
+          "description": "Create component displaying categorized applications in two lists (productive and distracting) with add/edit functionality, using default examples including coding tools, document editors as productive, and social media, video platforms as distracting"
+        },
+        {
+          "path": "frontend/src/hooks/useApplications.ts",
+          "operation": "create",
+          "description": "Create custom hook managing application state in local storage, providing functions to add, update, and retrieve categorized applications with default pre-populated apps"
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add routing for application categorization page and integrate AppCategorizationManager component into navigation structure"
+        }
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "summary": "Create live monitoring simulation interface displaying active application and real-time switching metrics",
+      "acceptanceCriteria": [
+        "Current active application is displayed in real-time",
+        "Switch frequency metrics update live",
+        "Visual feedback indicates when switches occur",
+        "Continuous focus timer shows uninterrupted work duration"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/LiveMonitor.tsx",
+          "operation": "create",
+          "description": "Create component simulating live monitoring with current active application display, real-time switch frequency counter, continuous focus duration timer, and visual pulse indicator when context switches occur"
+        },
+        {
+          "path": "frontend/src/hooks/useActivitySimulator.ts",
+          "operation": "create",
+          "description": "Create custom hook simulating application switching behavior, generating context switch events, calculating switches per minute and per hour, and calling backend recordSwitch method with ContextSwitch data"
+        },
+        {
+          "path": "frontend/src/hooks/useFocusTimer.tsx",
+          "operation": "create",
+          "description": "Create custom hook tracking continuous focus duration, resetting on context switches, and providing formatted time display"
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add routing for live monitoring page and integrate LiveMonitor component into main navigation"
+        }
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "summary": "Implement progressive warning system UI with burnout threshold notifications and visual effects",
+      "acceptanceCriteria": [
+        "First warning shows gentle notification with burnout index",
+        "Second warning applies greyscale visual effect to entire interface",
+        "Warnings are dismissible but reappear if behavior continues",
+        "Visual effects scale with burnout severity"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/BurnoutWarning.tsx",
+          "operation": "create",
+          "description": "Create warning notification component displaying burnout index and encouragement message with gentle styling using warm colors, dismissible but persistent based on continued behavior"
+        },
+        {
+          "path": "frontend/src/components/GreyscaleOverlay.tsx",
+          "operation": "create",
+          "description": "Create component applying subtle greyscale CSS filter to reduce visual stimulation at high burnout threshold, with smooth transition animation"
+        },
+        {
+          "path": "frontend/src/hooks/useBurnoutMonitor.ts",
+          "operation": "create",
+          "description": "Create custom hook calculating burnout index based on switching patterns (productive-to-productive small increase, productive-to-distracting moderate increase, distracting-to-distracting large increase), tracking threshold levels, and triggering warning states"
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Integrate BurnoutWarning and GreyscaleOverlay components at app root level to overlay entire interface when thresholds are reached"
+        }
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "summary": "Build smart blocking interface for distracting applications after ignored warnings",
+      "acceptanceCriteria": [
+        "Block screen activates after two warnings for distracting apps",
+        "Block screen displays required focus duration (20-25 minutes)",
+        "Timer counts down productive work session",
+        "Block is removed automatically after productive session completes"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/BlockScreen.tsx",
+          "operation": "create",
+          "description": "Create full-screen blocking component displaying required productive session duration (20-25 minutes), countdown timer with progress indicator, and encouraging message about completing focus work to unlock"
+        },
+        {
+          "path": "frontend/src/hooks/useBlockingLogic.ts",
+          "operation": "create",
+          "description": "Create custom hook tracking warning count, activating block screen after two ignored warnings, managing productive work timer, and automatically removing block after session completes while calling backend recordSession method"
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Integrate BlockScreen component at app root level to display over entire interface when blocking condition is met"
+        }
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "summary": "Create desk recovery break interface with guided breathing exercises",
+      "acceptanceCriteria": [
+        "Breathing exercise displays animated visual guide",
+        "Interface uses calming colors and smooth animations",
+        "Short timer (3-5 minutes) tracks desk recovery duration",
+        "Break can be started and ended from main interface"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/DeskRecoveryBreak.tsx",
+          "operation": "create",
+          "description": "Create component with animated breathing guide using expanding/contracting circle animation, calming gradient background using frontend/public/assets/generated/breathing-background.dim_1200x800.png as backdrop, and 3-5 minute timer display with start/end controls"
+        },
+        {
+          "path": "frontend/src/hooks/useBreathingAnimation.ts",
+          "operation": "create",
+          "description": "Create custom hook managing breathing animation cycle timing (inhale/hold/exhale phases) and animation state transitions"
+        },
+        {
+          "path": "frontend/src/hooks/useBreakTimer.tsx",
+          "operation": "create",
+          "description": "Create custom hook managing break session timing, calling backend recordBreak method with BreakSession data including breakType deskRecovery and isRestorative classification"
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add routing for desk recovery break page and integrate DeskRecoveryBreak component into navigation with quick-access button from dashboard"
+        }
+      ]
+    },
+    {
+      "id": "REQ-12",
+      "summary": "Implement walk break timer interface with countdown and alert alarm",
+      "acceptanceCriteria": [
+        "User can input desired break duration before starting walk break",
+        "Countdown timer is visible and updates in real-time",
+        "Alert sound plays when timer reaches zero",
+        "User can manually end break early if they return before timer expires"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/WalkBreakTimer.tsx",
+          "operation": "create",
+          "description": "Create component with duration input field, prominent countdown display updating every second, alert audio element playing sound when timer expires, and manual end break button"
+        },
+        {
+          "path": "frontend/src/hooks/useWalkBreakTimer.tsx",
+          "operation": "create",
+          "description": "Create custom hook managing countdown timer state, triggering audio alert on expiration, handling manual early completion, and calling backend recordBreak method with BreakSession data including breakType walkBreak"
+        },
+        {
+          "path": "frontend/public/assets/alert-sound.mp3",
+          "operation": "create",
+          "description": "Add alert sound audio file for walk break timer expiration notification"
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add routing for walk break timer page and integrate WalkBreakTimer component into navigation with quick-access button from dashboard"
+        }
+      ]
+    },
+    {
+      "id": "REQ-13",
+      "summary": "Build gamification achievements display with badges and share functionality",
+      "acceptanceCriteria": [
+        "Achievements are displayed as visual badges with icons",
+        "Each achievement shows unlock date and criteria",
+        "Users can share achievements externally",
+        "Achievement progress is visible for locked badges"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/AchievementsBadge.tsx",
+          "operation": "create",
+          "description": "Create badge component displaying achievement icon using generated badge images (frontend/public/assets/generated/badge-focus-streak.dim_256x256.png for focus streaks, frontend/public/assets/generated/badge-deep-work.dim_256x256.png for deep work milestones, frontend/public/assets/generated/badge-distraction-shield.dim_256x256.png for distraction resistance), unlock date, criteria description, and locked/unlocked state styling"
+        },
+        {
+          "path": "frontend/src/components/AchievementsGallery.tsx",
+          "operation": "create",
+          "description": "Create gallery component displaying all achievements in grid layout, showing earned badges with full details and locked badges with progress indicators, including share button with copy-to-clipboard or download functionality"
+        },
+        {
+          "path": "frontend/src/hooks/useAchievements.ts",
+          "operation": "create",
+          "description": "Create custom hook fetching achievement data from backend, calculating progress toward locked achievements, and providing share functionality"
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add routing for achievements page and integrate AchievementsGallery component into main navigation"
+        }
+      ]
+    },
+    {
+      "id": "REQ-14",
+      "summary": "Create recovery quality visualization using pie chart for break analysis",
+      "acceptanceCriteria": [
+        "Pie chart displays break quality distribution",
+        "Restorative and non-restorative segments are clearly differentiated",
+        "Percentages and time durations are labeled",
+        "Chart updates based on selected time period"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/RecoveryQualityChart.tsx",
+          "operation": "create",
+          "description": "Create pie chart component using recharts library displaying break time segmented into restorative activities (walks, breathing exercises, inactivity) and non-restorative activities (passive browsing, social media) with clear color differentiation, percentage labels, and time duration tooltips"
+        },
+        {
+          "path": "frontend/src/hooks/useBreakAnalytics.ts",
+          "operation": "create",
+          "description": "Create custom hook aggregating break session data from backend, calculating restorative vs non-restorative percentages, and filtering by selected time period"
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Integrate RecoveryQualityChart component into dashboard view as analytics card"
+        }
+      ]
+    },
+    {
+      "id": "REQ-15",
+      "summary": "Build comprehensive dashboard displaying key metrics and daily recommendations",
+      "acceptanceCriteria": [
+        "Dashboard displays all key metrics in organized card layout",
+        "Charts visualize trends over time (switching frequency, burnout index)",
+        "Productivity score is prominently displayed with visual indicator",
+        "Daily recommendations are personalized based on user patterns",
+        "Layout is clean and information is quickly scannable"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Dashboard.tsx",
+          "operation": "create",
+          "description": "Create dashboard component with card-based layout displaying total focus time, distraction time, switching frequency chart, burnout index trend graph, productivity score with circular progress indicator, daily personalized recommendations, and hero section using frontend/public/assets/generated/dashboard-hero.dim_800x400.png showing focused person at desk"
+        },
+        {
+          "path": "frontend/src/components/MetricsCard.tsx",
+          "operation": "create",
+          "description": "Create reusable card component for displaying individual metrics with title, value, trend indicator, and optional chart"
+        },
+        {
+          "path": "frontend/src/components/ProductivityScore.tsx",
+          "operation": "create",
+          "description": "Create component displaying overall productivity score as large number with circular progress visualization and color-coded indicator (green for good, yellow for moderate, red for needs improvement)"
+        },
+        {
+          "path": "frontend/src/components/DailyRecommendations.tsx",
+          "operation": "create",
+          "description": "Create component displaying 3-5 personalized recommendations based on user behavior patterns, using encouraging coaching language and actionable suggestions"
+        },
+        {
+          "path": "frontend/src/hooks/useDashboardData.ts",
+          "operation": "create",
+          "description": "Create custom hook aggregating session data from backend, calculating total focus time, distraction time, switching frequency trends, burnout index over time, productivity score, and generating personalized recommendations"
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Set Dashboard component as default home route and ensure it is accessible from main navigation"
+        }
+      ]
+    },
+    {
+      "id": "REQ-16",
+      "summary": "Implement periodic report view displaying positive and negative behavioral patterns",
+      "acceptanceCriteria": [
+        "Report displays positive patterns with encouraging visual indicators",
+        "Negative patterns are highlighted constructively for self-correction",
+        "Patterns show week-over-week or month-over-month comparisons",
+        "Report is exportable or viewable for different time periods"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/PeriodicReport.tsx",
+          "operation": "create",
+          "description": "Create report component displaying positive patterns (consistent work sessions, healthy break timing, reduced distractions) with green checkmarks and encouraging messages, and negative patterns (late-night work fatigue, frequent context switching, distraction spikes) with constructive yellow/orange warnings and improvement suggestions, including time period selector and export button"
+        },
+        {
+          "path": "frontend/src/components/PatternCard.tsx",
+          "operation": "create",
+          "description": "Create component displaying individual pattern with icon, description, trend comparison, and visual indicator (positive green or constructive yellow/orange for negative patterns)"
+        },
+        {
+          "path": "frontend/src/hooks/useReportData.ts",
+          "operation": "create",
+          "description": "Create custom hook fetching reports from backend using getAllReports method, parsing Pattern data for positive and negative patterns, calculating week-over-week and month-over-month comparisons, and providing export functionality"
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add routing for periodic report page and integrate PeriodicReport component into main navigation"
+        }
+      ]
+    },
+    {
+      "id": "REQ-17",
+      "summary": "Design application with supportive coaching aesthetic using warm colors and encouraging design language",
+      "acceptanceCriteria": [
+        "Visual design uses warm, supportive color palette (avoid harsh reds or aggressive tones)",
+        "Typography and language tone is encouraging and coaching-oriented",
+        "Interventions feel helpful rather than restrictive",
+        "Overall aesthetic conveys trust and personal growth support"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/tailwind.config.js",
+          "operation": "modify",
+          "description": "Extend Tailwind theme with warm, supportive color palette including soft blues, greens, and warm neutrals for primary colors, gentle yellows and oranges for warnings (not harsh reds), and calming purples for accents, avoiding aggressive or punishing color choices"
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Add global CSS variables for coaching aesthetic including warm base colors, soft shadows, rounded corners, and encouraging typography styles with friendly font choices and comfortable line heights"
+        },
+        {
+          "path": "frontend/src/lib/copyConstants.ts",
+          "operation": "create",
+          "description": "Create constants file with all user-facing text using encouraging, coaching-oriented language throughout the application, avoiding harsh or punishing terminology and emphasizing support, growth, and personal improvement"
+        }
+      ]
+    }
+  ]
+}

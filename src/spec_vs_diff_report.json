@@ -1,0 +1,156 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-20T14:29:08.231Z",
+  "summary": "The implementation covers most frontend and backend requirements with strong focus on UI components, routing, and data structures. However, several key functional requirements are missing or incomplete, particularly around burnout calculation logic, switch frequency metrics, report generation algorithms, and break quality classification. Some features appear to be UI-only without backend integration.",
+  "missing_requirements": [
+    {
+      "id": "REQ-2",
+      "requirement": "Implement backend burnout index calculation logic that differentiates between productive-to-productive switching (small increase), productive-to-distracting switching (moderate increase), and distracting-to-distracting switching (large increase)",
+      "reason": "Backend data structures exist but no calculation logic is implemented. The burnout index differentiation based on switching types is not present in backend/main.mo",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "requirement": "Create backend endpoints to record context switches with timestamp, source application, target application, and calculated switch frequency metrics (switches per minute, switches per hour)",
+      "reason": "While recordSwitch endpoint exists, the calculated switch frequency metrics (switches per minute/hour) are not calculated or stored in the backend. These calculations only exist in the frontend simulator",
+      "evidence": [
+        "backend/main.mo",
+        "frontend/src/hooks/useActivitySimulator.ts"
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "requirement": "Create backend break session tracking that records break type, duration, timer settings, and break quality classification (restorative vs non-restorative based on activity during break)",
+      "reason": "Backend has BreakSession type and recordBreak endpoint, but there is no logic to analyze break activity and determine restorative quality classification. The isRestorative field is passed in but not calculated",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "requirement": "Implement backend periodic report generation that analyzes positive patterns (consistent work sessions, healthy break timing, reduced distractions) and negative patterns (late-night work fatigue, frequent context switching, distraction spikes)",
+      "reason": "While Report data structure and generateReport endpoint exist, there are no pattern detection algorithms implemented. The patterns are passed as parameters rather than calculated from session data",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "requirement": "Build smart blocking interface that after two ignored warnings displays a block screen for distracting applications, showing required productive session duration (20-25 minutes) needed to unlock, with a focus timer and progress indicator",
+      "reason": "BlockScreen UI exists but there is no connection to warnings being ignored. The useBlockingLogic hook has warningCount but no mechanism tracks warning dismissals or connects burnout warnings to blocking logic",
+      "evidence": [
+        "frontend/src/components/BlockScreen.tsx",
+        "frontend/src/hooks/useBlockingLogic.ts",
+        "frontend/src/App.tsx"
+      ]
+    },
+    {
+      "id": "REQ-12",
+      "requirement": "Implement walk break timer interface where users set break duration before leaving, displays countdown timer prominently, and plays an alert alarm sound when time expires if user has not returned",
+      "reason": "WalkBreak page is referenced in routing but the actual component file is not included in the diff. Cannot verify alert sound functionality",
+      "evidence": [
+        "frontend/src/App.tsx"
+      ]
+    },
+    {
+      "id": "REQ-13",
+      "requirement": "Build gamification achievements display showing earned badges for focus streaks, deep work milestones, and distraction resistance with visual icons, unlock dates, and share functionality for portfolio or interview use",
+      "reason": "While achievements display and share functionality exist in the frontend, there is no backend logic to actually track and award achievements based on user behavior patterns. The achievements are hardcoded mock data",
+      "evidence": [
+        "frontend/src/hooks/useAchievements.ts",
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-15",
+      "requirement": "Build comprehensive dashboard displaying total focus time, distraction time, switching frequency chart, burnout index trend graph, overall productivity score, and daily personalized recommendations in a clean visual layout",
+      "reason": "Dashboard page is referenced but not included in diff. Cannot verify if switching frequency chart and burnout index trend graph are implemented",
+      "evidence": [
+        "frontend/src/App.tsx"
+      ]
+    },
+    {
+      "id": "REQ-16",
+      "requirement": "Implement periodic report view that displays positive behavioral patterns and negative patterns with visual indicators and trend comparisons over time",
+      "reason": "PeriodicReport component exists but relies on useReportData hook which is not included in the diff. Cannot verify if trend comparisons over time are actually implemented",
+      "evidence": [
+        "frontend/src/components/PeriodicReport.tsx"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "Internet Identity authentication integration",
+      "reason": "The implementation includes useInternetIdentity hook and authentication logic, but this was not requested in the BuildRequest",
+      "evidence": [
+        "frontend/src/hooks/useActor.ts"
+      ]
+    },
+    {
+      "description": "Theme switching capability (ThemeProvider)",
+      "reason": "The app includes theme provider with dark/light mode support, which was not requested in the requirements",
+      "evidence": [
+        "frontend/src/App.tsx"
+      ]
+    },
+    {
+      "description": "Footer with external link attribution",
+      "reason": "Layout includes a footer with caffeine.ai attribution link that was not requested",
+      "evidence": [
+        "frontend/src/components/Layout.tsx"
+      ]
+    }
+  ],
+  "confidence": 0.75,
+  "changed_files": [
+    "all_files_summary.json",
+    "backend/main.mo",
+    "frontend-file-summaries.txt",
+    "frontend/index.css",
+    "frontend/index.html",
+    "frontend/src/App.tsx",
+    "frontend/src/components/AchievementsBadge.tsx",
+    "frontend/src/components/AchievementsGallery.tsx",
+    "frontend/src/components/BlockScreen.tsx",
+    "frontend/src/components/BurnoutWarning.tsx",
+    "frontend/src/components/DailyRecommendations.tsx",
+    "frontend/src/components/GreyscaleOverlay.tsx",
+    "frontend/src/components/Layout.tsx",
+    "frontend/src/components/MetricsCard.tsx",
+    "frontend/src/components/PatternCard.tsx",
+    "frontend/src/components/PeriodicReport.tsx",
+    "frontend/src/components/ProductivityScore.tsx",
+    "frontend/src/components/RecoveryQualityChart.tsx",
+    "frontend/src/hooks/useAchievements.ts",
+    "frontend/src/hooks/useActivitySimulator.ts",
+    "frontend/src/hooks/useActor.ts",
+    "frontend/src/hooks/useApplications.ts",
+    "frontend/src/hooks/useBlockingLogic.ts",
+    "frontend/src/hooks/useBreakAnalytics.ts",
+    "frontend/src/hooks/useBreakTimer.ts",
+    "frontend/src/hooks/useBreathingAnimation.ts",
+    "frontend/src/hooks/useBurnoutMonitor.ts",
+    "frontend/src/hooks/useDashboardData.ts",
+    "frontend/src/hooks/useFocusTimer.ts",
+    "frontend/src/hooks/useInternetIdentity.ts",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/hooks/useReportData.ts",
+    "frontend/src/hooks/useWalkBreakTimer.ts",
+    "frontend/src/index.css",
+    "frontend/src/lib/copyConstants.ts",
+    "frontend/src/main.tsx",
+    "frontend/src/pages/Achievements.tsx",
+    "frontend/src/pages/AppCategorization.tsx",
+    "frontend/src/pages/Dashboard.tsx",
+    "frontend/src/pages/DeskRecovery.tsx",
+    "frontend/src/pages/LiveMonitor.tsx",
+    "frontend/src/pages/Reports.tsx",
+    "frontend/src/pages/WalkBreak.tsx",
+    "frontend/src/types/index.ts",
+    "frontend/tailwind.config.js",
+    "project_state.json"
+  ]
+}

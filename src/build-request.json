@@ -1,0 +1,351 @@
+{
+  "kind": "build_request",
+  "title": "Build Focus Guardian productivity monitoring application",
+  "projectName": "Focus Guardian",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Create backend data model to store user activity sessions including timestamp, application name, application category (productive/distracting), duration, and session type (focus/distraction/break)",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-user-1"
+        ],
+        "quotes": [
+          "The system does not record typed data or private information. It only detects: which application is active, how long it remains active, how frequently switching occurs"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Backend stores activity sessions with all required fields",
+        "Sessions can be queried by user and time range",
+        "Application categories are persisted (productive vs distracting)"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Implement backend burnout index calculation logic that differentiates between productive-to-productive switching (small increase), productive-to-distracting switching (moderate increase), and distracting-to-distracting switching (large increase)",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-user-1"
+        ],
+        "quotes": [
+          "The burnout index estimates cognitive fatigue. It increases differently depending on the type of switching"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Burnout index calculation uses switch frequency and application category transitions",
+        "Different burnout increment rates apply based on switching type",
+        "Burnout index is stored and retrievable per user session"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Create backend endpoints to record context switches with timestamp, source application, target application, and calculated switch frequency metrics (switches per minute, switches per hour)",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-user-1"
+        ],
+        "quotes": [
+          "Each time the active window changes, a switch event is recorded. From this the system calculates: switches per minute, switches per hour"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Switch events are recorded with source and target applications",
+        "Switch frequency metrics are calculated and stored",
+        "Switch history is queryable by time range"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Implement backend achievement tracking system that awards focus streak badges, deep work hour milestones, and distraction resistance awards based on user behavior patterns",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-user-1"
+        ],
+        "quotes": [
+          "Users earn: Focus streak badges, Deep work hours milestones, Distraction resistance awards"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Achievement types are defined with unlock criteria",
+        "User achievements are tracked and persisted",
+        "Achievements can be queried and displayed"
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Create backend break session tracking that records break type (desk recovery/walk break), duration, timer settings, and break quality classification (restorative vs non-restorative based on activity during break)",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-user-1"
+        ],
+        "quotes": [
+          "Not all breaks are restorative. Scrolling social media is not a true rest. A recovery pie chart shows: restorative breaks (walks, breathing, inactivity), non-restorative breaks (passive browsing)"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Break sessions store type, duration, and quality classification",
+        "Break activity can be analyzed to determine restorative quality",
+        "Break data is aggregatable for visualization"
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Implement backend periodic report generation that analyzes positive patterns (consistent work sessions, healthy break timing, reduced distractions) and negative patterns (late-night work fatigue, frequent context switching, distraction spikes)",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-user-1"
+        ],
+        "quotes": [
+          "The system generates a periodic report showing: Positive patterns: consistent work sessions, healthy break timing, reduced distractions; Negative patterns: late-night work fatigue, frequent context switching, distraction spikes"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Reports analyze session data to identify positive and negative patterns",
+        "Pattern detection algorithms identify work consistency, break timing, and distraction trends",
+        "Reports are generated for configurable time periods"
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "text": "Build application categorization interface where users can view and manage which applications are classified as productive or distracting, with default examples including coding tools, document editors, and presentation software as productive, and social media, video platforms, and games as distracting",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-1"
+        ],
+        "quotes": [
+          "Productive Apps: coding tools, document editors, presentation software, research websites, textbooks, PDF readers. Distracting Apps: social media, video platforms, entertainment websites, games, and messaging apps"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Users can view categorized applications",
+        "Users can add new applications and assign categories",
+        "Users can edit existing application categories",
+        "Default productive and distracting apps are pre-populated"
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "text": "Create live monitoring simulation interface that displays current active application, real-time switching frequency, continuous focus duration, and a visual indicator when context switches occur",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-1"
+        ],
+        "quotes": [
+          "The app constantly checks the active window every few seconds. Each time the active window changes, a switch event is recorded"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Current active application is displayed in real-time",
+        "Switch frequency metrics update live",
+        "Visual feedback indicates when switches occur",
+        "Continuous focus timer shows uninterrupted work duration"
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "text": "Implement progressive warning system UI that shows non-intrusive notifications at first burnout threshold displaying current burnout index and encouragement message, then applies subtle greyscale filter to screen at second threshold to reduce visual stimulation",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-1"
+        ],
+        "quotes": [
+          "First Threshold (Early Fatigue): A small notification appears, Burnout index is shown, User is encouraged to refocus. Second Threshold (High Fatigue): The screen slightly greyscales, Visual stimulation is reduced"
+        ]
+      },
+      "acceptanceCriteria": [
+        "First warning shows gentle notification with burnout index",
+        "Second warning applies greyscale visual effect to entire interface",
+        "Warnings are dismissible but reappear if behavior continues",
+        "Visual effects scale with burnout severity"
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "text": "Build smart blocking interface that after two ignored warnings displays a block screen for distracting applications, showing required productive session duration (20-25 minutes) needed to unlock, with a focus timer and progress indicator",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-1"
+        ],
+        "quotes": [
+          "After two warnings, the system temporarily blocks distracting applications. Unlock condition: The user must complete a productive session (for example 20–25 minutes of uninterrupted work)"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Block screen activates after two warnings for distracting apps",
+        "Block screen displays required focus duration (20-25 minutes)",
+        "Timer counts down productive work session",
+        "Block is removed automatically after productive session completes"
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "text": "Create desk recovery break interface with guided breathing exercise animations, calming visual elements, and short mental reset timer that can be completed without leaving the workspace",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-1"
+        ],
+        "quotes": [
+          "The app offers: guided breathing exercises, calm focus visuals, short mental reset. These can be completed without leaving the desk"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Breathing exercise displays animated visual guide",
+        "Interface uses calming colors and smooth animations",
+        "Short timer (3-5 minutes) tracks desk recovery duration",
+        "Break can be started and ended from main interface"
+      ]
+    },
+    {
+      "id": "REQ-12",
+      "text": "Implement walk break timer interface where users set break duration before leaving, displays countdown timer prominently, and plays an alert alarm sound when time expires if user has not returned",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-1"
+        ],
+        "quotes": [
+          "If the user chooses to leave: they set a break timer, the app starts a countdown, if they do not return in time, an alert alarm plays"
+        ]
+      },
+      "acceptanceCriteria": [
+        "User can input desired break duration before starting walk break",
+        "Countdown timer is visible and updates in real-time",
+        "Alert sound plays when timer reaches zero",
+        "User can manually end break early if they return before timer expires"
+      ]
+    },
+    {
+      "id": "REQ-13",
+      "text": "Build gamification achievements display showing earned badges for focus streaks, deep work milestones, and distraction resistance with visual icons, unlock dates, and share functionality for portfolio or interview use",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-1"
+        ],
+        "quotes": [
+          "Focus streak badges, Deep work hours milestones, Distraction resistance awards. These achievements can be shared or used as proof of work discipline (for example during interviews or portfolio demonstrations)"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Achievements are displayed as visual badges with icons",
+        "Each achievement shows unlock date and criteria",
+        "Users can share achievements externally",
+        "Achievement progress is visible for locked badges"
+      ]
+    },
+    {
+      "id": "REQ-14",
+      "text": "Create recovery quality visualization using a pie chart that segments break time into restorative activities (walks, breathing exercises, inactivity) and non-restorative activities (passive browsing, social media) with clear labels and percentages",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-1"
+        ],
+        "quotes": [
+          "A recovery pie chart shows: restorative breaks (walks, breathing, inactivity), non-restorative breaks (passive browsing)"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Pie chart displays break quality distribution",
+        "Restorative and non-restorative segments are clearly differentiated",
+        "Percentages and time durations are labeled",
+        "Chart updates based on selected time period"
+      ]
+    },
+    {
+      "id": "REQ-15",
+      "text": "Build comprehensive dashboard displaying total focus time, distraction time, switching frequency chart, burnout index trend graph, overall productivity score, and daily personalized recommendations in a clean visual layout",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-1"
+        ],
+        "quotes": [
+          "The home screen dashboard provides a full behavioral summary: total focus time, distraction time, switching frequency, burnout index trend, productivity score, daily recommendations. The dashboard should be simple and visual"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Dashboard displays all key metrics in organized card layout",
+        "Charts visualize trends over time (switching frequency, burnout index)",
+        "Productivity score is prominently displayed with visual indicator",
+        "Daily recommendations are personalized based on user patterns",
+        "Layout is clean and information is quickly scannable"
+      ]
+    },
+    {
+      "id": "REQ-16",
+      "text": "Implement periodic report view that displays positive behavioral patterns (consistent work sessions, healthy break timing, reduced distractions) and negative patterns (late-night work fatigue, frequent context switching, distraction spikes) with visual indicators and trend comparisons over time",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-1"
+        ],
+        "quotes": [
+          "The system generates a periodic report showing: Positive patterns: consistent work sessions, healthy break timing, reduced distractions; Negative patterns: late-night work fatigue, frequent context switching, distraction spikes"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Report displays positive patterns with encouraging visual indicators",
+        "Negative patterns are highlighted constructively for self-correction",
+        "Patterns show week-over-week or month-over-month comparisons",
+        "Report is exportable or viewable for different time periods"
+      ]
+    },
+    {
+      "id": "REQ-17",
+      "text": "Design the application with a supportive coaching aesthetic using warm, encouraging colors and gentle typography that conveys non-intrusive monitoring, privacy-respecting tracking, and encouragement over punishment throughout all interfaces",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-1"
+        ],
+        "quotes": [
+          "The application should feel like a coach, not a supervisor. Important principles: Non-intrusive monitoring, Privacy-respecting tracking, Gentle nudges instead of harsh blocking, Encouragement over punishment"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Visual design uses warm, supportive color palette (avoid harsh reds or aggressive tones)",
+        "Typography and language tone is encouraging and coaching-oriented",
+        "Interventions feel helpful rather than restrictive",
+        "Overall aesthetic conveys trust and personal growth support"
+      ]
+    }
+  ],
+  "constraints": [
+    "The system must not record typed content, passwords, or private information - only application names and switching behavior",
+    "All monitoring must be local and privacy-respecting without external data transmission beyond Internet Computer backend",
+    "Blocking mechanisms must allow user override after completing productive sessions, not permanent blocks",
+    "Visual interventions (greyscale, notifications) must be subtle and non-disruptive to workflow"
+  ],
+  "nonGoals": [
+    "Real-time native desktop application monitoring (this will be simulated within the web application)",
+    "Integration with external productivity tools or calendar systems",
+    "Team or organizational monitoring features",
+    "Cross-device synchronization of activity data",
+    "AI-powered automatic application categorization (user must manually categorize)",
+    "Screen recording or screenshot capture",
+    "Keystroke logging or content analysis"
+  ],
+  "imageRequirements": {
+    "required": [
+      "Focus streak badge icon illustration with subtle gradient, modern line art style (badge-focus-streak.dim_256x256.png)",
+      "Deep work milestone trophy icon illustration, minimalist geometric style (badge-deep-work.dim_256x256.png)",
+      "Distraction resistance shield icon illustration, protective and encouraging theme (badge-distraction-shield.dim_256x256.png)",
+      "Calming breathing exercise background with soft gradient waves, peaceful and meditative (breathing-background.dim_1200x800.png)",
+      "Dashboard hero illustration showing focused person at desk with calm, supportive atmosphere (dashboard-hero.dim_800x400.png)"
+    ],
+    "edits": []
+  }
+}

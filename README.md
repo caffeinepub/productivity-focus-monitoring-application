@@ -1,2 +1,3 @@
-# productivity-focus-monitoring-application
-Exported from Caffeine project: Productivity &amp; Focus Monitoring Application
+## Productivity &amp; Focus Monitoring Application
+
+To run app build and run docker image: `docker build -t app . docker run -it --network host app`
