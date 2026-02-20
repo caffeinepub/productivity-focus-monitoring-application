@@ -1,7 +1,7 @@
 {
   "frontend/src/App.tsx": "Main application component with TanStack Router setup, theme provider, and global overlays for burnout warnings, greyscale effects, and blocking screens with proper React component naming.",
   "frontend/src/components/Layout.tsx": "Application layout component with header navigation, quick action buttons for breaks, and footer with attribution.",
-  "frontend/src/pages/Dashboard.tsx": "Dashboard page displaying productivity score, key metrics cards, burnout trend chart, recovery quality visualization, and personalized daily recommendations.",
+  "frontend/src/pages/Dashboard.tsx": "Dashboard page displaying productivity score, key metrics cards, burnout trend chart, recovery quality visualization, personalized daily recommendations, and integrated focus monitoring with distraction warnings.",
   "frontend/src/pages/LiveMonitor.tsx": "Live activity monitoring page showing current application, category badge, continuous focus timer, switching frequency metrics, and contextual insights.",
   "frontend/src/pages/AppCategorization.tsx": "Application categorization management page allowing users to add, edit, and remove applications with productive/distracting categories.",
   "frontend/src/pages/DeskRecovery.tsx": "Desk recovery break page with animated breathing exercise, calming background, timer controls, and benefits information.",
@@ -19,7 +19,7 @@
   "frontend/src/components/BurnoutWarning.tsx": "Animated warning notification component that appears when burnout threshold is reached, with dismissible action using CSS transitions instead of framer-motion.",
   "frontend/src/components/GreyscaleOverlay.tsx": "Greyscale overlay component that applies visual filter to reduce stimulation at high burnout levels using CSS transitions.",
   "frontend/src/components/BlockScreen.tsx": "Full-screen blocking component requiring productive session completion to unlock distracting apps.",
-  "frontend/src/hooks/useQueries.ts": "React Query hooks for fetching data from backend, currently implementing getAllReports query.",
+  "frontend/src/hooks/useQueries.ts": "React Query hooks for fetching reports and focus scores from backend, and mutation hook for recording focus score data with automatic cache invalidation.",
   "frontend/src/hooks/useApplications.ts": "Custom hook managing application categorization state in localStorage with default productive and distracting apps.",
   "frontend/src/hooks/useActivitySimulator.ts": "Activity simulator hook that generates context switches, tracks metrics, and records switches to backend.",
   "frontend/src/hooks/useFocusTimer.ts": "Focus timer hook tracking continuous focus duration with formatted time display.",
@@ -35,5 +35,7 @@
   "frontend/src/types/index.ts": "TypeScript type definitions for Application, ContextSwitch, and FocusSession interfaces.",
   "frontend/src/lib/copyConstants.ts": "Centralized copy constants for all user-facing text with encouraging, coaching-oriented language.",
   "frontend/src/index.css": "Global styles with warm, supportive OKLCH color system for light and dark modes with coaching aesthetic.",
-  "frontend/tailwind.config.js": "Tailwind configuration with extended warm color palette, custom border radii, Inter font family, and soft shadows."
+  "frontend/tailwind.config.js": "Tailwind configuration with extended warm color palette, custom border radii, Inter font family, and soft shadows.",
+  "frontend/src/hooks/useFocusMonitor.ts": "Custom React hook that monitors page visibility and window focus events, tracks tab switching frequency, calculates distraction scores based on switching patterns, and sends metrics to the backend while respecting privacy (no content or keystrokes tracked).",
+  "frontend/src/components/DistractionWarning.tsx": "Toast-style warning component that appears in the bottom-right corner when frequent tab switching is detected, displays switch count and encouragement message, and can be dismissed by the user."
 }

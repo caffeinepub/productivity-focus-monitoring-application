@@ -33,6 +33,12 @@ export interface ContextSwitch {
   'targetApp' : string,
   'timestamp' : Time,
 }
+export interface FocusScore {
+  'distractionScore' : bigint,
+  'timestamp' : Time,
+  'timeAway' : bigint,
+  'tabSwitchCount' : bigint,
+}
 export type NegativePattern = { 'distractionSpikes' : null } |
   { 'lateNightFatigue' : null } |
   { 'frequentSwitching' : null };
@@ -61,9 +67,11 @@ export interface _SERVICE {
   'addAchievement' : ActorMethod<[Achievement], undefined>,
   'generateReport' : ActorMethod<[Array<Pattern>], Report>,
   'getAllReports' : ActorMethod<[], Array<Report>>,
-  'getReportById' : ActorMethod<[bigint], Report>,
+  'getFocusScores' : ActorMethod<[], Array<FocusScore>>,
+  'getReportById' : ActorMethod<[bigint], [] | [Report]>,
   'recordBreak' : ActorMethod<[BreakSession], undefined>,
   'recordContextSwitch' : ActorMethod<[], undefined>,
+  'recordFocusScore' : ActorMethod<[bigint, bigint, bigint], undefined>,
   'recordSession' : ActorMethod<[Session], undefined>,
   'recordSwitch' : ActorMethod<[ContextSwitch], undefined>,
 }

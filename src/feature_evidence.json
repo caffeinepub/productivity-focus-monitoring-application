@@ -2,12 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-build-application-categorization-interface-where-users-can-view-and-manage-which-applications-are-classified-as-productive-or-distracting-with-default-examples-including-coding-tools-document-editors-and-presentation-software-as-productive-and-social-media-video-platforms-and-games-as-distracting",
-      "featureTitle": "Build application categorization interface where users can view and manage which applications are classified as productive or distracting, with default examples including coding tools, document editors, and presentation software as productive, and social media, video platforms, and games as distracting",
+      "featureId": "feature-create-a-usefocusmonitor-react-hook-that-tracks-page-visibility-changes-using-the-page-visibility-api-visibilitychange-event-and-window-focus-blur-events-window-onblur-and-window-onfocus-recording-timestamps-whenever-the-user-leaves-and-returns-to-the-page",
+      "featureTitle": "Create a useFocusMonitor React hook that tracks page visibility changes using the Page Visibility API (visibilitychange event) and window focus/blur events (window.onblur and window.onfocus), recording timestamps whenever the user leaves and returns to the page",
       "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/hooks/useApplications.ts",
-        "frontend/src/types/index.ts"
+        "frontend/src/hooks/useFocusMonitor.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -17,16 +15,15 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-7"
+        "REQ-18"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-create-live-monitoring-simulation-interface-that-displays-current-active-application-real-time-switching-frequency-continuous-focus-duration-and-a-visual-indicator-when-context-switches-occur",
-      "featureTitle": "Create live monitoring simulation interface that displays current active application, real-time switching frequency, continuous focus duration, and a visual indicator when context switches occur",
+      "featureId": "feature-in-the-usefocusmonitor-hook-calculate-how-long-the-user-stayed-away-from-the-page-by-comparing-leave-and-return-timestamps-and-count-how-many-times-the-user-switches-away-within-a-time-period-e-g-per-minute",
+      "featureTitle": "In the useFocusMonitor hook, calculate how long the user stayed away from the page by comparing leave and return timestamps, and count how many times the user switches away within a time period (e.g., per minute)",
       "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/hooks/useActivitySimulator.ts"
+        "frontend/src/hooks/useFocusMonitor.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -36,18 +33,15 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-8"
+        "REQ-19"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-implement-progressive-warning-system-ui-that-shows-non-intrusive-notifications-at-first-burnout-threshold-displaying-current-burnout-index-and-encouragement-message-then-applies-subtle-greyscale-filter-to-screen-at-second-threshold-to-reduce-visual-stimulation",
-      "featureTitle": "Implement progressive warning system UI that shows non-intrusive notifications at first burnout threshold displaying current burnout index and encouragement message, then applies subtle greyscale filter to screen at second threshold to reduce visual stimulation",
+      "featureId": "feature-in-the-usefocusmonitor-hook-implement-a-distraction-score-calculation-that-updates-when-the-user-switches-tabs-frequently-e-g-more-than-5-times-in-2-minutes-incrementing-the-score-based-on-switching-frequency",
+      "featureTitle": "In the useFocusMonitor hook, implement a distraction score calculation that updates when the user switches tabs frequently (e.g., more than 5 times in 2 minutes), incrementing the score based on switching frequency",
       "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/BurnoutWarning.tsx",
-        "frontend/src/components/GreyscaleOverlay.tsx",
-        "frontend/src/hooks/useBurnoutMonitor.ts"
+        "frontend/src/hooks/useFocusMonitor.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -57,17 +51,16 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-9"
+        "REQ-20"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-build-smart-blocking-interface-that-after-two-ignored-warnings-displays-a-block-screen-for-distracting-applications-showing-required-productive-session-duration-20-25-minutes-needed-to-unlock-with-a-focus-timer-and-progress-indicator",
-      "featureTitle": "Build smart blocking interface that after two ignored warnings displays a block screen for distracting applications, showing required productive session duration (20-25 minutes) needed to unlock, with a focus timer and progress indicator",
+      "featureId": "feature-display-a-small-on-screen-warning-component-when-the-distraction-score-threshold-is-exceeded-showing-a-message-like-frequent-tab-switching-detected-try-focusing-for-a-few-minutes-with-dismissible-functionality",
+      "featureTitle": "Display a small on-screen warning component when the distraction score threshold is exceeded, showing a message like 'Frequent tab switching detected. Try focusing for a few minutes.' with dismissible functionality",
       "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/BlockScreen.tsx",
-        "frontend/src/hooks/useBlockingLogic.ts"
+        "frontend/src/components/DistractionWarning.tsx",
+        "frontend/src/pages/Dashboard.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -77,16 +70,15 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-10"
+        "REQ-21"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-create-desk-recovery-break-interface-with-guided-breathing-exercise-animations-calming-visual-elements-and-short-mental-reset-timer-that-can-be-completed-without-leaving-the-workspace",
-      "featureTitle": "Create desk recovery break interface with guided breathing exercise animations, calming visual elements, and short mental reset timer that can be completed without leaving the workspace",
+      "featureId": "feature-send-the-distraction-score-and-switching-statistics-tab-switch-count-time-away-timestamps-to-the-backend-using-a-post-request-to-an-api-endpoint-transmitting-data-in-json-format-whenever-significant-changes-occur",
+      "featureTitle": "Send the distraction score and switching statistics (tab switch count, time away, timestamps) to the backend using a POST request to an API endpoint, transmitting data in JSON format whenever significant changes occur",
       "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/hooks/useBreathingAnimation.ts"
+        "frontend/src/hooks/useFocusMonitor.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -96,15 +88,15 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-11"
+        "REQ-22"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-implement-walk-break-timer-interface-where-users-set-break-duration-before-leaving-displays-countdown-timer-prominently-and-plays-an-alert-alarm-sound-when-time-expires-if-user-has-not-returned",
-      "featureTitle": "Implement walk break timer interface where users set break duration before leaving, displays countdown timer prominently, and plays an alert alarm sound when time expires if user has not returned",
+      "featureId": "feature-add-inline-code-comments-to-the-usefocusmonitor-hook-explaining-each-section-including-event-listener-setup-timestamp-recording-duration-calculation-switch-counting-distraction-score-logic-and-api-communication-ensuring-the-code-is-beginner-friendly-and-modifiable",
+      "featureTitle": "Add inline code comments to the useFocusMonitor hook explaining each section including event listener setup, timestamp recording, duration calculation, switch counting, distraction score logic, and API communication, ensuring the code is beginner-friendly and modifiable",
       "files": [
-        "frontend/src/App.tsx"
+        "frontend/src/hooks/useFocusMonitor.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -114,111 +106,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-12"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-build-gamification-achievements-display-showing-earned-badges-for-focus-streaks-deep-work-milestones-and-distraction-resistance-with-visual-icons-unlock-dates-and-share-functionality-for-portfolio-or-interview-use",
-      "featureTitle": "Build gamification achievements display showing earned badges for focus streaks, deep work milestones, and distraction resistance with visual icons, unlock dates, and share functionality for portfolio or interview use",
-      "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/AchievementsBadge.tsx",
-        "frontend/src/components/AchievementsGallery.tsx",
-        "frontend/src/hooks/useAchievements.ts"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-13"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-create-recovery-quality-visualization-using-a-pie-chart-that-segments-break-time-into-restorative-activities-walks-breathing-exercises-inactivity-and-non-restorative-activities-passive-browsing-social-media-with-clear-labels-and-percentages",
-      "featureTitle": "Create recovery quality visualization using a pie chart that segments break time into restorative activities (walks, breathing exercises, inactivity) and non-restorative activities (passive browsing, social media) with clear labels and percentages",
-      "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/RecoveryQualityChart.tsx",
-        "frontend/src/hooks/useBreakAnalytics.ts"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-14"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-build-comprehensive-dashboard-displaying-total-focus-time-distraction-time-switching-frequency-chart-burnout-index-trend-graph-overall-productivity-score-and-daily-personalized-recommendations-in-a-clean-visual-layout",
-      "featureTitle": "Build comprehensive dashboard displaying total focus time, distraction time, switching frequency chart, burnout index trend graph, overall productivity score, and daily personalized recommendations in a clean visual layout",
-      "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/DailyRecommendations.tsx",
-        "frontend/src/components/MetricsCard.tsx",
-        "frontend/src/components/ProductivityScore.tsx",
-        "frontend/src/hooks/useDashboardData.ts"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-15"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-implement-periodic-report-view-that-displays-positive-behavioral-patterns-consistent-work-sessions-healthy-break-timing-reduced-distractions-and-negative-patterns-late-night-work-fatigue-frequent-context-switching-distraction-spikes-with-visual-indicators-and-trend-comparisons-over-time",
-      "featureTitle": "Implement periodic report view that displays positive behavioral patterns (consistent work sessions, healthy break timing, reduced distractions) and negative patterns (late-night work fatigue, frequent context switching, distraction spikes) with visual indicators and trend comparisons over time",
-      "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/PatternCard.tsx",
-        "frontend/src/components/PeriodicReport.tsx",
-        "frontend/src/hooks/useReportData.ts"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-16"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-design-the-application-with-a-supportive-coaching-aesthetic-using-warm-encouraging-colors-and-gentle-typography-that-conveys-non-intrusive-monitoring-privacy-respecting-tracking-and-encouragement-over-punishment-throughout-all-interfaces",
-      "featureTitle": "Design the application with a supportive coaching aesthetic using warm, encouraging colors and gentle typography that conveys non-intrusive monitoring, privacy-respecting tracking, and encouragement over punishment throughout all interfaces",
-      "files": [
-        "frontend/src/index.css",
-        "frontend/src/lib/copyConstants.ts",
-        "frontend/tailwind.config.js"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-17"
+        "REQ-24"
       ],
       "confidence": "high"
     }

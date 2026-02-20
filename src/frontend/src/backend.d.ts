@@ -49,6 +49,12 @@ export interface BreakSession {
     breakType: BreakType;
     isRestorative: boolean;
 }
+export interface FocusScore {
+    distractionScore: bigint;
+    timestamp: Time;
+    timeAway: bigint;
+    tabSwitchCount: bigint;
+}
 export enum AppCategory {
     productive = "productive",
     distracting = "distracting"
@@ -81,9 +87,11 @@ export interface backendInterface {
     addAchievement(achievement: Achievement): Promise<void>;
     generateReport(patterns: Array<Pattern>): Promise<Report>;
     getAllReports(): Promise<Array<Report>>;
-    getReportById(reportId: bigint): Promise<Report>;
+    getFocusScores(): Promise<Array<FocusScore>>;
+    getReportById(reportId: bigint): Promise<Report | null>;
     recordBreak(breakSession: BreakSession): Promise<void>;
     recordContextSwitch(): Promise<void>;
+    recordFocusScore(distractionScore: bigint, tabSwitchCount: bigint, timeAway: bigint): Promise<void>;
     recordSession(session: Session): Promise<void>;
     recordSwitch(contextSwitch: ContextSwitch): Promise<void>;
 }

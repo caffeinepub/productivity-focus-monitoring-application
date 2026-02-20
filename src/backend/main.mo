@@ -5,7 +5,9 @@ import Text "mo:core/Text";
 import Runtime "mo:core/Runtime";
 import Time "mo:core/Time";
 import Principal "mo:core/Principal";
+import Migration "migration";
 
+(with migration = Migration.run)
 actor {
   type Session = {
     timestamp : Time.Time;
@@ -86,12 +88,20 @@ actor {
     #distractionSpikes;
   };
 
-  var nextReportId = 0;
+  type FocusScore = {
+    timestamp : Time.Time;
+    distractionScore : Nat;
+    tabSwitchCount : Nat;
+    timeAway : Nat;
+  };
+
+  var nextReportId = 0 : Nat;
   let sessions = Map.empty<Principal, List.List<Session>>();
   let switches = Map.empty<Principal, List.List<ContextSwitch>>();
   let achievements = Map.empty<Principal, List.List<Achievement>>();
   let breaks = Map.empty<Principal, List.List<BreakSession>>();
   let reports = Map.empty<Nat, Report>();
+  let focusScores = Map.empty<Principal, List.List<FocusScore>>();
 
   public shared ({ caller }) func recordSession(session : Session) : async () {
     let existingSessions = switch (sessions.get(caller)) {
@@ -154,10 +164,33 @@ actor {
     await recordSwitch(newSwitch);
   };
 
-  public query ({ caller }) func getReportById(reportId : Nat) : async Report {
+  public query ({ caller }) func getReportById(reportId : Nat) : async ?Report {
     switch (reports.get(reportId)) {
-      case (?report) { report };
-      case (null) { Runtime.trap("Report not found") };
+      case (?report) { ?report };
+      case (null) { null };
+    };
+  };
+
+  public shared ({ caller }) func recordFocusScore(distractionScore : Nat, tabSwitchCount : Nat, timeAway : Nat) : async () {
+    let newScore : FocusScore = {
+      timestamp = Time.now();
+      distractionScore;
+      tabSwitchCount;
+      timeAway;
+    };
+
+    let existingScores = switch (focusScores.get(caller)) {
+      case (?scores) { scores };
+      case (null) { List.empty<FocusScore>() };
+    };
+    existingScores.add(newScore);
+    focusScores.add(caller, existingScores);
+  };
+
+  public query ({ caller }) func getFocusScores() : async [FocusScore] {
+    switch (focusScores.get(caller)) {
+      case (?scores) { scores.toArray() };
+      case (null) { [] };
     };
   };
 };

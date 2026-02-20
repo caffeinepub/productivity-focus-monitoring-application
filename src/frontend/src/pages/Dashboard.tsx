@@ -3,9 +3,12 @@ import { MetricsCard } from '@/components/MetricsCard';
 import { ProductivityScore } from '@/components/ProductivityScore';
 import { DailyRecommendations } from '@/components/DailyRecommendations';
 import { RecoveryQualityChart } from '@/components/RecoveryQualityChart';
+import { DistractionWarning } from '@/components/DistractionWarning';
 import { useDashboardData } from '@/hooks/useDashboardData';
+import { useFocusMonitor } from '@/hooks/useFocusMonitor';
 import { Clock, Zap, Activity, TrendingUp } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useState, useEffect } from 'react';
 
 export default function Dashboard() {
   const {
@@ -17,6 +20,37 @@ export default function Dashboard() {
     recommendations,
     isLoading,
   } = useDashboardData();
+
+  // Monitor focus and tab switching behavior
+  const { distractionScore, switchCount, switchesPerMinute } = useFocusMonitor();
+
+  // Track whether to show the distraction warning
+  const [showWarning, setShowWarning] = useState(false);
+  const [warningCooldown, setWarningCooldown] = useState(false);
+
+  /**
+   * Show warning when distraction score exceeds threshold (3)
+   * and we're not in cooldown period
+   */
+  useEffect(() => {
+    if (distractionScore >= 3 && !warningCooldown && !showWarning) {
+      setShowWarning(true);
+    }
+  }, [distractionScore, warningCooldown, showWarning]);
+
+  /**
+   * Handle warning dismissal with cooldown period
+   * Prevents warning from appearing too frequently
+   */
+  const handleDismissWarning = () => {
+    setShowWarning(false);
+    setWarningCooldown(true);
+    
+    // Reset cooldown after 5 minutes
+    setTimeout(() => {
+      setWarningCooldown(false);
+    }, 5 * 60 * 1000);
+  };
 
   if (isLoading) {
     return (
@@ -122,6 +156,13 @@ export default function Dashboard() {
 
       {/* Daily Recommendations */}
       <DailyRecommendations recommendations={recommendations} />
+
+      {/* Distraction Warning - appears when threshold is exceeded */}
+      <DistractionWarning
+        visible={showWarning}
+        onDismiss={handleDismissWarning}
+        switchCount={switchCount}
+      />
     </div>
   );
 }

@@ -39,6 +39,12 @@ export const Report = IDL.Record({
   'patterns' : IDL.Vec(Pattern),
   'timestamp' : Time,
 });
+export const FocusScore = IDL.Record({
+  'distractionScore' : IDL.Nat,
+  'timestamp' : Time,
+  'timeAway' : IDL.Nat,
+  'tabSwitchCount' : IDL.Nat,
+});
 export const TimerSetting = IDL.Record({
   'duration' : IDL.Nat,
   'notification' : IDL.Bool,
@@ -80,9 +86,11 @@ export const idlService = IDL.Service({
   'addAchievement' : IDL.Func([Achievement], [], []),
   'generateReport' : IDL.Func([IDL.Vec(Pattern)], [Report], []),
   'getAllReports' : IDL.Func([], [IDL.Vec(Report)], ['query']),
-  'getReportById' : IDL.Func([IDL.Nat], [Report], ['query']),
+  'getFocusScores' : IDL.Func([], [IDL.Vec(FocusScore)], ['query']),
+  'getReportById' : IDL.Func([IDL.Nat], [IDL.Opt(Report)], ['query']),
   'recordBreak' : IDL.Func([BreakSession], [], []),
   'recordContextSwitch' : IDL.Func([], [], []),
+  'recordFocusScore' : IDL.Func([IDL.Nat, IDL.Nat, IDL.Nat], [], []),
   'recordSession' : IDL.Func([Session], [], []),
   'recordSwitch' : IDL.Func([ContextSwitch], [], []),
 });
@@ -120,6 +128,12 @@ export const idlFactory = ({ IDL }) => {
   const Report = IDL.Record({
     'patterns' : IDL.Vec(Pattern),
     'timestamp' : Time,
+  });
+  const FocusScore = IDL.Record({
+    'distractionScore' : IDL.Nat,
+    'timestamp' : Time,
+    'timeAway' : IDL.Nat,
+    'tabSwitchCount' : IDL.Nat,
   });
   const TimerSetting = IDL.Record({
     'duration' : IDL.Nat,
@@ -162,9 +176,11 @@ export const idlFactory = ({ IDL }) => {
     'addAchievement' : IDL.Func([Achievement], [], []),
     'generateReport' : IDL.Func([IDL.Vec(Pattern)], [Report], []),
     'getAllReports' : IDL.Func([], [IDL.Vec(Report)], ['query']),
-    'getReportById' : IDL.Func([IDL.Nat], [Report], ['query']),
+    'getFocusScores' : IDL.Func([], [IDL.Vec(FocusScore)], ['query']),
+    'getReportById' : IDL.Func([IDL.Nat], [IDL.Opt(Report)], ['query']),
     'recordBreak' : IDL.Func([BreakSession], [], []),
     'recordContextSwitch' : IDL.Func([], [], []),
+    'recordFocusScore' : IDL.Func([IDL.Nat, IDL.Nat, IDL.Nat], [], []),
     'recordSession' : IDL.Func([Session], [], []),
     'recordSwitch' : IDL.Func([ContextSwitch], [], []),
   });
