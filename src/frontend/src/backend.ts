@@ -89,6 +89,12 @@ export class ExternalBlob {
         return this;
     }
 }
+export interface BreakAnalysis {
+    walkBreaks: bigint;
+    restorativeRatio: number;
+    deskRecoveries: bigint;
+    totalBreaks: bigint;
+}
 export interface TimerSetting {
     duration: bigint;
     notification: boolean;
@@ -132,10 +138,33 @@ export interface BreakSession {
     isRestorative: boolean;
 }
 export interface FocusScore {
+    distractingToProductive: bigint;
     distractionScore: bigint;
+    productiveToProductive: bigint;
     timestamp: Time;
+    productiveToDistracting: bigint;
+    distractingToDistracting: bigint;
     timeAway: bigint;
     tabSwitchCount: bigint;
+}
+export interface BurnoutCalculation {
+    currentIndex: bigint;
+    focusSessionTimestamps: Array<Time>;
+    switchCount: bigint;
+    breakAnalysis: BreakAnalysis;
+    timestamp: Time;
+    sleepAnalysis: SleepAnalysis;
+    notificationAnalysis: NotificationAnalysis;
+    previousIndex: bigint;
+}
+export interface SleepAnalysis {
+    sleepDeficitScore: number;
+    deepRestHours: number;
+    totalSleepHours: number;
+}
+export interface NotificationAnalysis {
+    responseTimeAverage: number;
+    frequency: bigint;
 }
 export enum AppCategory {
     productive = "productive",
@@ -168,14 +197,18 @@ export enum StreakType {
 export interface backendInterface {
     addAchievement(achievement: Achievement): Promise<void>;
     generateReport(patterns: Array<Pattern>): Promise<Report>;
+    getAllBurnoutCalculations(): Promise<Array<[Principal, Array<BurnoutCalculation>]>>;
     getAllReports(): Promise<Array<Report>>;
+    getBurnoutCalculations(): Promise<Array<BurnoutCalculation>>;
     getFocusScores(): Promise<Array<FocusScore>>;
     getReportById(reportId: bigint): Promise<Report | null>;
     recordBreak(breakSession: BreakSession): Promise<void>;
+    recordBurnoutCalculation(calculation: BurnoutCalculation): Promise<void>;
     recordContextSwitch(): Promise<void>;
-    recordFocusScore(distractionScore: bigint, tabSwitchCount: bigint, timeAway: bigint): Promise<void>;
+    recordFocusScore(distractionScore: bigint, tabSwitchCount: bigint, timeAway: bigint, productiveToProductive: bigint, productiveToDistracting: bigint, distractingToProductive: bigint, distractingToDistracting: bigint): Promise<void>;
     recordSession(session: Session): Promise<void>;
     recordSwitch(contextSwitch: ContextSwitch): Promise<void>;
+    startFocusSession(): Promise<void>;
 }
 import type { Achievement as _Achievement, AppCategory as _AppCategory, BreakSession as _BreakSession, BreakType as _BreakType, NegativePattern as _NegativePattern, Pattern as _Pattern, PositivePattern as _PositivePattern, Report as _Report, Session as _Session, SessionType as _SessionType, StreakType as _StreakType, Time as _Time, TimerSetting as _TimerSetting } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
@@ -208,6 +241,20 @@ export class Backend implements backendInterface {
             return from_candid_Report_n12(this._uploadFile, this._downloadFile, result);
         }
     }
+    async getAllBurnoutCalculations(): Promise<Array<[Principal, Array<BurnoutCalculation>]>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getAllBurnoutCalculations();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getAllBurnoutCalculations();
+            return result;
+        }
+    }
     async getAllReports(): Promise<Array<Report>> {
         if (this.processError) {
             try {
@@ -220,6 +267,20 @@ export class Backend implements backendInterface {
         } else {
             const result = await this.actor.getAllReports();
             return from_candid_vec_n21(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getBurnoutCalculations(): Promise<Array<BurnoutCalculation>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getBurnoutCalculations();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getBurnoutCalculations();
+            return result;
         }
     }
     async getFocusScores(): Promise<Array<FocusScore>> {
@@ -264,6 +325,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async recordBurnoutCalculation(arg0: BurnoutCalculation): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.recordBurnoutCalculation(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.recordBurnoutCalculation(arg0);
+            return result;
+        }
+    }
     async recordContextSwitch(): Promise<void> {
         if (this.processError) {
             try {
@@ -278,17 +353,17 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async recordFocusScore(arg0: bigint, arg1: bigint, arg2: bigint): Promise<void> {
+    async recordFocusScore(arg0: bigint, arg1: bigint, arg2: bigint, arg3: bigint, arg4: bigint, arg5: bigint, arg6: bigint): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.recordFocusScore(arg0, arg1, arg2);
+                const result = await this.actor.recordFocusScore(arg0, arg1, arg2, arg3, arg4, arg5, arg6);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.recordFocusScore(arg0, arg1, arg2);
+            const result = await this.actor.recordFocusScore(arg0, arg1, arg2, arg3, arg4, arg5, arg6);
             return result;
         }
     }
@@ -317,6 +392,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.recordSwitch(arg0);
+            return result;
+        }
+    }
+    async startFocusSession(): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.startFocusSession();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.startFocusSession();
             return result;
         }
     }

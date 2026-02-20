@@ -1,18 +1,38 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, X } from 'lucide-react';
+import { AlertCircle, X, Clock, Zap } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { COPY } from '@/lib/copyConstants';
 
 interface BurnoutWarningProps {
   burnoutIndex: number;
+  timeBasedContribution: number;
+  switchingContribution: number;
   onDismiss: () => void;
 }
 
-export function BurnoutWarning({ burnoutIndex, onDismiss }: BurnoutWarningProps) {
+/**
+ * BurnoutWarning component displays when burnout reaches medium threshold (30+)
+ * 
+ * Features:
+ * - Shows current burnout index number
+ * - Displays breakdown of time-based and switching-based contributions
+ * - Suggests desk recovery break
+ * - Dismissible with button
+ * - Reappears if burnout increases by 10+ points after dismissal
+ * - Positioned at bottom-right to avoid blocking UI
+ */
+export function BurnoutWarning({ 
+  burnoutIndex, 
+  timeBasedContribution, 
+  switchingContribution, 
+  onDismiss 
+}: BurnoutWarningProps) {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    setIsVisible(true);
+    // Trigger entrance animation
+    setTimeout(() => setIsVisible(true), 10);
   }, []);
 
   const handleDismiss = () => {
@@ -33,13 +53,28 @@ export function BurnoutWarning({ burnoutIndex, onDismiss }: BurnoutWarningProps)
               <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
             </div>
             <div className="flex-1">
-              <h4 className="font-bold mb-1">Focus Check-In</h4>
+              <h4 className="font-bold mb-1">{COPY.warnings.firstThreshold.title}</h4>
               <p className="text-sm text-muted-foreground mb-2">
-                Your burnout index is at <strong>{burnoutIndex.toFixed(1)}</strong>. You might be
-                experiencing cognitive fatigue.
+                Your burnout index is at <strong>{burnoutIndex.toFixed(1)}</strong>. {COPY.warnings.firstThreshold.message}
               </p>
+              
+              {/* Burnout breakdown section */}
+              <div className="mb-3 space-y-1.5 rounded-lg bg-amber-500/5 p-3 border border-amber-500/20">
+                <p className="text-xs font-semibold text-amber-700 dark:text-amber-300 mb-1.5">
+                  What's driving your burnout:
+                </p>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Clock className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+                  <span>Time in distracting apps: <strong>{timeBasedContribution.toFixed(1)}</strong> points</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Zap className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+                  <span>Context switching penalty: <strong>{switchingContribution.toFixed(1)}</strong> points</span>
+                </div>
+              </div>
+              
               <p className="text-sm text-muted-foreground mb-3">
-                Consider taking a short desk recovery break to reset your focus.
+                {COPY.warnings.firstThreshold.suggestion}
               </p>
               <div className="flex gap-2">
                 <Button size="sm" variant="outline" onClick={handleDismiss}>

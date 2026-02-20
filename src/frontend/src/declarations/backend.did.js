@@ -39,9 +39,38 @@ export const Report = IDL.Record({
   'patterns' : IDL.Vec(Pattern),
   'timestamp' : Time,
 });
-export const FocusScore = IDL.Record({
-  'distractionScore' : IDL.Nat,
+export const BreakAnalysis = IDL.Record({
+  'walkBreaks' : IDL.Nat,
+  'restorativeRatio' : IDL.Float64,
+  'deskRecoveries' : IDL.Nat,
+  'totalBreaks' : IDL.Nat,
+});
+export const SleepAnalysis = IDL.Record({
+  'sleepDeficitScore' : IDL.Float64,
+  'deepRestHours' : IDL.Float64,
+  'totalSleepHours' : IDL.Float64,
+});
+export const NotificationAnalysis = IDL.Record({
+  'responseTimeAverage' : IDL.Float64,
+  'frequency' : IDL.Nat,
+});
+export const BurnoutCalculation = IDL.Record({
+  'currentIndex' : IDL.Nat,
+  'focusSessionTimestamps' : IDL.Vec(Time),
+  'switchCount' : IDL.Nat,
+  'breakAnalysis' : BreakAnalysis,
   'timestamp' : Time,
+  'sleepAnalysis' : SleepAnalysis,
+  'notificationAnalysis' : NotificationAnalysis,
+  'previousIndex' : IDL.Nat,
+});
+export const FocusScore = IDL.Record({
+  'distractingToProductive' : IDL.Nat,
+  'distractionScore' : IDL.Nat,
+  'productiveToProductive' : IDL.Nat,
+  'timestamp' : Time,
+  'productiveToDistracting' : IDL.Nat,
+  'distractingToDistracting' : IDL.Nat,
   'timeAway' : IDL.Nat,
   'tabSwitchCount' : IDL.Nat,
 });
@@ -85,14 +114,30 @@ export const ContextSwitch = IDL.Record({
 export const idlService = IDL.Service({
   'addAchievement' : IDL.Func([Achievement], [], []),
   'generateReport' : IDL.Func([IDL.Vec(Pattern)], [Report], []),
+  'getAllBurnoutCalculations' : IDL.Func(
+      [],
+      [IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Vec(BurnoutCalculation)))],
+      ['query'],
+    ),
   'getAllReports' : IDL.Func([], [IDL.Vec(Report)], ['query']),
+  'getBurnoutCalculations' : IDL.Func(
+      [],
+      [IDL.Vec(BurnoutCalculation)],
+      ['query'],
+    ),
   'getFocusScores' : IDL.Func([], [IDL.Vec(FocusScore)], ['query']),
   'getReportById' : IDL.Func([IDL.Nat], [IDL.Opt(Report)], ['query']),
   'recordBreak' : IDL.Func([BreakSession], [], []),
+  'recordBurnoutCalculation' : IDL.Func([BurnoutCalculation], [], []),
   'recordContextSwitch' : IDL.Func([], [], []),
-  'recordFocusScore' : IDL.Func([IDL.Nat, IDL.Nat, IDL.Nat], [], []),
+  'recordFocusScore' : IDL.Func(
+      [IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat],
+      [],
+      [],
+    ),
   'recordSession' : IDL.Func([Session], [], []),
   'recordSwitch' : IDL.Func([ContextSwitch], [], []),
+  'startFocusSession' : IDL.Func([], [], []),
 });
 
 export const idlInitArgs = [];
@@ -129,9 +174,38 @@ export const idlFactory = ({ IDL }) => {
     'patterns' : IDL.Vec(Pattern),
     'timestamp' : Time,
   });
-  const FocusScore = IDL.Record({
-    'distractionScore' : IDL.Nat,
+  const BreakAnalysis = IDL.Record({
+    'walkBreaks' : IDL.Nat,
+    'restorativeRatio' : IDL.Float64,
+    'deskRecoveries' : IDL.Nat,
+    'totalBreaks' : IDL.Nat,
+  });
+  const SleepAnalysis = IDL.Record({
+    'sleepDeficitScore' : IDL.Float64,
+    'deepRestHours' : IDL.Float64,
+    'totalSleepHours' : IDL.Float64,
+  });
+  const NotificationAnalysis = IDL.Record({
+    'responseTimeAverage' : IDL.Float64,
+    'frequency' : IDL.Nat,
+  });
+  const BurnoutCalculation = IDL.Record({
+    'currentIndex' : IDL.Nat,
+    'focusSessionTimestamps' : IDL.Vec(Time),
+    'switchCount' : IDL.Nat,
+    'breakAnalysis' : BreakAnalysis,
     'timestamp' : Time,
+    'sleepAnalysis' : SleepAnalysis,
+    'notificationAnalysis' : NotificationAnalysis,
+    'previousIndex' : IDL.Nat,
+  });
+  const FocusScore = IDL.Record({
+    'distractingToProductive' : IDL.Nat,
+    'distractionScore' : IDL.Nat,
+    'productiveToProductive' : IDL.Nat,
+    'timestamp' : Time,
+    'productiveToDistracting' : IDL.Nat,
+    'distractingToDistracting' : IDL.Nat,
     'timeAway' : IDL.Nat,
     'tabSwitchCount' : IDL.Nat,
   });
@@ -175,14 +249,30 @@ export const idlFactory = ({ IDL }) => {
   return IDL.Service({
     'addAchievement' : IDL.Func([Achievement], [], []),
     'generateReport' : IDL.Func([IDL.Vec(Pattern)], [Report], []),
+    'getAllBurnoutCalculations' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Vec(BurnoutCalculation)))],
+        ['query'],
+      ),
     'getAllReports' : IDL.Func([], [IDL.Vec(Report)], ['query']),
+    'getBurnoutCalculations' : IDL.Func(
+        [],
+        [IDL.Vec(BurnoutCalculation)],
+        ['query'],
+      ),
     'getFocusScores' : IDL.Func([], [IDL.Vec(FocusScore)], ['query']),
     'getReportById' : IDL.Func([IDL.Nat], [IDL.Opt(Report)], ['query']),
     'recordBreak' : IDL.Func([BreakSession], [], []),
+    'recordBurnoutCalculation' : IDL.Func([BurnoutCalculation], [], []),
     'recordContextSwitch' : IDL.Func([], [], []),
-    'recordFocusScore' : IDL.Func([IDL.Nat, IDL.Nat, IDL.Nat], [], []),
+    'recordFocusScore' : IDL.Func(
+        [IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat],
+        [],
+        [],
+      ),
     'recordSession' : IDL.Func([Session], [], []),
     'recordSwitch' : IDL.Func([ContextSwitch], [], []),
+    'startFocusSession' : IDL.Func([], [], []),
   });
 };
 

@@ -14,6 +14,7 @@ interface DistractionWarningProps {
  * when the user switches tabs frequently, encouraging focused work.
  * 
  * Appears in the bottom-right corner and can be dismissed by the user.
+ * Uses CSS transitions for smooth entrance/exit animations.
  */
 export function DistractionWarning({ visible, onDismiss, switchCount }: DistractionWarningProps) {
   const [isVisible, setIsVisible] = useState(false);

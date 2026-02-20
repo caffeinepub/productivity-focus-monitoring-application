@@ -1,158 +1,181 @@
 {
   "kind": "build_request",
-  "title": "Implement Browser Tab Switching Detection and Focus Monitoring",
-  "projectName": "Focus Guard",
-  "priority": "normal",
+  "title": "Fix blank white page rendering issue in versions 9-12",
+  "priority": "high",
   "requirements": [
     {
-      "id": "REQ-18",
-      "text": "Create a useFocusMonitor React hook that tracks page visibility changes using the Page Visibility API (visibilitychange event) and window focus/blur events (window.onblur and window.onfocus), recording timestamps whenever the user leaves and returns to the page",
+      "id": "REQ-98",
+      "text": "Verify that frontend/index.html contains a root div element with id='root' in the body section, and if missing or malformed, add the correct markup: <div id=\"root\"></div>",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-user-blank-page"
         ],
         "quotes": [
-          "Detects when the browser tab becomes inactive or hidden using the Page Visibility API (visibilitychange)",
-          "Detects when the user leaves or returns to the browser window using window.onblur and window.onfocus",
-          "Records timestamps whenever the user leaves and comes back to the page"
+          "in the last 3 to 4 versions including the last one i can't see the preview screen it only shows blank white page"
         ]
       },
       "acceptanceCriteria": [
-        "Hook listens to document visibilitychange events",
-        "Hook listens to window blur and focus events",
-        "Timestamps are recorded for each leave and return event",
-        "Hook can be imported and used in any React component"
+        "frontend/index.html contains <div id=\"root\"></div> in the body section",
+        "The root div has no conflicting attributes or styles that prevent rendering"
       ]
     },
     {
-      "id": "REQ-19",
-      "text": "In the useFocusMonitor hook, calculate how long the user stayed away from the page by comparing leave and return timestamps, and count how many times the user switches away within a time period (e.g., per minute)",
+      "id": "REQ-99",
+      "text": "Verify that frontend/src/main.tsx correctly targets the root element using document.getElementById('root') with a null check, and if the element is not found, logs a clear error message to console and displays a visible error on the page",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "Calculates how long the user stayed away from the page",
-          "Counts how many times the user switches away within a time period (for example per minute)"
+          "msg-user-blank-page"
         ]
       },
       "acceptanceCriteria": [
-        "Duration away is calculated in seconds or milliseconds",
-        "Switch count is tracked and reset per time window (e.g., 2 minutes)",
-        "Switching frequency (switches per minute) is calculated and exposed"
+        "main.tsx uses document.getElementById('root') to get the root element",
+        "A null check is present before calling createRoot",
+        "If root element is missing, console.error logs 'Root element #root not found'",
+        "If root element is missing, a visible error message appears in document.body"
       ]
     },
     {
-      "id": "REQ-20",
-      "text": "In the useFocusMonitor hook, implement a distraction score calculation that updates when the user switches tabs frequently (e.g., more than 5 times in 2 minutes), incrementing the score based on switching frequency",
+      "id": "REQ-100",
+      "text": "Wrap the ReactDOM.createRoot and root.render calls in frontend/src/main.tsx in a try-catch block that catches initialization errors, logs them with full stack traces to console.error, and displays a user-visible error message directly in document.body",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "If the user switches tabs frequently (e.g., more than 5 times in 2 minutes), update a \"Distraction Score\" variable on the frontend"
+          "msg-user-blank-page"
         ]
       },
       "acceptanceCriteria": [
-        "Distraction score is a numeric value that increases with frequent switching",
-        "Threshold of 5 switches in 2 minutes triggers score increase",
-        "Score is exposed by the hook for consumption by components"
+        "try-catch block wraps createRoot and render calls",
+        "Caught errors are logged to console.error with stack traces",
+        "Caught errors display visible error message in document.body with red background",
+        "Error message includes the error name and message"
       ]
     },
     {
-      "id": "REQ-21",
-      "text": "Display a small on-screen warning component when the distraction score threshold is exceeded, showing a message like 'Frequent tab switching detected. Try focusing for a few minutes.' with dismissible functionality",
+      "id": "REQ-101",
+      "text": "Add console.log statements at three strategic points in frontend/src/main.tsx: at the very beginning (before imports if possible), after imports, and immediately before the createRoot call, logging 'main.tsx: Script execution started', 'main.tsx: Imports completed', and 'main.tsx: Mounting React app'",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "Display a small on-screen warning like: \"Frequent tab switching detected. Try focusing for a few minutes.\""
+          "msg-user-blank-page"
         ]
       },
       "acceptanceCriteria": [
-        "Warning component appears when distraction threshold is exceeded",
-        "Message is clear and non-intrusive (toast or subtle notification)",
-        "Warning can be dismissed by the user",
-        "Warning does not block the user interface"
+        "console.log at the beginning of main.tsx logs 'main.tsx: Script execution started'",
+        "console.log after imports logs 'main.tsx: Imports completed'",
+        "console.log before createRoot logs 'main.tsx: Mounting React app'",
+        "All three console logs appear in browser console during app initialization"
       ]
     },
     {
-      "id": "REQ-22",
-      "text": "Send the distraction score and switching statistics (tab switch count, time away, timestamps) to the backend using a POST request to an API endpoint, transmitting data in JSON format whenever significant changes occur",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "Send the distraction score and switching statistics to a backend API endpoint using fetch() in JSON format"
-        ]
-      },
-      "acceptanceCriteria": [
-        "POST request sends JSON payload with distraction score, switch count, time away, and timestamp",
-        "Request is sent after user returns or at regular intervals",
-        "Backend actor receives and stores the data",
-        "No personal content, keystrokes, or page content is transmitted"
-      ]
-    },
-    {
-      "id": "REQ-23",
-      "text": "Create a backend Motoko function to record focus monitoring data including distraction score, tab switch count, time away from page, and timestamp, storing this data in the existing backend storage structure",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-5"
-        ],
-        "quotes": [
-          "The backend should receive data sent from the frontend: tab switch count, distraction score, time away from page, timestamp"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Backend function accepts distraction score, switch count, time away, and timestamp parameters",
-        "Data is stored in a way that links to user sessions or activity logs",
-        "Function returns success or error response",
-        "Privacy requirement: no page content or keystrokes are stored"
-      ]
-    },
-    {
-      "id": "REQ-24",
-      "text": "Add inline code comments to the useFocusMonitor hook explaining each section including event listener setup, timestamp recording, duration calculation, switch counting, distraction score logic, and API communication, ensuring the code is beginner-friendly and modifiable",
+      "id": "REQ-102",
+      "text": "Verify that all import statements in frontend/src/main.tsx resolve correctly by ensuring imported modules (React, ReactDOM, App component, QueryClient, InternetIdentityProvider) have valid exports and wrap critical imports in try-catch blocks if module resolution errors are suspected",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "Also include comments explaining each part of the code so I can easily understand and modify it. The code should be clean, beginner-friendly, and ready to paste into an existing webpage"
+          "msg-user-blank-page"
         ]
       },
       "acceptanceCriteria": [
-        "Each major section of the hook has a descriptive comment",
-        "Comments explain why certain logic is implemented (e.g., why thresholds are chosen)",
-        "Variable names are clear and self-documenting",
-        "Hook is easy to integrate into any component"
+        "All imports in main.tsx resolve without errors",
+        "If any import fails, a try-catch block catches it and logs the specific module that failed",
+        "Browser console shows clear error messages if imports fail"
+      ]
+    },
+    {
+      "id": "REQ-103",
+      "text": "Add defensive error handling to InternetIdentityProvider in frontend/src/hooks/useInternetIdentity.ts by wrapping AuthClient initialization and any async calls in try-catch blocks, logging errors to console, and providing fallback to unauthenticated state instead of throwing uncaught errors",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-blank-page"
+        ]
+      },
+      "acceptanceCriteria": [
+        "AuthClient initialization is wrapped in try-catch",
+        "Errors during authentication setup are logged to console.error",
+        "Application continues to render with unauthenticated state if authentication setup fails",
+        "No uncaught exceptions are thrown from useInternetIdentity hook"
+      ]
+    },
+    {
+      "id": "REQ-104",
+      "text": "Verify that the App component in frontend/src/App.tsx has a valid default export and renders without throwing errors by temporarily simplifying its content to return a single div with text 'App component loaded' to isolate rendering issues",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-blank-page"
+        ]
+      },
+      "acceptanceCriteria": [
+        "App component has default export",
+        "Simplified App component renders successfully",
+        "Browser displays 'App component loaded' text when simplified",
+        "No JavaScript errors appear in console when rendering simplified App"
+      ]
+    },
+    {
+      "id": "REQ-105",
+      "text": "Verify that the ErrorBoundary component in frontend/src/components/ErrorBoundary.tsx is correctly wrapping the App component in frontend/src/main.tsx and that it includes comprehensive console.error logging in componentDidCatch with error message, stack trace, and component stack",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-blank-page"
+        ]
+      },
+      "acceptanceCriteria": [
+        "ErrorBoundary wraps <App /> in main.tsx",
+        "componentDidCatch method logs error.message to console.error",
+        "componentDidCatch method logs error.stack to console.error",
+        "componentDidCatch method logs errorInfo.componentStack to console.error",
+        "ErrorBoundary fallback UI is visible when errors are caught"
+      ]
+    },
+    {
+      "id": "REQ-106",
+      "text": "Check browser developer tools Network tab for failed resource loads (404, CORS errors, or failed JS bundle loads) and verify that frontend/src/main.tsx and all imported JavaScript bundles load successfully with 200 status codes",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-blank-page"
+        ]
+      },
+      "acceptanceCriteria": [
+        "main.tsx loads with 200 status code",
+        "All JavaScript bundles load without 404 errors",
+        "No CORS errors in browser console",
+        "All static assets required by the app load successfully"
+      ]
+    },
+    {
+      "id": "REQ-107",
+      "text": "Check that BurnoutMonitoring component and its child components (BurnoutWarning, GreyscaleOverlay, BlockScreen) in frontend/src/App.tsx do not cause render crashes by verifying all required props and state dependencies are defined and hooks (useBurnoutMonitor, useBlockingLogic) return valid data before rendering child components",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-blank-page"
+        ]
+      },
+      "acceptanceCriteria": [
+        "useBurnoutMonitor hook returns valid burnout index before rendering warnings",
+        "useBlockingLogic hook returns valid isBlocked state",
+        "All child components check for undefined/null values before rendering",
+        "No 'Cannot read property of undefined' errors in console"
       ]
     }
   ],
   "constraints": [
-    "Do not record page content, keystrokes, user inputs, or personal data",
-    "Only track focus state, timestamps, and switch counts",
-    "Do not modify existing hooks in frontend/src/hooks/useInternetIdentity.ts, useInternetIdentity.tsx, useActor.ts, or main.tsx",
-    "Do not edit components in frontend/src/components/ui",
-    "Use existing backend actor structure for data storage"
+    "Do not modify the backend/main.mo actor structure",
+    "Do not change the Internet Identity authentication flow",
+    "Preserve all existing functionality while fixing the rendering issue",
+    "Do not modify frontend/src/hooks/useInternetIdentity.ts or frontend/src/hooks/useActor.ts beyond adding error handling"
   ],
   "nonGoals": [
-    "Recording browser history or visited URLs",
-    "Tracking mouse movements or keyboard inputs",
-    "Implementing Python/Flask backend (use Motoko)",
-    "Creating new authentication system (Internet Identity already exists)",
-    "Implementing SQLite database (use existing Motoko storage)",
-    "Adding charts or graphs for tab switching data (dashboard already exists)"
+    "Adding new features or functionality",
+    "Redesigning the UI or layout",
+    "Changing the application's core logic or behavior",
+    "Modifying the backend API endpoints"
   ],
   "imageRequirements": {
     "required": [],

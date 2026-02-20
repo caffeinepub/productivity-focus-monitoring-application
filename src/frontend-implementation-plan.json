@@ -1,110 +1,203 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Implement Browser Tab Switching Detection and Focus Monitoring",
+  "title": "Fix blank white page rendering issue in versions 9-12",
   "requirements": [
     {
-      "id": "REQ-18",
-      "summary": "Create useFocusMonitor hook to track page visibility and window focus events with timestamp recording",
+      "id": "REQ-98",
+      "summary": "Verify and ensure frontend/index.html contains a properly formatted root div element",
       "acceptanceCriteria": [
-        "Hook listens to document visibilitychange events",
-        "Hook listens to window blur and focus events",
-        "Timestamps are recorded for each leave and return event",
-        "Hook can be imported and used in any React component"
+        "frontend/index.html contains <div id=\"root\"></div> in the body section",
+        "The root div has no conflicting attributes or styles that prevent rendering"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useFocusMonitor.ts",
-          "operation": "create",
-          "description": "Create a custom React hook that sets up event listeners for document visibilitychange, window.onblur, and window.onfocus events. Record timestamps using Date.now() whenever the user leaves (blur/hidden) or returns (focus/visible) to the page. Store leave/return timestamps in state arrays and provide them for consumption by components. Include cleanup in useEffect return to remove event listeners on unmount."
-        }
-      ]
-    },
-    {
-      "id": "REQ-19",
-      "summary": "Calculate time away duration and track switching frequency per time window in useFocusMonitor hook",
-      "acceptanceCriteria": [
-        "Duration away is calculated in seconds or milliseconds",
-        "Switch count is tracked and reset per time window (e.g., 2 minutes)",
-        "Switching frequency (switches per minute) is calculated and exposed"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/hooks/useFocusMonitor.ts",
+          "path": "frontend/index.html",
           "operation": "modify",
-          "description": "Add logic to calculate the duration between leave and return timestamps (in milliseconds). Track the number of switches within a rolling 2-minute window by filtering recent switch events. Calculate switching frequency as switches per minute and expose these metrics (timeAway, switchCount, switchesPerMinute) in the hook's return value. Reset or filter out old switches beyond the 2-minute window using timestamp comparisons."
+          "description": "Verify that the body section contains <div id=\"root\"></div> with correct spelling and no conflicting attributes. If missing or malformed, add the correct markup. Ensure no inline styles or classes interfere with React rendering."
         }
       ]
     },
     {
-      "id": "REQ-20",
-      "summary": "Implement distraction score calculation based on switching frequency threshold in useFocusMonitor hook",
+      "id": "REQ-99",
+      "summary": "Add null check and error handling for root element lookup in main.tsx",
       "acceptanceCriteria": [
-        "Distraction score is a numeric value that increases with frequent switching",
-        "Threshold of 5 switches in 2 minutes triggers score increase",
-        "Score is exposed by the hook for consumption by components"
+        "main.tsx uses document.getElementById('root') to get the root element",
+        "A null check is present before calling createRoot",
+        "If root element is missing, console.error logs 'Root element #root not found'",
+        "If root element is missing, a visible error message appears in document.body"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useFocusMonitor.ts",
+          "path": "frontend/src/main.tsx",
           "operation": "modify",
-          "description": "Add distractionScore state variable (initialized to 0). Whenever the switch count within the 2-minute window exceeds 5, increment the distraction score. Expose the distractionScore in the hook's return value so components can consume and display it. Optionally implement decay logic to reduce the score over time if switching behavior improves."
+          "description": "Add a null check after document.getElementById('root'). If the root element is null, log 'Root element #root not found' to console.error and display a visible error message in document.body with red background and white text indicating the root element is missing."
         }
       ]
     },
     {
-      "id": "REQ-21",
-      "summary": "Display dismissible warning component when distraction score threshold is exceeded",
+      "id": "REQ-100",
+      "summary": "Wrap React initialization in try-catch block with comprehensive error handling",
       "acceptanceCriteria": [
-        "Warning component appears when distraction threshold is exceeded",
-        "Message is clear and non-intrusive (toast or subtle notification)",
-        "Warning can be dismissed by the user",
-        "Warning does not block the user interface"
+        "try-catch block wraps createRoot and render calls",
+        "Caught errors are logged to console.error with stack traces",
+        "Caught errors display visible error message in document.body with red background",
+        "Error message includes the error name and message"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/DistractionWarning.tsx",
-          "operation": "create",
-          "description": "Create a DistractionWarning component that accepts a visible prop and an onDismiss callback. Display a toast-style notification with the message 'Frequent tab switching detected. Try focusing for a few minutes.' when visible is true. Include a dismiss button (X icon) that calls onDismiss to hide the warning. Use Tailwind CSS for non-intrusive positioning (e.g., bottom-right corner) and styling. Ensure the warning does not block user interaction with the main UI."
+          "path": "frontend/src/main.tsx",
+          "operation": "modify",
+          "description": "Wrap the ReactDOM.createRoot and root.render calls in a try-catch block. In the catch block, log the error with full stack trace to console.error and create a visible error message element appended to document.body with red background, white text, padding, and displaying the error name and message."
+        }
+      ]
+    },
+    {
+      "id": "REQ-101",
+      "summary": "Add diagnostic console.log statements at strategic execution points",
+      "acceptanceCriteria": [
+        "console.log at the beginning of main.tsx logs 'main.tsx: Script execution started'",
+        "console.log after imports logs 'main.tsx: Imports completed'",
+        "console.log before createRoot logs 'main.tsx: Mounting React app'",
+        "All three console logs appear in browser console during app initialization"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/main.tsx",
+          "operation": "modify",
+          "description": "Add console.log('main.tsx: Script execution started') at the very beginning of the file (first line after imports). Add console.log('main.tsx: Imports completed') immediately after all import statements. Add console.log('main.tsx: Mounting React app') immediately before the createRoot call."
+        }
+      ]
+    },
+    {
+      "id": "REQ-102",
+      "summary": "Verify and add defensive error handling for import resolution failures",
+      "acceptanceCriteria": [
+        "All imports in main.tsx resolve without errors",
+        "If any import fails, a try-catch block catches it and logs the specific module that failed",
+        "Browser console shows clear error messages if imports fail"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/main.tsx",
+          "operation": "modify",
+          "description": "Verify all import statements (React, ReactDOM, App, QueryClient, InternetIdentityProvider) have valid module paths. If any imports are suspected to fail, wrap critical dynamic imports in try-catch blocks that log the specific failed module name to console.error with a descriptive message."
+        }
+      ]
+    },
+    {
+      "id": "REQ-103",
+      "summary": "Add defensive error handling to InternetIdentityProvider and AuthClient initialization",
+      "acceptanceCriteria": [
+        "AuthClient initialization is wrapped in try-catch",
+        "Errors during authentication setup are logged to console.error",
+        "Application continues to render with unauthenticated state if authentication setup fails",
+        "No uncaught exceptions are thrown from useInternetIdentity hook"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useInternetIdentity.ts",
+          "operation": "modify",
+          "description": "Wrap AuthClient.create() and all async authentication calls in try-catch blocks. Log errors to console.error with descriptive messages. Ensure the hook provides a fallback unauthenticated state (isAuthenticated: false, identity: null) if authentication setup fails, allowing the app to continue rendering without throwing uncaught errors."
+        }
+      ]
+    },
+    {
+      "id": "REQ-104",
+      "summary": "Verify App component export and create simplified fallback version for testing",
+      "acceptanceCriteria": [
+        "App component has default export",
+        "Simplified App component renders successfully",
+        "Browser displays 'App component loaded' text when simplified",
+        "No JavaScript errors appear in console when rendering simplified App"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Verify that App component has a default export. Temporarily add a comment block containing a simplified fallback version: 'export default function App() { return <div>App component loaded</div>; }' as a debugging aid. Document that this simplified version can be uncommented to isolate rendering issues and verify basic React mounting works."
+        }
+      ]
+    },
+    {
+      "id": "REQ-105",
+      "summary": "Enhance ErrorBoundary with comprehensive logging in componentDidCatch",
+      "acceptanceCriteria": [
+        "ErrorBoundary wraps <App /> in main.tsx",
+        "componentDidCatch method logs error.message to console.error",
+        "componentDidCatch method logs error.stack to console.error",
+        "componentDidCatch method logs errorInfo.componentStack to console.error",
+        "ErrorBoundary fallback UI is visible when errors are caught"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/ErrorBoundary.tsx",
+          "operation": "modify",
+          "description": "Enhance componentDidCatch method to log error.message, error.stack, and errorInfo.componentStack to console.error with clear labels. Ensure the fallback UI displays the error details prominently. Verify the component exports correctly and can catch errors from child components."
         },
         {
-          "path": "frontend/src/pages/Dashboard.tsx",
+          "path": "frontend/src/main.tsx",
           "operation": "modify",
-          "description": "Import and use the useFocusMonitor hook to access distractionScore. Add state to track whether the DistractionWarning is visible. When distractionScore exceeds a threshold (e.g., 3), set warning visibility to true. Render the DistractionWarning component with visible and onDismiss props. Implement onDismiss handler to hide the warning and optionally reset the flag after a cooldown period."
+          "description": "Verify that ErrorBoundary component wraps the <App /> component in the render call. Ensure the import path is correct and ErrorBoundary is positioned to catch all rendering errors from App and its children."
         }
       ]
     },
     {
-      "id": "REQ-22",
-      "summary": "Send distraction score and switching statistics to backend via POST request in JSON format",
+      "id": "REQ-106",
+      "summary": "Add resource loading verification and error handling for failed bundle loads",
       "acceptanceCriteria": [
-        "POST request sends JSON payload with distraction score, switch count, time away, and timestamp",
-        "Request is sent after user returns or at regular intervals",
-        "Backend actor receives and stores the data",
-        "No personal content, keystrokes, or page content is transmitted"
+        "main.tsx loads with 200 status code",
+        "All JavaScript bundles load without 404 errors",
+        "No CORS errors in browser console",
+        "All static assets required by the app load successfully"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useFocusMonitor.ts",
+          "path": "frontend/index.html",
           "operation": "modify",
-          "description": "Add logic to send focus monitoring data to the backend by calling the backend actor's recordFocusScore method (which accepts distractionScore, tabSwitchCount, and timeAway as bigint parameters). Use the useActor hook to access the authenticated backend actor. Trigger data transmission after the user returns to the page (on focus/visible event) or at regular intervals (e.g., every 30 seconds) using a timer. Convert numeric values to BigInt before calling the backend method. Ensure no page content, keystrokes, or personal data are included in the payload."
+          "description": "Add error event listener to the script tag loading main.tsx to catch and log script loading failures. Add a global onerror handler in a script tag before the main.tsx import that logs resource loading failures with URL and error details to console.error and displays a visible error message if critical resources fail to load."
         }
       ]
     },
     {
-      "id": "REQ-24",
-      "summary": "Add inline code comments to useFocusMonitor hook for clarity and beginner-friendliness",
+      "id": "REQ-107",
+      "summary": "Add defensive null checks and error handling to BurnoutMonitoring components and hooks",
       "acceptanceCriteria": [
-        "Each major section of the hook has a descriptive comment",
-        "Comments explain why certain logic is implemented (e.g., why thresholds are chosen)",
-        "Variable names are clear and self-documenting",
-        "Hook is easy to integrate into any component"
+        "useBurnoutMonitor hook returns valid burnout index before rendering warnings",
+        "useBlockingLogic hook returns valid isBlocked state",
+        "All child components check for undefined/null values before rendering",
+        "No 'Cannot read property of undefined' errors in console"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useFocusMonitor.ts",
+          "path": "frontend/src/hooks/useBurnoutMonitor.ts",
           "operation": "modify",
-          "description": "Add inline comments throughout the useFocusMonitor hook explaining each section: event listener setup (visibilitychange, blur, focus), timestamp recording logic, duration calculation (subtracting leave from return timestamps), switch counting within the 2-minute rolling window, distraction score increment logic (threshold of 5 switches in 2 minutes), and backend communication (calling recordFocusScore). Include comments explaining design choices such as why 2 minutes is used as the window and why 5 switches is the threshold. Use clear, self-documenting variable names (e.g., leaveTimestamp, returnTimestamp, switchCountInWindow) to improve readability."
+          "description": "Add defensive checks to ensure all returned values have safe defaults. Initialize burnoutIndex to 0 and breakdown to { timeBased: 0, switchingBased: 0 } if calculations fail. Wrap complex calculations in try-catch blocks that log errors and return safe default values."
+        },
+        {
+          "path": "frontend/src/hooks/useBlockingLogic.ts",
+          "operation": "modify",
+          "description": "Add defensive initialization for isBlocked state (default to false). Ensure dismissCount and blockStartTime have safe default values. Add try-catch around localStorage operations with fallback to in-memory state if localStorage fails."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add null/undefined checks before rendering BurnoutWarning, GreyscaleOverlay, and BlockScreen components. Verify that useBurnoutMonitor and useBlockingLogic hooks return defined values before passing them as props. Add conditional rendering: only render BurnoutMonitoring child components if hook data is valid."
+        },
+        {
+          "path": "frontend/src/components/BurnoutWarning.tsx",
+          "operation": "modify",
+          "description": "Add prop validation at the component entry. Check that burnoutIndex and breakdown props are defined and are valid numbers before rendering. Provide fallback UI or return null if required props are missing."
+        },
+        {
+          "path": "frontend/src/components/GreyscaleOverlay.tsx",
+          "operation": "modify",
+          "description": "Add validation for burnoutIndex prop. Ensure numeric calculations handle NaN and Infinity cases. Clamp intensity values to safe ranges (0-1) to prevent invalid CSS values."
+        },
+        {
+          "path": "frontend/src/components/BlockScreen.tsx",
+          "operation": "modify",
+          "description": "Add validation for all props and hook return values used in rendering. Ensure timer and switching frequency data are defined before displaying. Add error boundaries or try-catch around rendering logic that could fail due to undefined state."
         }
       ]
     }

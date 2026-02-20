@@ -1,17 +1,41 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Shield, Clock } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { COPY } from '@/lib/copyConstants';
 
 interface BlockScreenProps {
   timeRemaining: number;
   onComplete: () => void;
 }
 
+/**
+ * BlockScreen component displays full-screen blocking interface
+ * 
+ * Features:
+ * - Covers entire viewport (cannot be dismissed)
+ * - Timer displays minutes and seconds remaining
+ * - Progress bar fills from 0% to 100% over 25 minutes
+ * - Productivity tips rotate every 30 seconds
+ * - Automatically closes when productive session completes
+ * - Timer only decrements when user maintains focus (low switching)
+ */
 export function BlockScreen({ timeRemaining, onComplete }: BlockScreenProps) {
-  const totalTime = 25 * 60;
+  const totalTime = 25 * 60; // 25 minutes in seconds
   const progress = ((totalTime - timeRemaining) / totalTime) * 100;
   const minutes = Math.floor(timeRemaining / 60);
   const seconds = timeRemaining % 60;
+  
+  // Rotate through productivity tips every 30 seconds
+  const [currentTipIndex, setCurrentTipIndex] = useState(0);
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTipIndex((prev) => (prev + 1) % COPY.blocking.tips.length);
+    }, 30000); // 30 seconds
+    
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-sm">
@@ -22,9 +46,9 @@ export function BlockScreen({ timeRemaining, onComplete }: BlockScreenProps) {
               <Shield className="h-8 w-8 text-primary" />
             </div>
           </div>
-          <CardTitle className="text-2xl">Focus Session Required</CardTitle>
+          <CardTitle className="text-2xl">{COPY.blocking.title}</CardTitle>
           <CardDescription>
-            Complete a productive work session to unlock distracting applications
+            {COPY.blocking.subtitle}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -46,14 +70,12 @@ export function BlockScreen({ timeRemaining, onComplete }: BlockScreenProps) {
               productive tasks.
             </p>
             <div className="p-4 rounded-lg bg-muted/50">
-              <p className="font-medium text-foreground mb-2">Tips for this session:</p>
-              <ul className="space-y-1 list-disc list-inside">
-                <li>Close unnecessary tabs and applications</li>
-                <li>Focus on a single task</li>
-                <li>Minimize context switching</li>
-                <li>Take deep breaths if you feel restless</li>
-              </ul>
+              <p className="font-medium text-foreground mb-2">Tip #{currentTipIndex + 1}:</p>
+              <p className="text-base">{COPY.blocking.tips[currentTipIndex]}</p>
             </div>
+            <p className="text-xs text-center text-muted-foreground">
+              Timer advances only when you maintain focus (low tab switching)
+            </p>
           </div>
         </CardContent>
       </Card>

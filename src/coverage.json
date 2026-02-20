@@ -1,108 +1,135 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-20T17:23:29.918Z",
+  "generatedAt": "2026-02-20T20:17:11.724Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 7,
-    "implemented": 6,
+    "total": 10,
+    "implemented": 5,
     "items": [
       {
-        "id": "REQ-18",
-        "summary": "Create a useFocusMonitor React hook that tracks page visibility changes using the Page Visibility API (visibilitychange event) and window focus/blur events (window.onblur and window.onfocus), recording timestamps whenever the user leaves and returns to the page",
-        "status": "implemented",
+        "id": "REQ-100",
+        "summary": "Wrap the ReactDOM.createRoot and root.render calls in frontend/src/main.tsx in a try-catch block that catches initialization errors, logs them with full stack traces to console.error, and displays a user-visible error message directly in document.body",
+        "status": "missing",
         "plannedFiles": [
-          "frontend/src/hooks/useFocusMonitor.ts"
+          "frontend/src/main.tsx"
         ],
-        "matchedFiles": [
-          "frontend/src/hooks/useFocusMonitor.ts"
-        ]
-      },
-      {
-        "id": "REQ-19",
-        "summary": "In the useFocusMonitor hook, calculate how long the user stayed away from the page by comparing leave and return timestamps, and count how many times the user switches away within a time period (e.g., per minute)",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/hooks/useFocusMonitor.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/hooks/useFocusMonitor.ts"
-        ]
-      },
-      {
-        "id": "REQ-20",
-        "summary": "In the useFocusMonitor hook, implement a distraction score calculation that updates when the user switches tabs frequently (e.g., more than 5 times in 2 minutes), incrementing the score based on switching frequency",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/hooks/useFocusMonitor.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/hooks/useFocusMonitor.ts"
-        ]
-      },
-      {
-        "id": "REQ-21",
-        "summary": "Display a small on-screen warning component when the distraction score threshold is exceeded, showing a message like 'Frequent tab switching detected. Try focusing for a few minutes.' with dismissible functionality",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/DistractionWarning.tsx",
-          "frontend/src/pages/Dashboard.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/DistractionWarning.tsx",
-          "frontend/src/pages/Dashboard.tsx"
-        ]
-      },
-      {
-        "id": "REQ-22",
-        "summary": "Send the distraction score and switching statistics (tab switch count, time away, timestamps) to the backend using a POST request to an API endpoint, transmitting data in JSON format whenever significant changes occur",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/hooks/useFocusMonitor.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/hooks/useFocusMonitor.ts"
-        ]
-      },
-      {
-        "id": "REQ-23",
-        "summary": "Create a backend Motoko function to record focus monitoring data including distraction score, tab switch count, time away from page, and timestamp, storing this data in the existing backend storage structure",
-        "status": "unknown",
-        "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-24",
-        "summary": "Add inline code comments to the useFocusMonitor hook explaining each section including event listener setup, timestamp recording, duration calculation, switch counting, distraction score logic, and API communication, ensuring the code is beginner-friendly and modifiable",
+        "id": "REQ-101",
+        "summary": "Add console.log statements at three strategic points in frontend/src/main.tsx: at the very beginning (before imports if possible), after imports, and immediately before the createRoot call, logging 'main.tsx: Script execution started', 'main.tsx: Imports completed', and 'main.tsx: Mounting React app'",
+        "status": "missing",
+        "plannedFiles": [
+          "frontend/src/main.tsx"
+        ],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-102",
+        "summary": "Verify that all import statements in frontend/src/main.tsx resolve correctly by ensuring imported modules (React, ReactDOM, App component, QueryClient, InternetIdentityProvider) have valid exports and wrap critical imports in try-catch blocks if module resolution errors are suspected",
+        "status": "missing",
+        "plannedFiles": [
+          "frontend/src/main.tsx"
+        ],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-103",
+        "summary": "Add defensive error handling to InternetIdentityProvider in frontend/src/hooks/useInternetIdentity.ts by wrapping AuthClient initialization and any async calls in try-catch blocks, logging errors to console, and providing fallback to unauthenticated state instead of throwing uncaught errors",
+        "status": "missing",
+        "plannedFiles": [
+          "frontend/src/hooks/useInternetIdentity.ts"
+        ],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-104",
+        "summary": "Verify that the App component in frontend/src/App.tsx has a valid default export and renders without throwing errors by temporarily simplifying its content to return a single div with text 'App component loaded' to isolate rendering issues",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useFocusMonitor.ts"
+          "frontend/src/App.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useFocusMonitor.ts"
+          "frontend/src/App.tsx"
         ]
+      },
+      {
+        "id": "REQ-105",
+        "summary": "Verify that the ErrorBoundary component in frontend/src/components/ErrorBoundary.tsx is correctly wrapping the App component in frontend/src/main.tsx and that it includes comprehensive console.error logging in componentDidCatch with error message, stack trace, and component stack",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/ErrorBoundary.tsx",
+          "frontend/src/main.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/ErrorBoundary.tsx"
+        ]
+      },
+      {
+        "id": "REQ-106",
+        "summary": "Check browser developer tools Network tab for failed resource loads (404, CORS errors, or failed JS bundle loads) and verify that frontend/src/main.tsx and all imported JavaScript bundles load successfully with 200 status codes",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/index.html"
+        ],
+        "matchedFiles": [
+          "frontend/index.html"
+        ]
+      },
+      {
+        "id": "REQ-107",
+        "summary": "Check that BurnoutMonitoring component and its child components (BurnoutWarning, GreyscaleOverlay, BlockScreen) in frontend/src/App.tsx do not cause render crashes by verifying all required props and state dependencies are defined and hooks (useBurnoutMonitor, useBlockingLogic) return valid data before rendering child components",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useBurnoutMonitor.ts",
+          "frontend/src/hooks/useBlockingLogic.ts",
+          "frontend/src/App.tsx",
+          "frontend/src/components/BurnoutWarning.tsx",
+          "frontend/src/components/GreyscaleOverlay.tsx",
+          "frontend/src/components/BlockScreen.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useBurnoutMonitor.ts",
+          "frontend/src/hooks/useBlockingLogic.ts",
+          "frontend/src/App.tsx"
+        ]
+      },
+      {
+        "id": "REQ-98",
+        "summary": "Verify that frontend/index.html contains a root div element with id='root' in the body section, and if missing or malformed, add the correct markup: <div id=\"root\"></div>",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/index.html"
+        ],
+        "matchedFiles": [
+          "frontend/index.html"
+        ]
+      },
+      {
+        "id": "REQ-99",
+        "summary": "Verify that frontend/src/main.tsx correctly targets the root element using document.getElementById('root') with a null check, and if the element is not found, logs a clear error message to console and displays a visible error on the page",
+        "status": "missing",
+        "plannedFiles": [
+          "frontend/src/main.tsx"
+        ],
+        "matchedFiles": []
       }
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
-    "build-template/README.md",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
-    "frontend/src/components/DistractionWarning.tsx",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
-    "frontend/src/hooks/useFocusMonitor.ts",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/Dashboard.tsx",
+    "frontend/index.html",
+    "frontend/src/App.tsx",
+    "frontend/src/components/ErrorBoundary.tsx",
+    "frontend/src/hooks/useBlockingLogic.ts",
+    "frontend/src/hooks/useBurnoutMonitor.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

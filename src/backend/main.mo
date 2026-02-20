@@ -1,13 +1,11 @@
 import Map "mo:core/Map";
-import Array "mo:core/Array";
 import List "mo:core/List";
-import Text "mo:core/Text";
-import Runtime "mo:core/Runtime";
+import Array "mo:core/Array";
 import Time "mo:core/Time";
 import Principal "mo:core/Principal";
-import Migration "migration";
 
-(with migration = Migration.run)
+
+
 actor {
   type Session = {
     timestamp : Time.Time;
@@ -93,6 +91,44 @@ actor {
     distractionScore : Nat;
     tabSwitchCount : Nat;
     timeAway : Nat;
+    productiveToProductive : Nat;
+    productiveToDistracting : Nat;
+    distractingToProductive : Nat;
+    distractingToDistracting : Nat;
+  };
+
+  type ScoreWindow = {
+    start : Time.Time;
+    end : Time.Time;
+  };
+
+  type BurnoutCalculation = {
+    timestamp : Time.Time;
+    previousIndex : Nat;
+    currentIndex : Nat;
+    focusSessionTimestamps : [Time.Time];
+    switchCount : Nat;
+    breakAnalysis : BreakAnalysis;
+    sleepAnalysis : SleepAnalysis;
+    notificationAnalysis : NotificationAnalysis;
+  };
+
+  type BreakAnalysis = {
+    totalBreaks : Nat;
+    deskRecoveries : Nat;
+    walkBreaks : Nat;
+    restorativeRatio : Float;
+  };
+
+  type SleepAnalysis = {
+    totalSleepHours : Float;
+    deepRestHours : Float;
+    sleepDeficitScore : Float;
+  };
+
+  type NotificationAnalysis = {
+    frequency : Nat;
+    responseTimeAverage : Float;
   };
 
   var nextReportId = 0 : Nat;
@@ -102,6 +138,8 @@ actor {
   let breaks = Map.empty<Principal, List.List<BreakSession>>();
   let reports = Map.empty<Nat, Report>();
   let focusScores = Map.empty<Principal, List.List<FocusScore>>();
+  let scoreWindows = Map.empty<Principal, ScoreWindow>();
+  let burnoutCalculations = Map.empty<Principal, List.List<BurnoutCalculation>>();
 
   public shared ({ caller }) func recordSession(session : Session) : async () {
     let existingSessions = switch (sessions.get(caller)) {
@@ -171,12 +209,35 @@ actor {
     };
   };
 
-  public shared ({ caller }) func recordFocusScore(distractionScore : Nat, tabSwitchCount : Nat, timeAway : Nat) : async () {
+  public shared ({ caller }) func startFocusSession() : async () {
+    let now = Time.now();
+    scoreWindows.add(
+      caller,
+      {
+        start = now;
+        end = now + 10_000_000_000; // 10 seconds in nanoseconds
+      },
+    );
+  };
+
+  public shared ({ caller }) func recordFocusScore(
+    distractionScore : Nat,
+    tabSwitchCount : Nat,
+    timeAway : Nat,
+    productiveToProductive : Nat,
+    productiveToDistracting : Nat,
+    distractingToProductive : Nat,
+    distractingToDistracting : Nat,
+  ) : async () {
     let newScore : FocusScore = {
       timestamp = Time.now();
       distractionScore;
       tabSwitchCount;
       timeAway;
+      productiveToProductive;
+      productiveToDistracting;
+      distractingToProductive;
+      distractingToDistracting;
     };
 
     let existingScores = switch (focusScores.get(caller)) {
@@ -192,5 +253,31 @@ actor {
       case (?scores) { scores.toArray() };
       case (null) { [] };
     };
+  };
+
+  public shared ({ caller }) func recordBurnoutCalculation(calculation : BurnoutCalculation) : async () {
+    let existingCalcs = switch (burnoutCalculations.get(caller)) {
+      case (?list) { list };
+      case (null) { List.empty<BurnoutCalculation>() };
+    };
+    existingCalcs.add(calculation);
+    burnoutCalculations.add(caller, existingCalcs);
+  };
+
+  public query ({ caller }) func getBurnoutCalculations() : async [BurnoutCalculation] {
+    switch (burnoutCalculations.get(caller)) {
+      case (?calcs) { calcs.toArray() };
+      case (null) { [] };
+    };
+  };
+
+  public query func getAllBurnoutCalculations() : async [(Principal, [BurnoutCalculation])] {
+    let entries = burnoutCalculations.toArray();
+    entries.map(
+      func(tuple) {
+        let (principal, list) = tuple;
+        (principal, list.toArray());
+      }
+    );
   };
 };
