@@ -1,122 +1,47 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-20T20:17:11.724Z",
+  "generatedAt": "2026-02-20T18:41:29.915Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 10,
-    "implemented": 5,
+    "total": 3,
+    "implemented": 3,
     "items": [
       {
-        "id": "REQ-100",
-        "summary": "Wrap the ReactDOM.createRoot and root.render calls in frontend/src/main.tsx in a try-catch block that catches initialization errors, logs them with full stack traces to console.error, and displays a user-visible error message directly in document.body",
-        "status": "missing",
-        "plannedFiles": [
-          "frontend/src/main.tsx"
-        ],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-101",
-        "summary": "Add console.log statements at three strategic points in frontend/src/main.tsx: at the very beginning (before imports if possible), after imports, and immediately before the createRoot call, logging 'main.tsx: Script execution started', 'main.tsx: Imports completed', and 'main.tsx: Mounting React app'",
-        "status": "missing",
-        "plannedFiles": [
-          "frontend/src/main.tsx"
-        ],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-102",
-        "summary": "Verify that all import statements in frontend/src/main.tsx resolve correctly by ensuring imported modules (React, ReactDOM, App component, QueryClient, InternetIdentityProvider) have valid exports and wrap critical imports in try-catch blocks if module resolution errors are suspected",
-        "status": "missing",
-        "plannedFiles": [
-          "frontend/src/main.tsx"
-        ],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-103",
-        "summary": "Add defensive error handling to InternetIdentityProvider in frontend/src/hooks/useInternetIdentity.ts by wrapping AuthClient initialization and any async calls in try-catch blocks, logging errors to console, and providing fallback to unauthenticated state instead of throwing uncaught errors",
-        "status": "missing",
-        "plannedFiles": [
-          "frontend/src/hooks/useInternetIdentity.ts"
-        ],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-104",
-        "summary": "Verify that the App component in frontend/src/App.tsx has a valid default export and renders without throwing errors by temporarily simplifying its content to return a single div with text 'App component loaded' to isolate rendering issues",
+        "id": "REQ-55",
+        "summary": "Create a detailed real-time metrics display component that shows exact tab switching data including precise switch timestamps (with milliseconds), switch frequency (per minute and per hour), time away durations for each switch, current distraction score with calculation breakdown, and total switches count since session start",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/App.tsx"
+          "frontend/src/components/ValidationMetrics.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/App.tsx"
+          "frontend/src/components/ValidationMetrics.tsx"
         ]
       },
       {
-        "id": "REQ-105",
-        "summary": "Verify that the ErrorBoundary component in frontend/src/components/ErrorBoundary.tsx is correctly wrapping the App component in frontend/src/main.tsx and that it includes comprehensive console.error logging in componentDidCatch with error message, stack trace, and component stack",
+        "id": "REQ-56",
+        "summary": "Update LiveMonitor component in frontend/src/pages/LiveMonitor.tsx to include a dedicated 'Validation Metrics' section that displays the detailed real-time metrics component with all precise switching data visible simultaneously for system accuracy verification",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/ErrorBoundary.tsx",
-          "frontend/src/main.tsx"
+          "frontend/src/pages/LiveMonitor.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/ErrorBoundary.tsx"
+          "frontend/src/pages/LiveMonitor.tsx"
         ]
       },
       {
-        "id": "REQ-106",
-        "summary": "Check browser developer tools Network tab for failed resource loads (404, CORS errors, or failed JS bundle loads) and verify that frontend/src/main.tsx and all imported JavaScript bundles load successfully with 200 status codes",
+        "id": "REQ-57",
+        "summary": "Enhance useFocusMonitor hook in frontend/src/hooks/useFocusMonitor.ts to expose a detailed switching history array containing the last 20 switch events with exact timestamps, away duration, and distraction score at time of switch for debugging and validation purposes",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/index.html"
+          "frontend/src/hooks/useFocusMonitor.ts"
         ],
         "matchedFiles": [
-          "frontend/index.html"
+          "frontend/src/hooks/useFocusMonitor.ts"
         ]
-      },
-      {
-        "id": "REQ-107",
-        "summary": "Check that BurnoutMonitoring component and its child components (BurnoutWarning, GreyscaleOverlay, BlockScreen) in frontend/src/App.tsx do not cause render crashes by verifying all required props and state dependencies are defined and hooks (useBurnoutMonitor, useBlockingLogic) return valid data before rendering child components",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/hooks/useBurnoutMonitor.ts",
-          "frontend/src/hooks/useBlockingLogic.ts",
-          "frontend/src/App.tsx",
-          "frontend/src/components/BurnoutWarning.tsx",
-          "frontend/src/components/GreyscaleOverlay.tsx",
-          "frontend/src/components/BlockScreen.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/hooks/useBurnoutMonitor.ts",
-          "frontend/src/hooks/useBlockingLogic.ts",
-          "frontend/src/App.tsx"
-        ]
-      },
-      {
-        "id": "REQ-98",
-        "summary": "Verify that frontend/index.html contains a root div element with id='root' in the body section, and if missing or malformed, add the correct markup: <div id=\"root\"></div>",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/index.html"
-        ],
-        "matchedFiles": [
-          "frontend/index.html"
-        ]
-      },
-      {
-        "id": "REQ-99",
-        "summary": "Verify that frontend/src/main.tsx correctly targets the root element using document.getElementById('root') with a null check, and if the element is not found, logs a clear error message to console and displays a visible error on the page",
-        "status": "missing",
-        "plannedFiles": [
-          "frontend/src/main.tsx"
-        ],
-        "matchedFiles": []
       }
     ]
   },
@@ -125,11 +50,9 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/index.html",
-    "frontend/src/App.tsx",
-    "frontend/src/components/ErrorBoundary.tsx",
-    "frontend/src/hooks/useBlockingLogic.ts",
-    "frontend/src/hooks/useBurnoutMonitor.ts",
+    "frontend/src/components/ValidationMetrics.tsx",
+    "frontend/src/hooks/useFocusMonitor.ts",
+    "frontend/src/pages/LiveMonitor.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

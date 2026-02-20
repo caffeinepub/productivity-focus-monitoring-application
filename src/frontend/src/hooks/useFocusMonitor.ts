@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRecordFocusScore, useGetFocusScores } from './useQueries';
-import { useApplications } from './useApplications';
 
 interface FocusEvent {
   timestamp: number;
@@ -13,15 +12,6 @@ interface SwitchEvent {
   distractionScore: number;
 }
 
-interface CategorizedSwitchEvent {
-  timestamp: number;
-  sourceUrl: string;
-  targetUrl: string;
-  sourceCategory: 'productive' | 'distracting' | 'unknown';
-  targetCategory: 'productive' | 'distracting' | 'unknown';
-  switchType: string;
-}
-
 interface UseFocusMonitorReturn {
   distractionScore: number;
   switchCount: number;
@@ -30,11 +20,6 @@ interface UseFocusMonitorReturn {
   timeAway: number;
   isAway: boolean;
   switchingHistory: SwitchEvent[];
-  productiveToProductive: number;
-  productiveToDistracting: number;
-  distractingToProductive: number;
-  distractingToDistracting: number;
-  categorizedSwitchingHistory: CategorizedSwitchEvent[];
 }
 
 /**
@@ -60,30 +45,6 @@ export function useFocusMonitor(): UseFocusMonitorReturn {
   
   // Track detailed switching history for validation (last 20 events)
   const [switchingHistory, setSwitchingHistory] = useState<SwitchEvent[]>([]);
-  
-  /**
-   * Track categorized switching counts
-   * - productiveToProductive: Switching between productive websites (e.g., GitHub to Stack Overflow)
-   * - productiveToDistracting: Switching from productive to distracting (e.g., VS Code docs to YouTube)
-   * - distractingToProductive: Switching from distracting to productive (e.g., Facebook to Google Docs)
-   * - distractingToDistracting: Switching between distracting websites (e.g., Instagram to TikTok)
-   */
-  const [productiveToProductive, setProductiveToProductive] = useState(0);
-  const [productiveToDistracting, setProductiveToDistracting] = useState(0);
-  const [distractingToProductive, setDistractionToProductive] = useState(0);
-  const [distractingToDistracting, setDistractionToDistracting] = useState(0);
-  
-  /**
-   * Track detailed categorized switching history (last 50 events)
-   * Each event includes source/target URLs, categories, and switch type
-   */
-  const [categorizedSwitchingHistory, setCategorizedSwitchingHistory] = useState<CategorizedSwitchEvent[]>([]);
-  
-  /**
-   * Track the previous URL to detect URL changes
-   * Using ref to avoid unnecessary re-renders
-   */
-  const previousUrlRef = useRef<string>(window.location.href);
   
   /**
    * Distraction score increases when user switches tabs frequently
@@ -115,9 +76,6 @@ export function useFocusMonitor(): UseFocusMonitorReturn {
   
   // Fetch existing focus scores to restore state on mount
   const { data: focusScores } = useGetFocusScores();
-  
-  // Get application categories for URL pattern matching
-  const { applications } = useApplications();
 
   /**
    * Initialize state from backend data on mount
@@ -132,10 +90,6 @@ export function useFocusMonitor(): UseFocusMonitorReturn {
         // Restore state from backend
         setDistractionScore(Number(latestScore.distractionScore));
         setTimeAway(Number(latestScore.timeAway) * 1000); // Convert seconds to milliseconds
-        setProductiveToProductive(Number(latestScore.productiveToProductive));
-        setProductiveToDistracting(Number(latestScore.productiveToDistracting));
-        setDistractionToProductive(Number(latestScore.distractingToProductive));
-        setDistractionToDistracting(Number(latestScore.distractingToDistracting));
         
         initializedRef.current = true;
       } catch (error) {
@@ -143,128 +97,6 @@ export function useFocusMonitor(): UseFocusMonitorReturn {
       }
     }
   }, [focusScores]);
-
-  /**
-   * Categorize a URL based on application list
-   * 
-   * URL Pattern Matching Logic:
-   * - Extracts domain from URL (e.g., "github.com" from "https://github.com/user/repo")
-   * - Checks if domain contains any application name from the categorized list
-   * - Returns 'productive', 'distracting', or 'unknown' based on match
-   * 
-   * Example:
-   * - URL: "https://www.youtube.com/watch?v=abc"
-   * - Domain: "youtube.com"
-   * - Application list contains: { name: "YouTube", category: "distracting" }
-   * - Match found: "youtube" in "youtube.com"
-   * - Returns: "distracting"
-   */
-  const categorizeUrl = useCallback((url: string): 'productive' | 'distracting' | 'unknown' => {
-    try {
-      // Extract domain from URL (e.g., "github.com" from "https://github.com/user/repo")
-      const urlObj = new URL(url);
-      const domain = urlObj.hostname.toLowerCase();
-      
-      // Check if domain matches any application in our categorized list
-      for (const app of applications) {
-        const appName = app.name.toLowerCase();
-        
-        // Check if the domain contains the application name
-        // Example: "youtube.com" contains "youtube"
-        if (domain.includes(appName) || appName.includes(domain)) {
-          return app.category;
-        }
-      }
-      
-      // If no match found, return unknown
-      return 'unknown';
-    } catch (error) {
-      // If URL parsing fails, return unknown
-      return 'unknown';
-    }
-  }, [applications]);
-
-  /**
-   * Detect and categorize URL transitions when user returns to the page
-   * 
-   * URL Transition Detection:
-   * - document.referrer: The URL of the page the user came from (previous page)
-   * - window.location.href: The current page URL
-   * 
-   * Switch Type Classification Decision Tree:
-   * 1. Both URLs are productive → productive-to-productive
-   * 2. Source is productive, target is distracting → productive-to-distracting (WARNING)
-   * 3. Source is distracting, target is productive → distracting-to-productive (GOOD)
-   * 4. Both URLs are distracting → distracting-to-distracting (ALERT)
-   * 
-   * Counter Increment Logic:
-   * - Each switch type increments its corresponding counter
-   * - Counters accumulate over the session to track switching patterns
-   */
-  const detectAndCategorizeSwitch = useCallback(() => {
-    // Get the current URL (where the user is now)
-    const currentUrl = window.location.href;
-    
-    // Get the previous URL (where the user was before)
-    // document.referrer contains the URL of the page that linked to this page
-    const sourceUrl = previousUrlRef.current;
-    
-    // Only process if we have both URLs and they're different
-    if (sourceUrl && currentUrl && sourceUrl !== currentUrl) {
-      // Categorize both URLs using our application list
-      const sourceCategory = categorizeUrl(sourceUrl);
-      const targetCategory = categorizeUrl(currentUrl);
-      
-      // Determine switch type based on source and target categories
-      let switchType = '';
-      
-      /**
-       * Switch Type Classification:
-       * - Productive → Productive: Good focus maintenance
-       * - Productive → Distracting: Warning - losing focus
-       * - Distracting → Productive: Good - returning to work
-       * - Distracting → Distracting: Alert - deep distraction
-       */
-      if (sourceCategory === 'productive' && targetCategory === 'productive') {
-        // Switching between productive sites (e.g., GitHub to Stack Overflow)
-        setProductiveToProductive(prev => prev + 1);
-        switchType = 'productive-to-productive';
-      } else if (sourceCategory === 'productive' && targetCategory === 'distracting') {
-        // Switching from productive to distracting (e.g., VS Code docs to YouTube)
-        setProductiveToDistracting(prev => prev + 1);
-        switchType = 'productive-to-distracting';
-      } else if (sourceCategory === 'distracting' && targetCategory === 'productive') {
-        // Switching from distracting to productive (e.g., Facebook to Google Docs)
-        setDistractionToProductive(prev => prev + 1);
-        switchType = 'distracting-to-productive';
-      } else if (sourceCategory === 'distracting' && targetCategory === 'distracting') {
-        // Switching between distracting sites (e.g., Instagram to TikTok)
-        setDistractionToDistracting(prev => prev + 1);
-        switchType = 'distracting-to-distracting';
-      }
-      
-      // Record the switch event in history (if it was categorized)
-      if (switchType) {
-        const switchEvent: CategorizedSwitchEvent = {
-          timestamp: Date.now(),
-          sourceUrl,
-          targetUrl: currentUrl,
-          sourceCategory,
-          targetCategory,
-          switchType,
-        };
-        
-        // Add to history, keeping only the last 50 events
-        setCategorizedSwitchingHistory(prev => {
-          const updated = [...prev, switchEvent];
-          return updated.slice(-50);
-        });
-      }
-    }
-    
-    // Update the previous URL for next comparison
-    previousUrlRef.current = currentUrl;
-  }, [categorizeUrl]);
 
   /**
    * Handle when user leaves the page (tab becomes hidden or window loses focus)
@@ -298,9 +130,6 @@ export function useFocusMonitor(): UseFocusMonitorReturn {
   const handleReturn = useCallback(() => {
     const now = Date.now();
     
-    // Detect and categorize URL transition when user returns
-    detectAndCategorizeSwitch();
-    
     // Calculate time away if we have a leave timestamp
     if (leaveTimestampRef.current) {
       const duration = now - leaveTimestampRef.current;
@@ -325,7 +154,7 @@ export function useFocusMonitor(): UseFocusMonitorReturn {
       // Add return event to history
       setEvents((prev) => [...prev, { timestamp: now, type: 'return' }]);
     }
-  }, [distractionScore, detectAndCategorizeSwitch]);
+  }, [distractionScore]);
 
   /**
    * Set up event listeners for page visibility and window focus changes
@@ -427,7 +256,7 @@ export function useFocusMonitor(): UseFocusMonitorReturn {
    * 
    * Backend communication pattern:
    * - Sends data every 10 seconds for real-time updates
-   * - Data sent: distractionScore, tabSwitchCount, timeAway, and categorized switching counts (all as BigInt)
+   * - Data sent: distractionScore, tabSwitchCount, timeAway (all as BigInt)
    * 
    * Error handling:
    * - Network errors are caught and logged
@@ -466,10 +295,6 @@ export function useFocusMonitor(): UseFocusMonitorReturn {
             distractionScore: BigInt(distractionScore),
             tabSwitchCount: BigInt(recentSwitches),
             timeAway: BigInt(Math.floor(timeAway / 1000)), // Convert milliseconds to seconds
-            productiveToProductive: BigInt(productiveToProductive),
-            productiveToDistracting: BigInt(productiveToDistracting),
-            distractingToProductive: BigInt(distractingToProductive),
-            distractingToDistracting: BigInt(distractingToDistracting),
           },
           {
             onSuccess: () => {
@@ -485,16 +310,7 @@ export function useFocusMonitor(): UseFocusMonitorReturn {
         console.error('Error submitting focus score:', error);
       }
     }
-  }, [
-    distractionScore, 
-    timeAway, 
-    events, 
-    recordFocusScore, 
-    productiveToProductive, 
-    productiveToDistracting, 
-    distractingToProductive, 
-    distractingToDistracting
-  ]);
+  }, [distractionScore, timeAway, events, recordFocusScore]);
 
   /**
    * Calculate current metrics for return value
@@ -532,10 +348,5 @@ export function useFocusMonitor(): UseFocusMonitorReturn {
     timeAway: Math.floor(timeAway / 1000), // Return in seconds
     isAway,
     switchingHistory,
-    productiveToProductive,
-    productiveToDistracting,
-    distractingToProductive,
-    distractingToDistracting,
-    categorizedSwitchingHistory,
   };
 }

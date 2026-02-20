@@ -75,19 +75,19 @@ export default function Login() {
             <div className="pt-4 border-t border-border/50">
               <div className="space-y-3 text-sm text-muted-foreground">
                 <div className="flex items-start gap-2">
-                  <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
                     <div className="h-2 w-2 rounded-full bg-primary" />
                   </div>
                   <p>Secure authentication powered by Internet Computer</p>
                 </div>
                 <div className="flex items-start gap-2">
-                  <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
                     <div className="h-2 w-2 rounded-full bg-primary" />
                   </div>
                   <p>No passwords to remember or manage</p>
                 </div>
                 <div className="flex items-start gap-2">
-                  <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
                     <div className="h-2 w-2 rounded-full bg-primary" />
                   </div>
                   <p>Your data stays private and secure</p>

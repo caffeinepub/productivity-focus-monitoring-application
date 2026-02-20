@@ -1,13 +1,11 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, X, Clock, Zap } from 'lucide-react';
+import { AlertCircle, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { COPY } from '@/lib/copyConstants';
 
 interface BurnoutWarningProps {
   burnoutIndex: number;
-  timeBasedContribution: number;
-  switchingContribution: number;
   onDismiss: () => void;
 }
 
@@ -16,18 +14,12 @@ interface BurnoutWarningProps {
  * 
  * Features:
  * - Shows current burnout index number
- * - Displays breakdown of time-based and switching-based contributions
  * - Suggests desk recovery break
  * - Dismissible with button
  * - Reappears if burnout increases by 10+ points after dismissal
  * - Positioned at bottom-right to avoid blocking UI
  */
-export function BurnoutWarning({ 
-  burnoutIndex, 
-  timeBasedContribution, 
-  switchingContribution, 
-  onDismiss 
-}: BurnoutWarningProps) {
+export function BurnoutWarning({ burnoutIndex, onDismiss }: BurnoutWarningProps) {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -57,22 +49,6 @@ export function BurnoutWarning({
               <p className="text-sm text-muted-foreground mb-2">
                 Your burnout index is at <strong>{burnoutIndex.toFixed(1)}</strong>. {COPY.warnings.firstThreshold.message}
               </p>
-              
-              {/* Burnout breakdown section */}
-              <div className="mb-3 space-y-1.5 rounded-lg bg-amber-500/5 p-3 border border-amber-500/20">
-                <p className="text-xs font-semibold text-amber-700 dark:text-amber-300 mb-1.5">
-                  What's driving your burnout:
-                </p>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Clock className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
-                  <span>Time in distracting apps: <strong>{timeBasedContribution.toFixed(1)}</strong> points</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Zap className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
-                  <span>Context switching penalty: <strong>{switchingContribution.toFixed(1)}</strong> points</span>
-                </div>
-              </div>
-              
               <p className="text-sm text-muted-foreground mb-3">
                 {COPY.warnings.firstThreshold.suggestion}
               </p>

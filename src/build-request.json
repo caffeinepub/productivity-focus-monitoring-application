@@ -1,181 +1,78 @@
 {
   "kind": "build_request",
-  "title": "Fix blank white page rendering issue in versions 9-12",
-  "priority": "high",
+  "title": "Implement precise real-time tab switching metrics display for system validation",
+  "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-98",
-      "text": "Verify that frontend/index.html contains a root div element with id='root' in the body section, and if missing or malformed, add the correct markup: <div id=\"root\"></div>",
+      "id": "REQ-55",
+      "text": "Create a detailed real-time metrics display component that shows exact tab switching data including precise switch timestamps (with milliseconds), switch frequency (per minute and per hour), time away durations for each switch, current distraction score with calculation breakdown, and total switches count since session start",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-user-blank-page"
+          "msg-user-latest"
         ],
         "quotes": [
-          "in the last 3 to 4 versions including the last one i can't see the preview screen it only shows blank white page"
+          "we need exact tab switching real time monitor result to make sure that everything is perfect"
         ]
       },
       "acceptanceCriteria": [
-        "frontend/index.html contains <div id=\"root\"></div> in the body section",
-        "The root div has no conflicting attributes or styles that prevent rendering"
+        "Display shows millisecond-precision timestamps for each tab switch event",
+        "Switch frequency metrics update in real-time showing switches per minute and per hour",
+        "Each switch event displays the exact duration user was away from the page",
+        "Distraction score calculation is visible with the formula breakdown showing how it increments",
+        "Total switch count displays cumulative switches since monitoring session began",
+        "All metrics update immediately when tab switching occurs without any delay"
       ]
     },
     {
-      "id": "REQ-99",
-      "text": "Verify that frontend/src/main.tsx correctly targets the root element using document.getElementById('root') with a null check, and if the element is not found, logs a clear error message to console and displays a visible error on the page",
+      "id": "REQ-56",
+      "text": "Update LiveMonitor component in frontend/src/pages/LiveMonitor.tsx to include a dedicated 'Validation Metrics' section that displays the detailed real-time metrics component with all precise switching data visible simultaneously for system accuracy verification",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-user-blank-page"
+          "msg-user-latest"
+        ],
+        "quotes": [
+          "we need exact tab switching real time monitor result to make sure that everything is perfect"
         ]
       },
       "acceptanceCriteria": [
-        "main.tsx uses document.getElementById('root') to get the root element",
-        "A null check is present before calling createRoot",
-        "If root element is missing, console.error logs 'Root element #root not found'",
-        "If root element is missing, a visible error message appears in document.body"
+        "LiveMonitor page includes a clearly labeled 'Validation Metrics' or 'Detailed Switching Data' section",
+        "Section displays all switching metrics in an easily readable format",
+        "Metrics are visible alongside existing monitoring displays",
+        "Layout allows for easy comparison between real-time activity and raw switching data"
       ]
     },
     {
-      "id": "REQ-100",
-      "text": "Wrap the ReactDOM.createRoot and root.render calls in frontend/src/main.tsx in a try-catch block that catches initialization errors, logs them with full stack traces to console.error, and displays a user-visible error message directly in document.body",
+      "id": "REQ-57",
+      "text": "Enhance useFocusMonitor hook in frontend/src/hooks/useFocusMonitor.ts to expose a detailed switching history array containing the last 20 switch events with exact timestamps, away duration, and distraction score at time of switch for debugging and validation purposes",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-user-blank-page"
+          "msg-user-latest"
+        ],
+        "quotes": [
+          "we need exact tab switching real time monitor result to make sure that everything is perfect"
         ]
       },
       "acceptanceCriteria": [
-        "try-catch block wraps createRoot and render calls",
-        "Caught errors are logged to console.error with stack traces",
-        "Caught errors display visible error message in document.body with red background",
-        "Error message includes the error name and message"
-      ]
-    },
-    {
-      "id": "REQ-101",
-      "text": "Add console.log statements at three strategic points in frontend/src/main.tsx: at the very beginning (before imports if possible), after imports, and immediately before the createRoot call, logging 'main.tsx: Script execution started', 'main.tsx: Imports completed', and 'main.tsx: Mounting React app'",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-user-blank-page"
-        ]
-      },
-      "acceptanceCriteria": [
-        "console.log at the beginning of main.tsx logs 'main.tsx: Script execution started'",
-        "console.log after imports logs 'main.tsx: Imports completed'",
-        "console.log before createRoot logs 'main.tsx: Mounting React app'",
-        "All three console logs appear in browser console during app initialization"
-      ]
-    },
-    {
-      "id": "REQ-102",
-      "text": "Verify that all import statements in frontend/src/main.tsx resolve correctly by ensuring imported modules (React, ReactDOM, App component, QueryClient, InternetIdentityProvider) have valid exports and wrap critical imports in try-catch blocks if module resolution errors are suspected",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-user-blank-page"
-        ]
-      },
-      "acceptanceCriteria": [
-        "All imports in main.tsx resolve without errors",
-        "If any import fails, a try-catch block catches it and logs the specific module that failed",
-        "Browser console shows clear error messages if imports fail"
-      ]
-    },
-    {
-      "id": "REQ-103",
-      "text": "Add defensive error handling to InternetIdentityProvider in frontend/src/hooks/useInternetIdentity.ts by wrapping AuthClient initialization and any async calls in try-catch blocks, logging errors to console, and providing fallback to unauthenticated state instead of throwing uncaught errors",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-user-blank-page"
-        ]
-      },
-      "acceptanceCriteria": [
-        "AuthClient initialization is wrapped in try-catch",
-        "Errors during authentication setup are logged to console.error",
-        "Application continues to render with unauthenticated state if authentication setup fails",
-        "No uncaught exceptions are thrown from useInternetIdentity hook"
-      ]
-    },
-    {
-      "id": "REQ-104",
-      "text": "Verify that the App component in frontend/src/App.tsx has a valid default export and renders without throwing errors by temporarily simplifying its content to return a single div with text 'App component loaded' to isolate rendering issues",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-user-blank-page"
-        ]
-      },
-      "acceptanceCriteria": [
-        "App component has default export",
-        "Simplified App component renders successfully",
-        "Browser displays 'App component loaded' text when simplified",
-        "No JavaScript errors appear in console when rendering simplified App"
-      ]
-    },
-    {
-      "id": "REQ-105",
-      "text": "Verify that the ErrorBoundary component in frontend/src/components/ErrorBoundary.tsx is correctly wrapping the App component in frontend/src/main.tsx and that it includes comprehensive console.error logging in componentDidCatch with error message, stack trace, and component stack",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-user-blank-page"
-        ]
-      },
-      "acceptanceCriteria": [
-        "ErrorBoundary wraps <App /> in main.tsx",
-        "componentDidCatch method logs error.message to console.error",
-        "componentDidCatch method logs error.stack to console.error",
-        "componentDidCatch method logs errorInfo.componentStack to console.error",
-        "ErrorBoundary fallback UI is visible when errors are caught"
-      ]
-    },
-    {
-      "id": "REQ-106",
-      "text": "Check browser developer tools Network tab for failed resource loads (404, CORS errors, or failed JS bundle loads) and verify that frontend/src/main.tsx and all imported JavaScript bundles load successfully with 200 status codes",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-user-blank-page"
-        ]
-      },
-      "acceptanceCriteria": [
-        "main.tsx loads with 200 status code",
-        "All JavaScript bundles load without 404 errors",
-        "No CORS errors in browser console",
-        "All static assets required by the app load successfully"
-      ]
-    },
-    {
-      "id": "REQ-107",
-      "text": "Check that BurnoutMonitoring component and its child components (BurnoutWarning, GreyscaleOverlay, BlockScreen) in frontend/src/App.tsx do not cause render crashes by verifying all required props and state dependencies are defined and hooks (useBurnoutMonitor, useBlockingLogic) return valid data before rendering child components",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-user-blank-page"
-        ]
-      },
-      "acceptanceCriteria": [
-        "useBurnoutMonitor hook returns valid burnout index before rendering warnings",
-        "useBlockingLogic hook returns valid isBlocked state",
-        "All child components check for undefined/null values before rendering",
-        "No 'Cannot read property of undefined' errors in console"
+        "Hook maintains a rolling array of the last 20 switch events",
+        "Each event in history includes ISO timestamp with milliseconds, duration away, and distraction score snapshot",
+        "History array is accessible to components consuming the hook",
+        "History updates immediately when new switches occur"
       ]
     }
   ],
   "constraints": [
-    "Do not modify the backend/main.mo actor structure",
-    "Do not change the Internet Identity authentication flow",
-    "Preserve all existing functionality while fixing the rendering issue",
-    "Do not modify frontend/src/hooks/useInternetIdentity.ts or frontend/src/hooks/useActor.ts beyond adding error handling"
+    "Do not modify the existing useFocusMonitor core tracking logic that uses Page Visibility API and focus/blur events",
+    "Do not change the backend recordFocusScore function or data schema",
+    "Maintain the existing 10-second backend transmission interval for focus monitoring data"
   ],
   "nonGoals": [
-    "Adding new features or functionality",
-    "Redesigning the UI or layout",
-    "Changing the application's core logic or behavior",
-    "Modifying the backend API endpoints"
+    "Changing how tab switches are detected or tracked",
+    "Modifying the distraction score calculation algorithm",
+    "Adding new backend storage for switching history",
+    "Creating alerts or notifications based on the detailed metrics"
   ],
   "imageRequirements": {
     "required": [],

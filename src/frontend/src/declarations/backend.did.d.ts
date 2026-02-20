@@ -19,12 +19,6 @@ export interface Achievement {
 }
 export type AppCategory = { 'productive' : null } |
   { 'distracting' : null };
-export interface BreakAnalysis {
-  'walkBreaks' : bigint,
-  'restorativeRatio' : number,
-  'deskRecoveries' : bigint,
-  'totalBreaks' : bigint,
-}
 export interface BreakSession {
   'startTime' : Time,
   'timerSetting' : TimerSetting,
@@ -34,38 +28,20 @@ export interface BreakSession {
 }
 export type BreakType = { 'walkBreak' : null } |
   { 'deskRecovery' : null };
-export interface BurnoutCalculation {
-  'currentIndex' : bigint,
-  'focusSessionTimestamps' : Array<Time>,
-  'switchCount' : bigint,
-  'breakAnalysis' : BreakAnalysis,
-  'timestamp' : Time,
-  'sleepAnalysis' : SleepAnalysis,
-  'notificationAnalysis' : NotificationAnalysis,
-  'previousIndex' : bigint,
-}
 export interface ContextSwitch {
   'sourceApp' : string,
   'targetApp' : string,
   'timestamp' : Time,
 }
 export interface FocusScore {
-  'distractingToProductive' : bigint,
   'distractionScore' : bigint,
-  'productiveToProductive' : bigint,
   'timestamp' : Time,
-  'productiveToDistracting' : bigint,
-  'distractingToDistracting' : bigint,
   'timeAway' : bigint,
   'tabSwitchCount' : bigint,
 }
 export type NegativePattern = { 'distractionSpikes' : null } |
   { 'lateNightFatigue' : null } |
   { 'frequentSwitching' : null };
-export interface NotificationAnalysis {
-  'responseTimeAverage' : number,
-  'frequency' : bigint,
-}
 export type Pattern = { 'negative' : NegativePattern } |
   { 'positive' : PositivePattern };
 export type PositivePattern = { 'reducedDistractions' : null } |
@@ -82,11 +58,6 @@ export interface Session {
 export type SessionType = { 'focus' : null } |
   { 'rest' : null } |
   { 'distraction' : null };
-export interface SleepAnalysis {
-  'sleepDeficitScore' : number,
-  'deepRestHours' : number,
-  'totalSleepHours' : number,
-}
 export type StreakType = { 'deepWorkCompletion' : null } |
   { 'focusStreak' : null } |
   { 'distractionResistance' : null };
@@ -95,21 +66,12 @@ export interface TimerSetting { 'duration' : bigint, 'notification' : boolean }
 export interface _SERVICE {
   'addAchievement' : ActorMethod<[Achievement], undefined>,
   'generateReport' : ActorMethod<[Array<Pattern>], Report>,
-  'getAllBurnoutCalculations' : ActorMethod<
-    [],
-    Array<[Principal, Array<BurnoutCalculation>]>
-  >,
   'getAllReports' : ActorMethod<[], Array<Report>>,
-  'getBurnoutCalculations' : ActorMethod<[], Array<BurnoutCalculation>>,
   'getFocusScores' : ActorMethod<[], Array<FocusScore>>,
   'getReportById' : ActorMethod<[bigint], [] | [Report]>,
   'recordBreak' : ActorMethod<[BreakSession], undefined>,
-  'recordBurnoutCalculation' : ActorMethod<[BurnoutCalculation], undefined>,
   'recordContextSwitch' : ActorMethod<[], undefined>,
-  'recordFocusScore' : ActorMethod<
-    [bigint, bigint, bigint, bigint, bigint, bigint, bigint],
-    undefined
-  >,
+  'recordFocusScore' : ActorMethod<[bigint, bigint, bigint], undefined>,
   'recordSession' : ActorMethod<[Session], undefined>,
   'recordSwitch' : ActorMethod<[ContextSwitch], undefined>,
   'startFocusSession' : ActorMethod<[], undefined>,

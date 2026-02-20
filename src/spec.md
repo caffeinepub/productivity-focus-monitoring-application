@@ -1,17 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Fix the blank white page rendering issue that occurred in versions 9-12.
+**Goal:** Add detailed real-time metrics display to validate tab switching detection accuracy.
 
 **Planned changes:**
-- Add defensive error handling and logging throughout the React initialization chain in main.tsx
-- Verify and fix the root element mounting structure in index.html and main.tsx
-- Add try-catch blocks around ReactDOM.createRoot, render calls, and AuthClient initialization
-- Add strategic console.log statements to trace script execution flow
-- Verify all imports resolve correctly and add error handling for failed module resolution
-- Ensure ErrorBoundary component properly wraps the App and logs errors comprehensively
-- Add null checks and defensive rendering to BurnoutMonitoring components and hooks
-- Simplify App component temporarily to isolate rendering issues
-- Verify all JavaScript bundles and static assets load successfully without 404 or CORS errors
+- Create a real-time metrics component showing precise tab switch data with millisecond timestamps, switch frequency, away durations, distraction score breakdown, and total switches count
+- Add a 'Validation Metrics' section to the LiveMonitor page displaying all switching data for system verification
+- Enhance useFocusMonitor hook to expose a rolling history of the last 20 switch events with timestamps, durations, and scores
 
-**User-visible outcome:** The application renders successfully instead of showing a blank white page, with clear error messages in the console if initialization fails.
+**User-visible outcome:** Users can see detailed, real-time tab switching metrics on the LiveMonitor page to verify the accuracy of the focus tracking system.

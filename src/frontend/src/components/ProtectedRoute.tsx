@@ -20,19 +20,17 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
 
     if (!isAuthenticated) {
       // Redirect to login page
-      navigate({ to: '/login' }).catch((error) => {
-        console.error('Navigation error:', error);
-      });
+      navigate({ to: '/login' });
     }
   }, [identity, isInitializing, navigate]);
 
   // Show loading spinner while checking authentication
   if (isInitializing) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Initializing...</p>
+          <p className="text-sm text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
@@ -43,14 +41,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   // Don't render children if not authenticated (will redirect)
   if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Redirecting to login...</p>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return <>{children}</>;

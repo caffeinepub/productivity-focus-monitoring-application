@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-verify-that-frontend-index-html-contains-a-root-div-element-with-id-root-in-the-body-section-and-if-missing-or-malformed-add-the-correct-markup-div-id-root-div",
-      "featureTitle": "Verify that frontend/index.html contains a root div element with id='root' in the body section, and if missing or malformed, add the correct markup: <div id=\"root\"></div>",
+      "featureId": "feature-create-a-detailed-real-time-metrics-display-component-that-shows-exact-tab-switching-data-including-precise-switch-timestamps-with-milliseconds-switch-frequency-per-minute-and-per-hour-time-away-durations-for-each-switch-current-distraction-score-with-calculation-breakdown-and-total-switches-count-since-session-start",
+      "featureTitle": "Create a detailed real-time metrics display component that shows exact tab switching data including precise switch timestamps (with milliseconds), switch frequency (per minute and per hour), time away durations for each switch, current distraction score with calculation breakdown, and total switches count since session start",
       "files": [
-        "frontend/index.html"
+        "frontend/src/components/ValidationMetrics.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -15,15 +15,15 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-98"
+        "REQ-55"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-verify-that-the-app-component-in-frontend-src-app-tsx-has-a-valid-default-export-and-renders-without-throwing-errors-by-temporarily-simplifying-its-content-to-return-a-single-div-with-text-app-component-loaded-to-isolate-rendering-issues",
-      "featureTitle": "Verify that the App component in frontend/src/App.tsx has a valid default export and renders without throwing errors by temporarily simplifying its content to return a single div with text 'App component loaded' to isolate rendering issues",
+      "featureId": "feature-update-livemonitor-component-in-frontend-src-pages-livemonitor-tsx-to-include-a-dedicated-validation-metrics-section-that-displays-the-detailed-real-time-metrics-component-with-all-precise-switching-data-visible-simultaneously-for-system-accuracy-verification",
+      "featureTitle": "Update LiveMonitor component in frontend/src/pages/LiveMonitor.tsx to include a dedicated 'Validation Metrics' section that displays the detailed real-time metrics component with all precise switching data visible simultaneously for system accuracy verification",
       "files": [
-        "frontend/src/App.tsx"
+        "frontend/src/pages/LiveMonitor.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -33,15 +33,15 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-104"
+        "REQ-56"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-verify-that-the-errorboundary-component-in-frontend-src-components-errorboundary-tsx-is-correctly-wrapping-the-app-component-in-frontend-src-main-tsx-and-that-it-includes-comprehensive-console-error-logging-in-componentdidcatch-with-error-message-stack-trace-and-component-stack",
-      "featureTitle": "Verify that the ErrorBoundary component in frontend/src/components/ErrorBoundary.tsx is correctly wrapping the App component in frontend/src/main.tsx and that it includes comprehensive console.error logging in componentDidCatch with error message, stack trace, and component stack",
+      "featureId": "feature-enhance-usefocusmonitor-hook-in-frontend-src-hooks-usefocusmonitor-ts-to-expose-a-detailed-switching-history-array-containing-the-last-20-switch-events-with-exact-timestamps-away-duration-and-distraction-score-at-time-of-switch-for-debugging-and-validation-purposes",
+      "featureTitle": "Enhance useFocusMonitor hook in frontend/src/hooks/useFocusMonitor.ts to expose a detailed switching history array containing the last 20 switch events with exact timestamps, away duration, and distraction score at time of switch for debugging and validation purposes",
       "files": [
-        "frontend/src/components/ErrorBoundary.tsx"
+        "frontend/src/hooks/useFocusMonitor.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -51,45 +51,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-105"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-check-browser-developer-tools-network-tab-for-failed-resource-loads-404-cors-errors-or-failed-js-bundle-loads-and-verify-that-frontend-src-main-tsx-and-all-imported-javascript-bundles-load-successfully-with-200-status-codes",
-      "featureTitle": "Check browser developer tools Network tab for failed resource loads (404, CORS errors, or failed JS bundle loads) and verify that frontend/src/main.tsx and all imported JavaScript bundles load successfully with 200 status codes",
-      "files": [
-        "frontend/index.html"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-106"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-check-that-burnoutmonitoring-component-and-its-child-components-burnoutwarning-greyscaleoverlay-blockscreen-in-frontend-src-app-tsx-do-not-cause-render-crashes-by-verifying-all-required-props-and-state-dependencies-are-defined-and-hooks-useburnoutmonitor-useblockinglogic-return-valid-data-before-rendering-child-components",
-      "featureTitle": "Check that BurnoutMonitoring component and its child components (BurnoutWarning, GreyscaleOverlay, BlockScreen) in frontend/src/App.tsx do not cause render crashes by verifying all required props and state dependencies are defined and hooks (useBurnoutMonitor, useBlockingLogic) return valid data before rendering child components",
-      "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/hooks/useBlockingLogic.ts",
-        "frontend/src/hooks/useBurnoutMonitor.ts"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-107"
+        "REQ-57"
       ],
       "confidence": "high"
     }

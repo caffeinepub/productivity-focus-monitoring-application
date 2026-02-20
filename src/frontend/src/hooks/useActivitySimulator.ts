@@ -9,7 +9,6 @@ interface ActivityState {
   currentApp: string;
   category: 'productive' | 'distracting';
   switchHistory: Array<{ app: string; timestamp: number }>;
-  sessionStartTime: number;
 }
 
 export function useActivitySimulator() {
@@ -56,26 +55,11 @@ export function useActivitySimulator() {
     return [];
   });
   
-  // Track session start time for Δt calculation
-  const [sessionStartTime, setSessionStartTime] = useState(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const state: ActivityState = JSON.parse(stored);
-        return state.sessionStartTime || Date.now();
-      }
-    } catch (error) {
-      console.error('Failed to restore activity state:', error);
-    }
-    return Date.now();
-  });
-  
   const [switchCount, setSwitchCount] = useState(0);
   const [switchesPerMinute, setSwitchesPerMinute] = useState(0);
   const [switchesPerHour, setSwitchesPerHour] = useState(0);
   const [isActive, setIsActive] = useState(true);
   const [lastSwitchTime, setLastSwitchTime] = useState(Date.now());
-  const [sessionDuration, setSessionDuration] = useState(0);
 
   // Persist state to localStorage whenever it changes
   useEffect(() => {
@@ -84,32 +68,13 @@ export function useActivitySimulator() {
         currentApp,
         category,
         switchHistory,
-        sessionStartTime,
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch (error) {
       console.error('Failed to save activity state:', error);
     }
-  }, [currentApp, category, switchHistory, sessionStartTime]);
+  }, [currentApp, category, switchHistory]);
 
-  /**
-   * Calculate session duration (Δt) in real-time
-   * Updates every second to provide accurate time tracking
-   */
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const now = Date.now();
-      const duration = (now - sessionStartTime) / 1000; // Convert to seconds
-      setSessionDuration(duration);
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [sessionStartTime]);
-
-  /**
-   * Simulate application switching
-   * When switching occurs, reset session start time for next Δt calculation
-   */
   useEffect(() => {
     const interval = setInterval(() => {
       if (Math.random() > 0.7 && applications.length > 0) {
@@ -122,9 +87,6 @@ export function useActivitySimulator() {
         
         const now = Date.now();
         setSwitchHistory((prev) => [...prev, { app: randomApp.name, timestamp: now }]);
-        
-        // Reset session start time for new application session
-        setSessionStartTime(now);
 
         const timeSinceLastSwitch = (now - lastSwitchTime) / 1000;
         setLastSwitchTime(now);
@@ -162,6 +124,5 @@ export function useActivitySimulator() {
     switchesPerMinute,
     switchesPerHour,
     isActive,
-    sessionDuration, // Export session duration for burnout calculation
   };
 }

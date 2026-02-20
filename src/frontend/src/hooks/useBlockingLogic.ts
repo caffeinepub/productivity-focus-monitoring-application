@@ -1,126 +1,103 @@
 import { useState, useEffect } from 'react';
-import { useBurnoutMonitor } from './useBurnoutMonitor';
 import { useFocusMonitor } from './useFocusMonitor';
 
-const BLOCK_THRESHOLD = 80; // Burnout index threshold to trigger blocking
-const PRODUCTIVE_SESSION_DURATION = 25 * 60; // 25 minutes in seconds
-const DISMISS_LIMIT = 3; // Maximum number of dismissals before blocking
-
+/**
+ * Blocking logic hook that manages progressive warning system
+ * 
+ * Flow:
+ * 1. User dismisses burnout warning (warningCount++)
+ * 2. After 2 dismissals, block screen activates
+ * 3. User must complete 25-minute productive session
+ * 4. During session, must maintain low switching frequency
+ * 5. Timer only decrements when user is focused
+ * 6. After completion, warning count resets
+ */
 export function useBlockingLogic() {
-  console.log('useBlockingLogic: Hook initializing');
-  
+  const [warningCount, setWarningCount] = useState(0);
   const [isBlocked, setIsBlocked] = useState(false);
-  const [blockTimeRemaining, setBlockTimeRemaining] = useState(PRODUCTIVE_SESSION_DURATION);
-  const [dismissCount, setDismissCount] = useState(0);
-  const [blockStartTime, setBlockStartTime] = useState<number | null>(null);
+  const [blockTimeRemaining, setBlockTimeRemaining] = useState(25 * 60); // 25 minutes in seconds
   
-  const burnoutData = useBurnoutMonitor();
-  const focusData = useFocusMonitor();
-  
-  // Defensive null checks
-  const burnoutIndex = burnoutData?.burnoutIndex || 0;
-  const switchesPerMinute = focusData?.switchesPerMinute;
+  // Get real-time focus metrics to validate productive session
+  const { switchesPerMinute, isAway } = useFocusMonitor();
 
   /**
-   * Persist dismiss count to localStorage
+   * Persist warning count to localStorage
+   * Restore on mount to maintain state across sessions
    */
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem('dismissCount');
-      if (stored) {
-        const parsed = parseInt(stored, 10);
-        if (!isNaN(parsed)) {
-          setDismissCount(parsed);
-        }
-      }
-    } catch (error) {
-      console.error('useBlockingLogic: Error loading dismiss count from localStorage:', error);
+    const stored = localStorage.getItem('warningCount');
+    if (stored) {
+      setWarningCount(parseInt(stored, 10));
     }
   }, []);
 
   useEffect(() => {
-    try {
-      if (!isNaN(dismissCount)) {
-        localStorage.setItem('dismissCount', dismissCount.toString());
-      }
-    } catch (error) {
-      console.error('useBlockingLogic: Error saving dismiss count to localStorage:', error);
-    }
-  }, [dismissCount]);
+    localStorage.setItem('warningCount', warningCount.toString());
+  }, [warningCount]);
 
   /**
-   * Check if blocking should be triggered
+   * Activate block screen after second warning dismissal
    */
   useEffect(() => {
-    try {
-      // Trigger blocking if:
-      // 1. Burnout index exceeds threshold (80+)
-      // 2. User has dismissed warnings too many times (3+)
-      // 3. Excessive tab switching (10+ switches per minute)
-      const shouldBlock =
-        burnoutIndex >= BLOCK_THRESHOLD ||
-        dismissCount >= DISMISS_LIMIT ||
-        (typeof switchesPerMinute === 'number' && !isNaN(switchesPerMinute) && switchesPerMinute >= 10);
-
-      if (shouldBlock && !isBlocked) {
-        console.log('useBlockingLogic: Triggering block screen');
-        setIsBlocked(true);
-        setBlockStartTime(Date.now());
-        setBlockTimeRemaining(PRODUCTIVE_SESSION_DURATION);
-      }
-    } catch (error) {
-      console.error('useBlockingLogic: Error checking block conditions:', error);
+    if (warningCount >= 2) {
+      setIsBlocked(true);
     }
-  }, [burnoutIndex, dismissCount, switchesPerMinute, isBlocked]);
+  }, [warningCount]);
 
   /**
-   * Timer countdown for productive session
+   * Countdown timer for productive session
+   * 
+   * Timer only decrements when:
+   * - User is not away from the page
+   * - Switching frequency is low (< 1 per minute)
+   * 
+   * This ensures the user is actually being productive, not just
+   * keeping the tab open while doing other things
    */
   useEffect(() => {
-    if (!isBlocked || blockStartTime === null) return;
+    if (!isBlocked) return;
 
     const interval = setInterval(() => {
-      try {
-        const elapsed = Math.floor((Date.now() - blockStartTime) / 1000);
-        const remaining = Math.max(0, PRODUCTIVE_SESSION_DURATION - elapsed);
-        
-        setBlockTimeRemaining(remaining);
-
-        // Unblock when timer completes
-        if (remaining === 0) {
-          console.log('useBlockingLogic: Productive session completed, unblocking');
-          setIsBlocked(false);
-          setBlockStartTime(null);
-          setDismissCount(0); // Reset dismiss count after completing session
-        }
-      } catch (error) {
-        console.error('useBlockingLogic: Error in timer countdown:', error);
+      // Only decrement timer if user is focused
+      const isFocused = !isAway && switchesPerMinute < 1;
+      
+      if (isFocused) {
+        setBlockTimeRemaining((prev) => {
+          if (prev <= 1) {
+            // Session complete!
+            setIsBlocked(false);
+            setWarningCount(0);
+            return 25 * 60;
+          }
+          return prev - 1;
+        });
       }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isBlocked, blockStartTime]);
+  }, [isBlocked, isAway, switchesPerMinute]);
 
   /**
-   * Complete productive session manually
+   * Increment warning count (called when user dismisses burnout warning)
    */
-  const completeProductiveSession = () => {
-    try {
-      console.log('useBlockingLogic: Manually completing productive session');
-      setIsBlocked(false);
-      setBlockStartTime(null);
-      setBlockTimeRemaining(PRODUCTIVE_SESSION_DURATION);
-      setDismissCount(0);
-    } catch (error) {
-      console.error('useBlockingLogic: Error completing productive session:', error);
-    }
+  const incrementWarningCount = () => {
+    setWarningCount((prev) => prev + 1);
   };
 
-  console.log('useBlockingLogic: Returning state -', { isBlocked, blockTimeRemaining });
+  /**
+   * Complete productive session (called when timer reaches 0)
+   */
+  const completeProductiveSession = () => {
+    setIsBlocked(false);
+    setWarningCount(0);
+    setBlockTimeRemaining(25 * 60);
+  };
 
   return {
+    warningCount,
     isBlocked,
     blockTimeRemaining,
+    incrementWarningCount,
     completeProductiveSession,
   };
 }

@@ -1,38 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Focus Guardian - Productivity & Focus Monitoring</title>
-    <meta name="description" content="Your personal productivity coach for better focus and work-life balance" />
-    <script>
-      // Early error detection for script loading failures
-      window.addEventListener('error', function(event) {
-        if (event.target && (event.target.tagName === 'SCRIPT' || event.target.tagName === 'LINK')) {
-          console.error('=== RESOURCE LOADING ERROR ===');
-          console.error('Failed to load:', event.target.src || event.target.href);
-          console.error('Tag:', event.target.tagName);
-          console.error('==============================');
-          
-          // Display visible error for critical script failures
-          if (event.target.src && event.target.src.includes('main.tsx')) {
-            document.body.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; text-align: center; font-family: system-ui, -apple-system, sans-serif; background: #fee;"><div><h1 style="font-size: 24px; margin-bottom: 16px; color: #c00;">Script Loading Error</h1><p style="color: #666; margin-bottom: 8px;">Failed to load main application script.</p><p style="color: #666; font-family: monospace; fontSize: 12px;">URL: ' + event.target.src + '</p><button onclick="window.location.reload()" style="margin-top: 16px; padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;">Reload Page</button></div></div>';
-          }
-        }
-      }, true);
-    </script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <noscript>
-      <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; text-align: center; font-family: system-ui, -apple-system, sans-serif;">
-        <div>
-          <h1 style="font-size: 24px; margin-bottom: 16px;">JavaScript Required</h1>
-          <p style="color: #666; margin-bottom: 8px;">This application requires JavaScript to run.</p>
-          <p style="color: #666;">Please enable JavaScript in your browser settings and reload the page.</p>
-        </div>
-      </div>
-    </noscript>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<html lang='en'>
+    <head>
+        <meta charset='UTF-8' />
+        <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+        <title>Productivity &amp; Focus Monitoring Application</title>
+    </head>
+    <body>
+        <div id='root'></div>
+        <script type='module' src='/src/main.tsx'></script>
+    </body>
 </html>

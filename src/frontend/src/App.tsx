@@ -1,13 +1,6 @@
 import { RouterProvider, createRouter, createRoute, createRootRoute, Outlet } from '@tanstack/react-router';
+import { ThemeProvider } from 'next-themes';
 import { Toaster } from '@/components/ui/sonner';
-import ErrorBoundary from './components/ErrorBoundary';
-import Layout from './components/Layout';
-import ProtectedRoute from './components/ProtectedRoute';
-import { BurnoutWarning } from './components/BurnoutWarning';
-import { GreyscaleOverlay } from './components/GreyscaleOverlay';
-import { BlockScreen } from './components/BlockScreen';
-import { useBurnoutMonitor } from './hooks/useBurnoutMonitor';
-import { useBlockingLogic } from './hooks/useBlockingLogic';
 import Dashboard from './pages/Dashboard';
 import LiveMonitor from './pages/LiveMonitor';
 import AppCategorization from './pages/AppCategorization';
@@ -16,103 +9,166 @@ import WalkBreak from './pages/WalkBreak';
 import Achievements from './pages/Achievements';
 import Reports from './pages/Reports';
 import Login from './pages/Login';
+import Layout from './components/Layout';
+import ProtectedRoute from './components/ProtectedRoute';
+import { BurnoutWarning } from './components/BurnoutWarning';
+import { GreyscaleOverlay } from './components/GreyscaleOverlay';
+import { BlockScreen } from './components/BlockScreen';
+import { useBurnoutMonitor } from './hooks/useBurnoutMonitor';
+import { useBlockingLogic } from './hooks/useBlockingLogic';
 
-console.log('App.tsx: Module loaded, defining routes');
+function RootComponent() {
+  const { burnoutLevel, burnoutIndex, dismissWarning } = useBurnoutMonitor();
+  const { isBlocked, blockTimeRemaining, completeProductiveSession, incrementWarningCount } = useBlockingLogic();
+
+  /**
+   * Handle burnout warning dismissal
+   * Increments warning count for blocking logic
+   */
+  const handleDismissWarning = () => {
+    dismissWarning();
+    incrementWarningCount();
+  };
+
+  /**
+   * Calculate grayscale intensity for overlay
+   * Maps burnout index to grayscale percentage
+   */
+  const grayscaleIntensity = burnoutIndex > 60 ? (burnoutIndex - 60) / 40 : 0;
+
+  return (
+    <>
+      <Outlet />
+      
+      {/* Show burnout warning at medium threshold (30-60) */}
+      {burnoutLevel === 1 && (
+        <BurnoutWarning burnoutIndex={burnoutIndex} onDismiss={handleDismissWarning} />
+      )}
+      
+      {/* Show grayscale overlay at high threshold (60+) */}
+      {burnoutIndex > 60 && !isBlocked && <GreyscaleOverlay intensity={grayscaleIntensity} />}
+      
+      {/* Show block screen after 2 warning dismissals */}
+      {isBlocked && (
+        <BlockScreen
+          timeRemaining={blockTimeRemaining}
+          onComplete={completeProductiveSession}
+        />
+      )}
+      
+      <Toaster />
+    </>
+  );
+}
 
 const rootRoute = createRootRoute({
-  component: () => <Outlet />,
+  component: RootComponent,
 });
 
+// Public route - no authentication required
 const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/login',
   component: Login,
 });
 
-const protectedRoute = createRoute({
+// Protected routes - require authentication
+const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
   component: () => (
     <ProtectedRoute>
       <Layout>
-        <Outlet />
+        <Dashboard />
       </Layout>
     </ProtectedRoute>
   ),
 });
 
-const dashboardRoute = createRoute({
-  getParentRoute: () => protectedRoute,
-  path: '/',
-  component: Dashboard,
-});
-
 const liveMonitorRoute = createRoute({
-  getParentRoute: () => protectedRoute,
-  path: '/live-monitor',
-  component: LiveMonitor,
+  getParentRoute: () => rootRoute,
+  path: '/monitor',
+  component: () => (
+    <ProtectedRoute>
+      <Layout>
+        <LiveMonitor />
+      </Layout>
+    </ProtectedRoute>
+  ),
 });
 
 const appCategorizationRoute = createRoute({
-  getParentRoute: () => protectedRoute,
-  path: '/app-categorization',
-  component: AppCategorization,
+  getParentRoute: () => rootRoute,
+  path: '/apps',
+  component: () => (
+    <ProtectedRoute>
+      <Layout>
+        <AppCategorization />
+      </Layout>
+    </ProtectedRoute>
+  ),
 });
 
 const deskRecoveryRoute = createRoute({
-  getParentRoute: () => protectedRoute,
+  getParentRoute: () => rootRoute,
   path: '/desk-recovery',
-  component: DeskRecovery,
+  component: () => (
+    <ProtectedRoute>
+      <Layout>
+        <DeskRecovery />
+      </Layout>
+    </ProtectedRoute>
+  ),
 });
 
 const walkBreakRoute = createRoute({
-  getParentRoute: () => protectedRoute,
+  getParentRoute: () => rootRoute,
   path: '/walk-break',
-  component: WalkBreak,
+  component: () => (
+    <ProtectedRoute>
+      <Layout>
+        <WalkBreak />
+      </Layout>
+    </ProtectedRoute>
+  ),
 });
 
 const achievementsRoute = createRoute({
-  getParentRoute: () => protectedRoute,
+  getParentRoute: () => rootRoute,
   path: '/achievements',
-  component: Achievements,
+  component: () => (
+    <ProtectedRoute>
+      <Layout>
+        <Achievements />
+      </Layout>
+    </ProtectedRoute>
+  ),
 });
 
 const reportsRoute = createRoute({
-  getParentRoute: () => protectedRoute,
+  getParentRoute: () => rootRoute,
   path: '/reports',
-  component: Reports,
+  component: () => (
+    <ProtectedRoute>
+      <Layout>
+        <Reports />
+      </Layout>
+    </ProtectedRoute>
+  ),
 });
 
 const routeTree = rootRoute.addChildren([
   loginRoute,
-  protectedRoute.addChildren([
-    dashboardRoute,
-    liveMonitorRoute,
-    appCategorizationRoute,
-    deskRecoveryRoute,
-    walkBreakRoute,
-    achievementsRoute,
-    reportsRoute,
-  ]),
+  indexRoute,
+  liveMonitorRoute,
+  appCategorizationRoute,
+  deskRecoveryRoute,
+  walkBreakRoute,
+  achievementsRoute,
+  reportsRoute,
 ]);
 
-console.log('App.tsx: Route tree created');
-
-let router: ReturnType<typeof createRouter>;
-
-try {
-  console.log('App.tsx: Creating router...');
-  router = createRouter({ 
-    routeTree,
-    defaultPreload: 'intent',
-  });
-  console.log('App.tsx: Router created successfully');
-} catch (error) {
-  console.error('=== CRITICAL: Failed to create router ===');
-  console.error('Error:', error);
-  console.error('========================================');
-  throw error;
-}
+const router = createRouter({ routeTree });
 
 declare module '@tanstack/react-router' {
   interface Register {
@@ -120,148 +176,10 @@ declare module '@tanstack/react-router' {
   }
 }
 
-function BurnoutMonitoring() {
-  console.log('BurnoutMonitoring: Component rendering');
-  
-  // React Hooks MUST be called at the top level, not inside try-catch
-  const burnoutMonitorResult = useBurnoutMonitor();
-  const blockingLogicResult = useBlockingLogic();
-
-  // Defensive null checks
-  if (!burnoutMonitorResult || !blockingLogicResult) {
-    console.error('BurnoutMonitoring: Hook returned null/undefined');
-    return null;
-  }
-
-  const { 
-    burnoutIndex = 0, 
-    burnoutLevel = 0, 
-    dismissWarning, 
-    timeBasedContribution = 0, 
-    switchingContribution = 0 
-  } = burnoutMonitorResult;
-  
-  const { 
-    isBlocked = false, 
-    blockTimeRemaining = 0, 
-    completeProductiveSession 
-  } = blockingLogicResult;
-
-  console.log('BurnoutMonitoring: State -', { 
-    burnoutIndex, 
-    burnoutLevel, 
-    isBlocked,
-    timeBasedContribution,
-    switchingContribution
-  });
-
-  try {
-    return (
-      <>
-        {/* Show warning at medium burnout level (30-60) */}
-        {burnoutLevel === 1 && typeof burnoutIndex === 'number' && !isNaN(burnoutIndex) && (
-          <BurnoutWarning 
-            burnoutIndex={burnoutIndex} 
-            timeBasedContribution={timeBasedContribution}
-            switchingContribution={switchingContribution}
-            onDismiss={dismissWarning} 
-          />
-        )}
-
-        {/* Show greyscale overlay at high burnout level (60+) */}
-        {burnoutLevel === 2 && typeof burnoutIndex === 'number' && !isNaN(burnoutIndex) && (
-          <GreyscaleOverlay intensity={burnoutLevel} />
-        )}
-
-        {/* Show block screen when blocking is triggered */}
-        {isBlocked && typeof blockTimeRemaining === 'number' && !isNaN(blockTimeRemaining) && (
-          <BlockScreen 
-            timeRemaining={blockTimeRemaining} 
-            onComplete={completeProductiveSession} 
-          />
-        )}
-      </>
-    );
-  } catch (error) {
-    console.error('BurnoutMonitoring: Render error -', error);
-    return null;
-  }
+export default function App() {
+  return (
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <RouterProvider router={router} />
+    </ThemeProvider>
+  );
 }
-
-function App() {
-  console.log('App: Component rendering');
-  
-  try {
-    return (
-      <ErrorBoundary>
-        {/* Visible test element to verify rendering */}
-        <div 
-          style={{ 
-            position: 'fixed', 
-            top: 0, 
-            left: 0, 
-            padding: '8px 12px', 
-            background: '#22c55e', 
-            color: 'white', 
-            fontSize: '12px',
-            fontWeight: 'bold',
-            zIndex: 9999,
-            pointerEvents: 'none'
-          }}
-        >
-          App is running ✓
-        </div>
-        
-        <RouterProvider router={router} />
-        <BurnoutMonitoring />
-        <Toaster />
-      </ErrorBoundary>
-    );
-  } catch (error) {
-    console.error('=== CRITICAL: App render error ===');
-    console.error('Error:', error);
-    console.error('==================================');
-    
-    // Fallback UI for render errors
-    return (
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-        padding: '20px',
-        textAlign: 'center',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-        background: '#fee'
-      }}>
-        <div>
-          <h1 style={{ fontSize: '24px', marginBottom: '16px', color: '#c00' }}>
-            App Render Error
-          </h1>
-          <p style={{ color: '#666', marginBottom: '8px' }}>
-            The application failed to render.
-          </p>
-          <p style={{ color: '#666', fontFamily: 'monospace', fontSize: '12px' }}>
-            {error instanceof Error ? error.message : String(error)}
-          </p>
-          <button
-            onClick={() => window.location.reload()}
-            style={{
-              marginTop: '16px',
-              padding: '8px 16px',
-              background: '#3b82f6',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer'
-            }}
-          >
-            Reload Page
-          </button>
-        </div>
-      </div>
-    );
-  }
-}
-
-export default App;

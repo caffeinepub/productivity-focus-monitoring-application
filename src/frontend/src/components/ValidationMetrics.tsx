@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Activity, Clock, TrendingUp, AlertCircle, ArrowRight } from 'lucide-react';
+import { Activity, Clock, TrendingUp, AlertCircle } from 'lucide-react';
 import { useMemo } from 'react';
 
 interface SwitchEvent {
@@ -10,22 +10,12 @@ interface SwitchEvent {
   distractionScore: number;
 }
 
-interface CategorizedSwitchEvent {
-  timestamp: number;
-  sourceUrl: string;
-  targetUrl: string;
-  sourceCategory: 'productive' | 'distracting' | 'unknown';
-  targetCategory: 'productive' | 'distracting' | 'unknown';
-  switchType: string;
-}
-
 interface ValidationMetricsProps {
   switchingHistory: SwitchEvent[];
   currentDistractionScore: number;
   totalSwitches: number;
   switchesPerMinute: number;
   switchesPerHour: number;
-  categorizedSwitchingHistory?: CategorizedSwitchEvent[];
 }
 
 export function ValidationMetrics({
@@ -34,7 +24,6 @@ export function ValidationMetrics({
   totalSwitches,
   switchesPerMinute,
   switchesPerHour,
-  categorizedSwitchingHistory = [],
 }: ValidationMetricsProps) {
   // Calculate distraction score breakdown
   const scoreBreakdown = useMemo(() => {
@@ -63,41 +52,6 @@ export function ValidationMetrics({
     const seconds = date.getSeconds().toString().padStart(2, '0');
     const milliseconds = date.getMilliseconds().toString().padStart(3, '0');
     return `${hours}:${minutes}:${seconds}.${milliseconds}`;
-  };
-
-  // Format timestamp from milliseconds
-  const formatTimestampFromMs = (ms: number) => {
-    const date = new Date(ms);
-    return date.toLocaleTimeString('en-US', { 
-      hour12: false, 
-      hour: '2-digit', 
-      minute: '2-digit', 
-      second: '2-digit' 
-    });
-  };
-
-  // Truncate URL to 40 characters
-  const truncateUrl = (url: string, maxLength: number = 40) => {
-    if (url.length <= maxLength) return url;
-    return url.substring(0, maxLength) + '...';
-  };
-
-  // Get category badge color
-  const getCategoryBadgeVariant = (category: string) => {
-    if (category === 'productive') return 'default';
-    if (category === 'distracting') return 'destructive';
-    return 'secondary';
-  };
-
-  // Format switch type label
-  const formatSwitchType = (switchType: string) => {
-    const parts = switchType.split('-to-');
-    if (parts.length === 2) {
-      const source = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
-      const target = parts[1].charAt(0).toUpperCase() + parts[1].slice(1);
-      return `${source} → ${target}`;
-    }
-    return switchType;
   };
 
   return (
@@ -195,88 +149,6 @@ export function ValidationMetrics({
               </Badge>
             </div>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Switch Categorization Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Switch Categorization</CardTitle>
-          <CardDescription>Last 20 categorized website switches with URL tracking</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {categorizedSwitchingHistory.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <ArrowRight className="h-12 w-12 mx-auto mb-3 opacity-50" />
-              <p>No categorized switches recorded yet</p>
-              <p className="text-sm mt-1">Switch between different websites to see categorized data</p>
-            </div>
-          ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[50px]">#</TableHead>
-                    <TableHead>Timestamp</TableHead>
-                    <TableHead>Source URL</TableHead>
-                    <TableHead>Target URL</TableHead>
-                    <TableHead>Source</TableHead>
-                    <TableHead>Target</TableHead>
-                    <TableHead>Switch Type</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {categorizedSwitchingHistory.slice(-20).reverse().map((event, index) => (
-                    <TableRow key={index}>
-                      <TableCell className="font-medium text-muted-foreground">
-                        {categorizedSwitchingHistory.slice(-20).length - index}
-                      </TableCell>
-                      <TableCell className="font-mono text-xs">
-                        {formatTimestampFromMs(event.timestamp)}
-                      </TableCell>
-                      <TableCell className="font-mono text-xs max-w-[200px] truncate" title={event.sourceUrl}>
-                        {truncateUrl(event.sourceUrl)}
-                      </TableCell>
-                      <TableCell className="font-mono text-xs max-w-[200px] truncate" title={event.targetUrl}>
-                        {truncateUrl(event.targetUrl)}
-                      </TableCell>
-                      <TableCell>
-                        <Badge 
-                          variant={getCategoryBadgeVariant(event.sourceCategory)}
-                          className={
-                            event.sourceCategory === 'productive' 
-                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' 
-                              : event.sourceCategory === 'distracting'
-                              ? 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-100'
-                              : ''
-                          }
-                        >
-                          {event.sourceCategory}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge 
-                          variant={getCategoryBadgeVariant(event.targetCategory)}
-                          className={
-                            event.targetCategory === 'productive' 
-                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' 
-                              : event.targetCategory === 'distracting'
-                              ? 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-100'
-                              : ''
-                          }
-                        >
-                          {event.targetCategory}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-sm">
-                        {formatSwitchType(event.switchType)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
         </CardContent>
       </Card>
 

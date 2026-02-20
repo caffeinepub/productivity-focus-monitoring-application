@@ -1,11 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import type { Report, FocusScore } from '../backend';
 
 export function useGetAllReports() {
   const { actor, isFetching } = useActor();
 
-  return useQuery<Report[]>({
+  return useQuery({
     queryKey: ['reports'],
     queryFn: async () => {
       if (!actor) return [];
@@ -17,13 +16,20 @@ export function useGetAllReports() {
       }
     },
     enabled: !!actor && !isFetching,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    refetchOnWindowFocus: false,
   });
 }
 
+/**
+ * Hook to fetch focus scores from the backend with automatic refetching
+ * Refetches every 10 seconds for real-time dashboard updates
+ */
 export function useGetFocusScores() {
   const { actor, isFetching } = useActor();
 
-  return useQuery<FocusScore[]>({
+  return useQuery({
     queryKey: ['focusScores'],
     queryFn: async () => {
       if (!actor) return [];
@@ -35,14 +41,23 @@ export function useGetFocusScores() {
       }
     },
     enabled: !!actor && !isFetching,
+    refetchInterval: 10000,
+    staleTime: 5000,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    refetchOnWindowFocus: false,
   });
 }
 
+/**
+ * Hook to fetch activity data for LiveMonitor with faster refetch interval
+ * Refetches every 5 seconds for real-time activity display
+ */
 export function useActivityData() {
   const { actor, isFetching } = useActor();
 
-  return useQuery<FocusScore[]>({
-    queryKey: ['focusScores'],
+  return useQuery({
+    queryKey: ['activityData'],
     queryFn: async () => {
       if (!actor) return [];
       try {
@@ -53,9 +68,17 @@ export function useActivityData() {
       }
     },
     enabled: !!actor && !isFetching,
+    refetchInterval: 5000,
+    staleTime: 2000,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    refetchOnWindowFocus: false,
   });
 }
 
+/**
+ * Hook to record focus score data to the backend
+ */
 export function useRecordFocusScore() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
@@ -65,40 +88,20 @@ export function useRecordFocusScore() {
       distractionScore,
       tabSwitchCount,
       timeAway,
-      productiveToProductive,
-      productiveToDistracting,
-      distractingToProductive,
-      distractingToDistracting,
     }: {
       distractionScore: bigint;
       tabSwitchCount: bigint;
       timeAway: bigint;
-      productiveToProductive: bigint;
-      productiveToDistracting: bigint;
-      distractingToProductive: bigint;
-      distractingToDistracting: bigint;
     }) => {
       if (!actor) throw new Error('Actor not initialized');
-      try {
-        await actor.recordFocusScore(
-          distractionScore,
-          tabSwitchCount,
-          timeAway,
-          productiveToProductive,
-          productiveToDistracting,
-          distractingToProductive,
-          distractingToDistracting
-        );
-      } catch (error) {
-        console.error('Failed to record focus score:', error);
-        throw error;
-      }
+      return actor.recordFocusScore(distractionScore, tabSwitchCount, timeAway);
     },
     onSuccess: () => {
+      // Invalidate both queries to refetch updated data
       queryClient.invalidateQueries({ queryKey: ['focusScores'] });
+      queryClient.invalidateQueries({ queryKey: ['activityData'] });
     },
-    onError: (error) => {
-      console.error('Mutation error:', error);
-    },
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 }

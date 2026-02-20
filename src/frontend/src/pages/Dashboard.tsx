@@ -5,11 +5,8 @@ import { ProductivityScore } from '@/components/ProductivityScore';
 import { DailyRecommendations } from '@/components/DailyRecommendations';
 import { RecoveryQualityChart } from '@/components/RecoveryQualityChart';
 import { DistractionWarning } from '@/components/DistractionWarning';
-import { BurnoutBreakdownChart } from '@/components/BurnoutBreakdownChart';
-import { SwitchingBreakdown } from '@/components/SwitchingBreakdown';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useFocusMonitor } from '@/hooks/useFocusMonitor';
-import { useBurnoutMonitor } from '@/hooks/useBurnoutMonitor';
 import { Clock, Zap, Activity, TrendingUp } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useState, useEffect } from 'react';
@@ -26,22 +23,7 @@ export default function Dashboard() {
   } = useDashboardData();
 
   // Monitor focus and tab switching behavior
-  const { 
-    distractionScore, 
-    switchCount, 
-    switchesPerMinute,
-    productiveToProductive,
-    productiveToDistracting,
-    distractingToProductive,
-    distractingToDistracting,
-  } = useFocusMonitor();
-
-  // Get burnout metrics with formula breakdown
-  const { 
-    burnoutIndex, 
-    timeBasedContribution, 
-    switchingContribution 
-  } = useBurnoutMonitor();
+  const { distractionScore, switchCount, switchesPerMinute } = useFocusMonitor();
 
   // Track whether to show the distraction warning
   const [showWarning, setShowWarning] = useState(false);
@@ -120,24 +102,25 @@ export default function Dashboard() {
     <div className="space-y-8">
       {/* Hero Section */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-8 md:p-12">
-        <div className="relative z-10">
-          <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
-            Welcome back! 👋
-          </h1>
-          <p className="mt-2 text-lg text-muted-foreground">
-            Here's your productivity overview for today
+        <div className="relative z-10 max-w-2xl">
+          <h2 className="text-3xl font-bold tracking-tight mb-2">Welcome back!</h2>
+          <p className="text-lg text-muted-foreground">
+            Let's review your focus journey and celebrate your progress.
           </p>
         </div>
-        <div className="absolute right-0 top-0 h-full w-1/3 opacity-10">
+        <div className="absolute right-0 top-0 h-full w-1/2 opacity-20">
           <img
             src="/assets/generated/dashboard-hero.dim_800x400.png"
-            alt=""
+            alt="Focus"
             className="h-full w-full object-cover"
           />
         </div>
       </div>
 
-      {/* Metrics Cards */}
+      {/* Productivity Score */}
+      <ProductivityScore score={productivityScore} />
+
+      {/* Key Metrics */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <MetricsCard
           title="Focus Time"
@@ -149,87 +132,62 @@ export default function Dashboard() {
         <MetricsCard
           title="Distraction Time"
           value={distractionTime}
-          icon={Zap}
-          trend="+8%"
-          trendUp={false}
-        />
-        <MetricsCard
-          title="Tab Switches"
-          value={switchCount.toString()}
           icon={Activity}
-          trend="+5%"
-          trendUp={false}
+          trend="-8%"
+          trendUp={true}
         />
         <MetricsCard
-          title="Burnout Index"
-          value={burnoutIndex.toString()}
+          title="Switching Frequency"
+          value={`${switchingFrequency}/hr`}
+          icon={Zap}
+          trend="-15%"
+          trendUp={true}
+        />
+        <MetricsCard
+          title="Real-time Switches"
+          value={`${switchCount}`}
           icon={TrendingUp}
-          trend={burnoutIndex < 40 ? "-3%" : "+3%"}
-          trendUp={burnoutIndex < 40}
+          trend={switchesPerMinute < 2 ? 'Good focus' : 'High switching'}
+          trendUp={switchesPerMinute < 2}
         />
       </div>
 
-      {/* Website Switching Breakdown */}
-      <SwitchingBreakdown
-        productiveToProductive={productiveToProductive}
-        productiveToDistracting={productiveToDistracting}
-        distractingToProductive={distractingToProductive}
-        distractingToDistracting={distractingToDistracting}
-      />
-
-      {/* Burnout Breakdown Chart */}
-      <BurnoutBreakdownChart
-        timeBasedContribution={timeBasedContribution}
-        switchingContribution={switchingContribution}
-        totalBurnoutIndex={burnoutIndex}
-      />
-
-      {/* Charts Grid */}
+      {/* Charts */}
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Productivity Score */}
-        <ProductivityScore score={productivityScore} />
+        {/* Burnout Trend */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Weekly Burnout Trend</CardTitle>
+            <CardDescription>Track your cognitive load patterns</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={burnoutTrend}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis dataKey="day" className="text-xs" />
+                <YAxis className="text-xs" />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="burnout"
+                  stroke="hsl(var(--primary))"
+                  strokeWidth={2}
+                  dot={{ fill: 'hsl(var(--primary))' }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
 
         {/* Recovery Quality */}
         <RecoveryQualityChart />
       </div>
-
-      {/* Burnout Trend Chart */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Burnout Trend</CardTitle>
-          <CardDescription>Your burnout index over the past week</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={burnoutTrend}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-              <XAxis
-                dataKey="date"
-                className="text-xs"
-                tick={{ fill: 'hsl(var(--muted-foreground))' }}
-              />
-              <YAxis
-                className="text-xs"
-                tick={{ fill: 'hsl(var(--muted-foreground))' }}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px',
-                }}
-              />
-              <Line
-                type="monotone"
-                dataKey="value"
-                stroke="hsl(var(--primary))"
-                strokeWidth={2}
-                dot={{ fill: 'hsl(var(--primary))' }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
 
       {/* Daily Recommendations */}
       <DailyRecommendations recommendations={recommendations} />
