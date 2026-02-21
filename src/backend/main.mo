@@ -1,277 +1,228 @@
 import Map "mo:core/Map";
-import Array "mo:core/Array";
-import List "mo:core/List";
+import Iter "mo:core/Iter";
+import Nat "mo:core/Nat";
 import Text "mo:core/Text";
-import Runtime "mo:core/Runtime";
 import Time "mo:core/Time";
-import Principal "mo:core/Principal";
+import Runtime "mo:core/Runtime";
 import Migration "migration";
 
 (with migration = Migration.run)
 actor {
-  type Session = {
-    timestamp : Time.Time;
-    appName : Text;
-    category : AppCategory;
-    duration : Nat;
-    sessionType : SessionType;
-  };
-
-  type AppCategory = {
+  // Categorization Types
+  public type Category = {
     #productive;
     #distracting;
+    #neutral;
   };
 
-  type SessionType = {
-    #focus;
-    #distraction;
-    #rest;
+  public type SourceType = {
+    #workApp;
+    #socialMedia;
+    #news;
+    #shopping;
+    #other;
   };
 
-  type ContextSwitch = {
-    timestamp : Time.Time;
-    sourceApp : Text;
-    targetApp : Text;
+  public type DistractionLog = {
+    timestamp : Int;
+    source : Text;
+    category : Category;
+    sourceType : SourceType;
+    description : Text;
   };
 
-  type BreakSession = {
-    startTime : Time.Time;
-    endTime : Time.Time;
-    breakType : BreakType;
-    timerSetting : TimerSetting;
-    isRestorative : Bool;
+  public type ActivitySwitch = {
+    timestamp : Int;
+    fromApp : Text;
+    toApp : Text;
+    fromCategory : Category;
+    toCategory : Category;
   };
 
-  type BreakType = {
-    #deskRecovery;
-    #walkBreak;
+  public type SessionSummary = {
+    sessionId : Nat;
+    startTime : Int;
+    endTime : Int;
+    totalDuration : Int;
+    productiveTime : Nat;
+    distractingTime : Nat;
+    distractionsCount : Nat;
+    switchesCount : Nat;
+    burnoutScore : Int;
   };
 
-  type TimerSetting = {
-    duration : Nat;
-    notification : Bool;
+  // Persistent Data Structures
+  let distractionLogs = Map.empty<Nat, DistractionLog>();
+  let activitySwitches = Map.empty<Nat, ActivitySwitch>();
+  let sessionSummaries = Map.empty<Nat, SessionSummary>();
+  let appCategories = Map.empty<Text, Category>();
+
+  // Session State
+  var currentSessionId = 0;
+  var currentSessionStartTime : Int = 0;
+  var currentSwitchCount = 0;
+  var currentDistractionCount = 0;
+  var productiveTime : Nat = 0;
+  var distractingTime : Nat = 0;
+
+  // Category Management
+  public shared ({ caller }) func setAppCategory(appName : Text, category : Category) : async () {
+    appCategories.add(appName, category);
   };
 
-  type Achievement = {
-    streakType : StreakType;
-    milestone : Nat;
-    isDeepWork : Bool;
-    streakStart : Time.Time;
-    streakEnd : Time.Time;
+  public query ({ caller }) func getAppCategory(appName : Text) : async ?Category {
+    appCategories.get(appName);
   };
 
-  type StreakType = {
-    #focusStreak;
-    #distractionResistance;
-    #deepWorkCompletion;
+  public query ({ caller }) func getAllAppCategories() : async [(Text, Category)] {
+    appCategories.toArray();
   };
 
-  type Report = {
-    timestamp : Time.Time;
-    patterns : [Pattern];
-  };
-
-  type Pattern = {
-    #positive : PositivePattern;
-    #negative : NegativePattern;
-  };
-
-  type PositivePattern = {
-    #workConsistency;
-    #healthyBreaks;
-    #reducedDistractions;
-  };
-
-  type NegativePattern = {
-    #lateNightFatigue;
-    #frequentSwitching;
-    #distractionSpikes;
-  };
-
-  type FocusScore = {
-    timestamp : Time.Time;
-    distractionScore : Nat;
-    tabSwitchCount : Nat;
-    timeAway : Nat;
-  };
-
-  type FocusSessionViolation = {
-    timestamp : Time.Time;
-    violationCount : Nat;
-    sourceTab : TabType;
-    targetTab : TabType;
-  };
-
-  type TabType = {
-    #productive;
-    #distractive;
-  };
-
-  type FocusSessionData = {
-    duration : Nat;
-    violations : [FocusSessionViolation];
-    completed : Bool;
-    focusScore : Nat;
-    timestamp : Time.Time;
-  };
-
-  type ScoreWindow = {
-    start : Time.Time;
-    end : Time.Time;
-  };
-
-  var nextReportId = 0 : Nat;
-  let sessions = Map.empty<Principal, List.List<Session>>();
-  let switches = Map.empty<Principal, List.List<ContextSwitch>>();
-  let achievements = Map.empty<Principal, List.List<Achievement>>();
-  let breaks = Map.empty<Principal, List.List<BreakSession>>();
-  let reports = Map.empty<Nat, Report>();
-  let focusSessionViolations = Map.empty<Principal, List.List<FocusSessionViolation>>();
-  let focusSessionData = Map.empty<Principal, List.List<FocusSessionData>>();
-  let focusScores = Map.empty<Principal, List.List<FocusScore>>();
-  let scoreWindows = Map.empty<Principal, ScoreWindow>();
-
-  public shared ({ caller }) func recordSession(session : Session) : async () {
-    let existingSessions = switch (sessions.get(caller)) {
-      case (?list) { list };
-      case (null) { List.empty<Session>() };
-    };
-    existingSessions.add(session);
-    sessions.add(caller, existingSessions);
-  };
-
-  public shared ({ caller }) func recordSwitch(contextSwitch : ContextSwitch) : async () {
-    let existingSwitches = switch (switches.get(caller)) {
-      case (?list) { list };
-      case (null) { List.empty<ContextSwitch>() };
-    };
-    existingSwitches.add(contextSwitch);
-    switches.add(caller, existingSwitches);
-  };
-
-  public shared ({ caller }) func addAchievement(achievement : Achievement) : async () {
-    let existingAchievements = switch (achievements.get(caller)) {
-      case (?list) { list };
-      case (null) { List.empty<Achievement>() };
-    };
-    existingAchievements.add(achievement);
-    achievements.add(caller, existingAchievements);
-  };
-
-  public shared ({ caller }) func recordBreak(breakSession : BreakSession) : async () {
-    let existingBreaks = switch (breaks.get(caller)) {
-      case (?list) { list };
-      case (null) { List.empty<BreakSession>() };
-    };
-    existingBreaks.add(breakSession);
-    breaks.add(caller, existingBreaks);
-  };
-
-  public shared ({ caller }) func generateReport(patterns : [Pattern]) : async Report {
-    let report : Report = {
+  // Distraction Logging
+  public shared ({ caller }) func logDistraction(source : Text, category : Category, sourceType : SourceType, description : Text) : async () {
+    let log : DistractionLog = {
       timestamp = Time.now();
-      patterns;
+      source;
+      category;
+      sourceType;
+      description;
     };
-    reports.add(nextReportId, report);
-    nextReportId += 1;
-    report;
+    distractionLogs.add(distractionLogs.size(), log);
+    currentDistractionCount += 1;
   };
 
-  public query ({ caller }) func getAllReports() : async [Report] {
-    reports.values().toArray();
+  public query ({ caller }) func getDistractionLogs() : async [(Nat, DistractionLog)] {
+    distractionLogs.toArray();
   };
 
-  public query ({ caller }) func getReportById(reportId : Nat) : async ?Report {
-    switch (reports.get(reportId)) {
-      case (?report) { ?report };
-      case (null) { null };
-    };
-  };
-
-  public shared ({ caller }) func startFocusSession() : async () {
-    let now = Time.now();
-    scoreWindows.add(
-      caller,
-      {
-        start = now;
-        end = now + 10_000_000_000; // 10 seconds in nanoseconds
-      },
-    );
-  };
-
-  public shared ({ caller }) func recordFocusScore(distractionScore : Nat, tabSwitchCount : Nat, timeAway : Nat) : async () {
-    let newScore : FocusScore = {
+  // Activity Switch Tracking
+  public shared ({ caller }) func recordActivitySwitch(fromApp : Text, toApp : Text, fromCategory : Category, toCategory : Category) : async () {
+    let switchRecord : ActivitySwitch = {
       timestamp = Time.now();
-      distractionScore;
-      tabSwitchCount;
-      timeAway;
+      fromApp;
+      toApp;
+      fromCategory;
+      toCategory;
     };
+    activitySwitches.add(activitySwitches.size(), switchRecord);
+    currentSwitchCount += 1;
 
-    let existingScores = switch (focusScores.get(caller)) {
-      case (?scores) { scores };
-      case (null) { List.empty<FocusScore>() };
+    if (fromCategory == #productive and toCategory == #distracting) {
+      currentDistractionCount += 1;
     };
-    existingScores.add(newScore);
-    focusScores.add(caller, existingScores);
   };
 
-  public shared ({ caller }) func recordTabSwitch(sourceTab : TabType, targetTab : TabType) : async () {
-    let now = Time.now();
-    let existingViolations = switch (focusSessionViolations.get(caller)) {
-      case (?violations) { violations.size() };
-      case (null) { 0 };
+  public query ({ caller }) func getActivitySwitches() : async [(Nat, ActivitySwitch)] {
+    activitySwitches.toArray();
+  };
+
+  // Session Management
+  public shared ({ caller }) func startSession() : async () {
+    currentSessionId += 1;
+    currentSessionStartTime := Time.now();
+    currentSwitchCount := 0;
+    currentDistractionCount := 0;
+    productiveTime := 0;
+    distractingTime := 0;
+  };
+
+  public shared ({ caller }) func endSession() : async () {
+    if (currentSessionStartTime == 0) {
+      Runtime.trap("No active session");
     };
 
-    let violationCount = if (sourceTab == #productive and targetTab == #distractive) {
-      existingViolations + 1;
-    } else { existingViolations };
+    let endTime = Time.now();
+    let totalDuration = endTime - currentSessionStartTime;
 
-    let newViolation : FocusSessionViolation = {
-      timestamp = now;
-      violationCount;
-      sourceTab;
-      targetTab;
+    let summary : SessionSummary = {
+      sessionId = currentSessionId;
+      startTime = currentSessionStartTime;
+      endTime;
+      totalDuration;
+      productiveTime;
+      distractingTime;
+      distractionsCount = currentDistractionCount;
+      switchesCount = currentSwitchCount;
+      burnoutScore = calculateBurnoutScore(totalDuration, productiveTime, distractingTime, currentDistractionCount, currentSwitchCount);
     };
 
-    if (sourceTab == #productive and targetTab == #distractive) {
-      let existingViolationsList = switch (focusSessionViolations.get(caller)) {
-        case (?violations) { violations };
-        case (null) { List.empty<FocusSessionViolation>() };
+    sessionSummaries.add(currentSessionId, summary);
+    currentSessionStartTime := 0;
+  };
+
+  public query ({ caller }) func getSessionSummaries() : async [(Nat, SessionSummary)] {
+    sessionSummaries.toArray();
+  };
+
+  // Time Tracking
+  public shared ({ caller }) func recordTimeBlock(category : Category, duration : Int) : async () {
+    if (duration < 0) { return };
+    let natDuration = duration.toNat();
+    switch (category) {
+      case (#productive) {
+        productiveTime += natDuration;
       };
-      existingViolationsList.add(newViolation);
-      focusSessionViolations.add(caller, existingViolationsList);
+      case (#distracting) { distractingTime += natDuration };
+      case (_) {};
     };
   };
 
-  public query ({ caller }) func getFocusScores() : async [FocusScore] {
-    switch (focusScores.get(caller)) {
-      case (?scores) { scores.toArray() };
-      case (null) { [] };
+  public query ({ caller }) func getCurrentSessionStats() : async (Nat, Nat, Int, Nat, Nat) {
+    (productiveTime, distractingTime, currentSessionStartTime, currentDistractionCount, currentSwitchCount);
+  };
+
+  // Analytics
+  public query ({ caller }) func getMostFrequentDistractions() : async [(Text, Nat)] {
+    let counts = Map.empty<Text, Nat>();
+
+    distractionLogs.values().forEach(
+      func(log) {
+        let source = log.source;
+        let currentCount = switch (counts.get(source)) {
+          case (null) { 0 };
+          case (?count) { count };
+        };
+        counts.add(source, currentCount + 1);
+      }
+    );
+
+    counts.toArray();
+  };
+
+  public query ({ caller }) func getLongestFocusStreak() : async Int {
+    var maxDuration : Int = 0;
+    switch (sessionSummaries.isEmpty()) {
+      case (true) { 0 };
+      case (false) {
+        for (summary in sessionSummaries.values()) {
+          if (summary.totalDuration > maxDuration) {
+            maxDuration := summary.totalDuration;
+          };
+        };
+        maxDuration;
+      };
     };
   };
 
-  public shared ({ caller }) func recordFocusSession(duration : Nat, completed : Bool, focusScore : Nat) : async () {
-    let now = Time.now();
-    let newSessionData : FocusSessionData = {
-      duration;
-      violations = [];
-      completed;
-      focusScore;
-      timestamp = now;
-    };
-
-    let existingSessions = switch (focusSessionData.get(caller)) {
-      case (?sessions) { sessions };
-      case (null) { List.empty<FocusSessionData>() };
-    };
-    existingSessions.add(newSessionData);
-    focusSessionData.add(caller, existingSessions);
+  public query ({ caller }) func getSessionHistory(sortBy : Text) : async [SessionSummary] {
+    var summaries = sessionSummaries.values().toArray();
+    summaries;
   };
 
-  public query ({ caller }) func getAllFocusSessions() : async [FocusSessionData] {
-    switch (focusSessionData.get(caller)) {
-      case (?sessions) { sessions.toArray() };
-      case (null) { [] };
-    };
+  func calculateBurnoutScore(totalDuration : Int, productiveTime : Nat, distractingTime : Nat, distractionsCount : Nat, switchesCount : Nat) : Int {
+    if (totalDuration <= 0) { return 0 };
+
+    let focusRatio = if (totalDuration > 0) {
+      (productiveTime * 100) / totalDuration.toNat();
+    } else { 0 };
+
+    let switchPenalty = switchesCount * 5;
+    let distractionPenalty = distractionsCount * 10;
+
+    let normalizedDuration = totalDuration / (60 * 60 * 1000000000);
+
+    let finalScore = focusRatio - switchPenalty - distractionPenalty + normalizedDuration;
+
+    if (finalScore < 0) { 0 } else { finalScore };
   };
 };

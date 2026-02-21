@@ -1,111 +1,36 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import { MetricsCard } from '@/components/MetricsCard';
-import { ProductivityScore } from '@/components/ProductivityScore';
-import { DailyRecommendations } from '@/components/DailyRecommendations';
-import { RecoveryQualityChart } from '@/components/RecoveryQualityChart';
-import { DistractionWarning } from '@/components/DistractionWarning';
-import { useDashboardData } from '@/hooks/useDashboardData';
-import { useFocusMonitor } from '@/hooks/useFocusMonitor';
-import { Clock, Zap, Activity, TrendingUp } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { useState, useEffect } from 'react';
+import { BurnoutScoreCard } from '@/components/BurnoutScoreCard';
+import { TransitionPatternsCard } from '@/components/TransitionPatternsCard';
+import { useBurnoutScore } from '@/hooks/useBurnoutScore';
+import { useActivityTransitions } from '@/hooks/useActivityTransitions';
+import { useSessionHistory } from '@/hooks/useSessionHistory';
+import { Clock, Target, TrendingUp, Play, History } from 'lucide-react';
+import { useNavigate } from '@tanstack/react-router';
 
 export default function Dashboard() {
-  const {
-    focusTime,
-    distractionTime,
-    switchingFrequency,
-    burnoutTrend,
-    productivityScore,
-    recommendations,
-    isLoading,
-  } = useDashboardData();
+  const navigate = useNavigate();
+  const { currentScore, scoreLevel, isLoading: burnoutLoading } = useBurnoutScore();
+  const { topInterruptions, isLoading: transitionsLoading } = useActivityTransitions();
+  const { recentSessions, topDistractions, isLoading: historyLoading } = useSessionHistory();
 
-  // Monitor focus and tab switching behavior
-  const { distractionScore, switchCount, switchesPerMinute } = useFocusMonitor();
-
-  // Track whether to show the distraction warning
-  const [showWarning, setShowWarning] = useState(false);
-  const [warningCooldown, setWarningCooldown] = useState(false);
-
-  /**
-   * Show warning when distraction score exceeds threshold (3)
-   * and we're not in cooldown period
-   */
-  useEffect(() => {
-    if (distractionScore >= 3 && !warningCooldown && !showWarning) {
-      setShowWarning(true);
-    }
-  }, [distractionScore, warningCooldown, showWarning]);
-
-  /**
-   * Handle warning dismissal with cooldown period
-   * Prevents warning from appearing too frequently
-   */
-  const handleDismissWarning = () => {
-    setShowWarning(false);
-    setWarningCooldown(true);
-    
-    // Reset cooldown after 5 minutes
-    setTimeout(() => {
-      setWarningCooldown(false);
-    }, 5 * 60 * 1000);
-  };
-
-  // Loading state with skeletons
-  if (isLoading) {
-    return (
-      <div className="space-y-8">
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-8 md:p-12">
-          <Skeleton className="h-8 w-64 mb-2" />
-          <Skeleton className="h-6 w-96" />
-        </div>
-        
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => (
-            <Card key={i}>
-              <CardHeader className="pb-3">
-                <Skeleton className="h-5 w-32" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-10 w-24 mb-2" />
-                <Skeleton className="h-4 w-20" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-        
-        <div className="grid gap-6 lg:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <Skeleton className="h-6 w-48" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-64 w-full" />
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <Skeleton className="h-6 w-48" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-64 w-full" />
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
+  const totalSessions = recentSessions.length;
+  const totalFocusTime = recentSessions.reduce((sum, session) => {
+    return sum + Number(session.totalDuration) / (60 * 1000000000);
+  }, 0);
+  const avgDistractions = totalSessions > 0
+    ? recentSessions.reduce((sum, s) => sum + Number(s.distractionsCount), 0) / totalSessions
+    : 0;
 
   return (
     <div className="space-y-8">
       {/* Hero Section */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-8 md:p-12">
         <div className="relative z-10 max-w-2xl">
-          <h2 className="text-3xl font-bold tracking-tight mb-2">Welcome back!</h2>
+          <h2 className="text-3xl font-bold tracking-tight mb-2">Welcome to Focus Tracker</h2>
           <p className="text-lg text-muted-foreground">
-            Let's review your focus journey and celebrate your progress.
+            Track your productivity with customizable timers and manual distraction logging
           </p>
         </div>
         <div className="absolute right-0 top-0 h-full w-1/2 opacity-20">
@@ -117,87 +42,118 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Productivity Score */}
-      <ProductivityScore score={productivityScore} />
-
-      {/* Key Metrics */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <MetricsCard
-          title="Focus Time"
-          value={focusTime}
-          icon={Clock}
-          trend="+12%"
-          trendUp={true}
-        />
-        <MetricsCard
-          title="Distraction Time"
-          value={distractionTime}
-          icon={Activity}
-          trend="-8%"
-          trendUp={true}
-        />
-        <MetricsCard
-          title="Switching Frequency"
-          value={`${switchingFrequency}/hr`}
-          icon={Zap}
-          trend="-15%"
-          trendUp={true}
-        />
-        <MetricsCard
-          title="Real-time Switches"
-          value={`${switchCount}`}
-          icon={TrendingUp}
-          trend={switchesPerMinute < 2 ? 'Good focus' : 'High switching'}
-          trendUp={switchesPerMinute < 2}
-        />
-      </div>
-
-      {/* Charts */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Burnout Trend */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Weekly Burnout Trend</CardTitle>
-            <CardDescription>Track your cognitive load patterns</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={burnoutTrend}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="day" className="text-xs" />
-                <YAxis className="text-xs" />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px',
-                  }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="burnout"
-                  stroke="hsl(var(--primary))"
-                  strokeWidth={2}
-                  dot={{ fill: 'hsl(var(--primary))' }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+      {/* Quick Actions */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card className="border-2 border-primary/20 bg-primary/5">
+          <CardContent className="pt-6">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-semibold mb-1">Start a Focus Session</h3>
+                <p className="text-sm text-muted-foreground">
+                  Begin a productivity timer with customizable work and break intervals
+                </p>
+              </div>
+              <Button 
+                size="lg" 
+                onClick={() => navigate({ to: '/focus-session' })}
+                className="gap-2"
+              >
+                <Play className="h-5 w-5" />
+                Start Session
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
-        {/* Recovery Quality */}
-        <RecoveryQualityChart />
+        <Card className="border-2 border-muted">
+          <CardContent className="pt-6">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-semibold mb-1">View Session History</h3>
+                <p className="text-sm text-muted-foreground">
+                  Analyze your patterns and identify common distractions
+                </p>
+              </div>
+              <Button 
+                size="lg" 
+                variant="outline"
+                onClick={() => navigate({ to: '/session-history' })}
+                className="gap-2"
+              >
+                <History className="h-5 w-5" />
+                View History
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Daily Recommendations */}
-      <DailyRecommendations recommendations={recommendations} />
-
-      {/* Distraction Warning */}
-      <DistractionWarning
-        visible={showWarning}
-        switchCount={switchCount}
-        onDismiss={handleDismissWarning}
+      {/* Burnout Score */}
+      <BurnoutScoreCard 
+        score={currentScore} 
+        level={scoreLevel}
+        isLoading={burnoutLoading}
       />
+
+      {/* Key Metrics */}
+      <div className="grid gap-6 md:grid-cols-3">
+        <MetricsCard
+          title="Total Sessions"
+          value={totalSessions.toString()}
+          icon={Target}
+          trend={totalSessions > 0 ? 'Active' : 'Get started'}
+          trendUp={totalSessions > 0}
+        />
+        <MetricsCard
+          title="Total Focus Time"
+          value={`${Math.round(totalFocusTime)}m`}
+          icon={Clock}
+          trend={`${totalSessions} sessions`}
+          trendUp={true}
+        />
+        <MetricsCard
+          title="Avg Distractions"
+          value={avgDistractions.toFixed(1)}
+          icon={TrendingUp}
+          trend={avgDistractions < 5 ? 'Good focus' : 'Room to improve'}
+          trendUp={avgDistractions < 5}
+        />
+      </div>
+
+      {/* Transition Patterns */}
+      <TransitionPatternsCard 
+        patterns={topInterruptions}
+        isLoading={transitionsLoading}
+      />
+
+      {/* Top Distractions */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Most Frequent Distractions</CardTitle>
+          <CardDescription>Your most common interruption sources</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {historyLoading ? (
+            <p className="text-sm text-muted-foreground text-center py-8">Loading...</p>
+          ) : topDistractions.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-8">
+              No distractions logged yet. Start a focus session to begin tracking!
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {topDistractions.slice(0, 5).map(([source, count], index) => (
+                <div key={source} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
+                  <div className="flex items-center gap-3">
+                    <span className="text-lg font-bold text-muted-foreground">#{index + 1}</span>
+                    <span className="font-medium">{source}</span>
+                  </div>
+                  <span className="text-sm text-muted-foreground">{count.toString()} times</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

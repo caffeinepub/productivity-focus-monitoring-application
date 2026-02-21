@@ -1,61 +1,78 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Focus monitoring web application with productive/distractive app categorization, tab switch tracking, warning system, and session-based locking",
+  "summary": "Web-based focus tracker with productivity timer and distraction logging features",
   "architectural_notes": [
-    "Web-based focus monitoring system (cannot block external browser tabs or desktop apps)",
-    "Track navigation within app between productive/distractive content sections",
-    "Grayscale CSS filter applied only to distractive content sections during warning period",
-    "Session-based restriction system tied to user-defined timer duration"
+    "React frontend with Motoko backend on Internet Computer",
+    "No auto-start: user manually controls session start/stop",
+    "Self-reported tracking (privacy-first, no browser monitoring)",
+    "Classification dictionary for productive vs distracting apps/sites",
+    "Pattern detection algorithm tracks transition frequency and session duration"
   ],
   "known_issues": [],
   "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-create-a-focus-session-setup-interface-where-users-can-select-a-session-duration-time-based-before-starting-their-focus-work-with-options-for-common-durations-like-25-45-60-90-minutes-or-custom-duration-input",
-      "title": "Create a focus session setup interface where users can select a session duration (time-based) before starting their focus work, with options for common durations like 25, 45, 60, 90 minutes or custom duration input",
+      "id": "feature-remove-automatic-focus-session-start-on-app-launch-users-must-manually-initiate-sessions-from-the-dashboard",
+      "title": "Remove automatic focus session start on app launch - users must manually initiate sessions from the dashboard",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-implement-tab-switch-tracking-specifically-between-productive-and-distractive-content-sections-within-the-app-incrementing-a-violation-counter-each-time-user-navigates-from-productive-to-distractive-sections",
-      "title": "Implement tab switch tracking specifically between productive and distractive content sections within the app, incrementing a violation counter each time user navigates from productive to distractive sections",
+      "id": "feature-implement-customizable-productivity-timer-with-preset-and-custom-work-break-intervals-pomodoro-style",
+      "title": "Implement customizable productivity timer with preset and custom work/break intervals (Pomodoro-style)",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-implement-a-three-strike-warning-system-that-applies-a-grayscale-visual-effect-to-distractive-content-sections-for-exactly-2-minutes-after-the-third-violation-switch-to-distractive-content",
-      "title": "Implement a three-strike warning system that applies a grayscale visual effect to distractive content sections for exactly 2 minutes after the third violation (switch to distractive content)",
+      "id": "feature-create-manual-distraction-logging-interface-where-users-can-record-interruptions-during-focus-sessions-and-categorize-them-by-source-youtube-instagram-work-apps-etc",
+      "title": "Create manual distraction logging interface where users can record interruptions during focus sessions and categorize them by source (YouTube, Instagram, work apps, etc.)",
       "reqIds": [
         "REQ-3"
       ],
       "version": 1
     },
     {
-      "id": "feature-after-the-2-minute-grayscale-warning-period-ends-reset-the-violation-counter-to-zero-and-start-a-new-warning-cycle-allowing-the-user-to-continue-with-a-fresh-count",
-      "title": "After the 2-minute grayscale warning period ends, reset the violation counter to zero and start a new warning cycle, allowing the user to continue with a fresh count",
+      "id": "feature-build-activity-classification-system-in-backend-that-categorizes-apps-websites-as-productive-or-distracting-based-on-user-defined-rules",
+      "title": "Build activity classification system in backend that categorizes apps/websites as productive or distracting based on user-defined rules",
       "reqIds": [
         "REQ-4"
       ],
       "version": 1
     },
     {
-      "id": "feature-lock-and-restrict-all-access-to-distractive-content-sections-until-the-user-s-focus-session-timer-completes-preventing-navigation-to-distractive-sections-even-if-user-attempts-to-access-them",
-      "title": "Lock and restrict all access to distractive content sections until the user's focus session timer completes, preventing navigation to distractive sections even if user attempts to access them",
+      "id": "feature-implement-transition-tracking-to-record-sequences-of-activity-switches-e-g-vs-code-youtube-and-identify-interruption-patterns",
+      "title": "Implement transition tracking to record sequences of activity switches (e.g., VS Code → YouTube) and identify interruption patterns",
       "reqIds": [
         "REQ-5"
       ],
       "version": 1
     },
     {
-      "id": "feature-when-focus-session-timer-completes-automatically-lift-all-restrictions-and-allow-full-access-to-both-productive-and-distractive-sections-with-option-for-user-to-start-a-new-focus-session-if-needed",
-      "title": "When focus session timer completes, automatically lift all restrictions and allow full access to both productive and distractive sections, with option for user to start a new focus session if needed",
+      "id": "feature-create-session-history-and-analytics-dashboard-showing-past-focus-sessions-distraction-patterns-and-most-frequent-interruption-sources-over-time",
+      "title": "Create session history and analytics dashboard showing past focus sessions, distraction patterns, and most frequent interruption sources over time",
       "reqIds": [
         "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-burnout-fatigue-scoring-algorithm-based-on-switching-frequency-between-productive-and-distracting-activities-with-weighted-penalties-for-context-switches",
+      "title": "Implement burnout/fatigue scoring algorithm based on switching frequency between productive and distracting activities with weighted penalties for context switches",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-measure-and-display-session-duration-metrics-to-distinguish-between-real-work-25-min-browsing-5-10-min-and-checking-habits-10-40-sec-repeated-visits",
+      "title": "Measure and display session duration metrics to distinguish between real work (25+ min), browsing (5-10 min), and checking habits (10-40 sec repeated visits)",
+      "reqIds": [
+        "REQ-8"
       ],
       "version": 1
     }
@@ -63,56 +80,43 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Productive and distractive app/content selection interface",
+      "summary": "Productivity timer with customizable work/break intervals",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Tab switch tracking between productive and distractive sections",
+      "summary": "Manual distraction logging with category selection",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-3",
-      "summary": "Three-strike warning system with grayscale effect on distractive sections for 2 minutes",
+      "summary": "Activity classification system (productive vs distracting)",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-4",
-      "summary": "Warning cycle reset after 2-minute grayscale period",
+      "summary": "Transition tracking to identify interruption patterns",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-5",
-      "summary": "Focus session timer with user-defined duration",
+      "summary": "Session history and analytics dashboard",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-6",
-      "summary": "Lock/restrict distractive sections until session timer completes",
+      "summary": "Burnout/fatigue scoring based on switching behavior",
       "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-7",
-      "summary": "Session reset capability when timer ends or user needs more time",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-14",
-      "summary": "Store focus session data (duration, violations, completion status) in the backend for each completed session to enable historical tracking and analytics",
-      "reqIds": [
-        "REQ-7"
-      ],
       "status": "pending"
     }
   ],
-  "projectName": "Focus Guardian",
+  "gameProjectType": "none",
+  "projectName": "Focus Tracker",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

@@ -8,225 +8,191 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
-export const Time = IDL.Int;
-export const StreakType = IDL.Variant({
-  'deepWorkCompletion' : IDL.Null,
-  'focusStreak' : IDL.Null,
-  'distractionResistance' : IDL.Null,
-});
-export const Achievement = IDL.Record({
-  'streakStart' : Time,
-  'isDeepWork' : IDL.Bool,
-  'streakType' : StreakType,
-  'streakEnd' : Time,
-  'milestone' : IDL.Nat,
-});
-export const NegativePattern = IDL.Variant({
-  'distractionSpikes' : IDL.Null,
-  'lateNightFatigue' : IDL.Null,
-  'frequentSwitching' : IDL.Null,
-});
-export const PositivePattern = IDL.Variant({
-  'reducedDistractions' : IDL.Null,
-  'workConsistency' : IDL.Null,
-  'healthyBreaks' : IDL.Null,
-});
-export const Pattern = IDL.Variant({
-  'negative' : NegativePattern,
-  'positive' : PositivePattern,
-});
-export const Report = IDL.Record({
-  'patterns' : IDL.Vec(Pattern),
-  'timestamp' : Time,
-});
-export const TabType = IDL.Variant({
-  'productive' : IDL.Null,
-  'distractive' : IDL.Null,
-});
-export const FocusSessionViolation = IDL.Record({
-  'sourceTab' : TabType,
-  'targetTab' : TabType,
-  'timestamp' : Time,
-  'violationCount' : IDL.Nat,
-});
-export const FocusSessionData = IDL.Record({
-  'duration' : IDL.Nat,
-  'focusScore' : IDL.Nat,
-  'completed' : IDL.Bool,
-  'violations' : IDL.Vec(FocusSessionViolation),
-  'timestamp' : Time,
-});
-export const FocusScore = IDL.Record({
-  'distractionScore' : IDL.Nat,
-  'timestamp' : Time,
-  'timeAway' : IDL.Nat,
-  'tabSwitchCount' : IDL.Nat,
-});
-export const TimerSetting = IDL.Record({
-  'duration' : IDL.Nat,
-  'notification' : IDL.Bool,
-});
-export const BreakType = IDL.Variant({
-  'walkBreak' : IDL.Null,
-  'deskRecovery' : IDL.Null,
-});
-export const BreakSession = IDL.Record({
-  'startTime' : Time,
-  'timerSetting' : TimerSetting,
-  'endTime' : Time,
-  'breakType' : BreakType,
-  'isRestorative' : IDL.Bool,
-});
-export const SessionType = IDL.Variant({
-  'focus' : IDL.Null,
-  'rest' : IDL.Null,
-  'distraction' : IDL.Null,
-});
-export const AppCategory = IDL.Variant({
+export const Category = IDL.Variant({
   'productive' : IDL.Null,
   'distracting' : IDL.Null,
+  'neutral' : IDL.Null,
 });
-export const Session = IDL.Record({
-  'duration' : IDL.Nat,
-  'sessionType' : SessionType,
-  'appName' : IDL.Text,
-  'timestamp' : Time,
-  'category' : AppCategory,
+export const ActivitySwitch = IDL.Record({
+  'toApp' : IDL.Text,
+  'toCategory' : Category,
+  'fromCategory' : Category,
+  'fromApp' : IDL.Text,
+  'timestamp' : IDL.Int,
 });
-export const ContextSwitch = IDL.Record({
-  'sourceApp' : IDL.Text,
-  'targetApp' : IDL.Text,
-  'timestamp' : Time,
+export const SourceType = IDL.Variant({
+  'other' : IDL.Null,
+  'news' : IDL.Null,
+  'workApp' : IDL.Null,
+  'shopping' : IDL.Null,
+  'socialMedia' : IDL.Null,
+});
+export const DistractionLog = IDL.Record({
+  'source' : IDL.Text,
+  'description' : IDL.Text,
+  'sourceType' : SourceType,
+  'timestamp' : IDL.Int,
+  'category' : Category,
+});
+export const SessionSummary = IDL.Record({
+  'startTime' : IDL.Int,
+  'productiveTime' : IDL.Nat,
+  'endTime' : IDL.Int,
+  'totalDuration' : IDL.Int,
+  'distractingTime' : IDL.Nat,
+  'burnoutScore' : IDL.Int,
+  'sessionId' : IDL.Nat,
+  'switchesCount' : IDL.Nat,
+  'distractionsCount' : IDL.Nat,
 });
 
 export const idlService = IDL.Service({
-  'addAchievement' : IDL.Func([Achievement], [], []),
-  'generateReport' : IDL.Func([IDL.Vec(Pattern)], [Report], []),
-  'getAllFocusSessions' : IDL.Func([], [IDL.Vec(FocusSessionData)], ['query']),
-  'getAllReports' : IDL.Func([], [IDL.Vec(Report)], ['query']),
-  'getFocusScores' : IDL.Func([], [IDL.Vec(FocusScore)], ['query']),
-  'getReportById' : IDL.Func([IDL.Nat], [IDL.Opt(Report)], ['query']),
-  'recordBreak' : IDL.Func([BreakSession], [], []),
-  'recordFocusScore' : IDL.Func([IDL.Nat, IDL.Nat, IDL.Nat], [], []),
-  'recordFocusSession' : IDL.Func([IDL.Nat, IDL.Bool, IDL.Nat], [], []),
-  'recordSession' : IDL.Func([Session], [], []),
-  'recordSwitch' : IDL.Func([ContextSwitch], [], []),
-  'recordTabSwitch' : IDL.Func([TabType, TabType], [], []),
-  'startFocusSession' : IDL.Func([], [], []),
+  'endSession' : IDL.Func([], [], []),
+  'getActivitySwitches' : IDL.Func(
+      [],
+      [IDL.Vec(IDL.Tuple(IDL.Nat, ActivitySwitch))],
+      ['query'],
+    ),
+  'getAllAppCategories' : IDL.Func(
+      [],
+      [IDL.Vec(IDL.Tuple(IDL.Text, Category))],
+      ['query'],
+    ),
+  'getAppCategory' : IDL.Func([IDL.Text], [IDL.Opt(Category)], ['query']),
+  'getCurrentSessionStats' : IDL.Func(
+      [],
+      [IDL.Nat, IDL.Nat, IDL.Int, IDL.Nat, IDL.Nat],
+      ['query'],
+    ),
+  'getDistractionLogs' : IDL.Func(
+      [],
+      [IDL.Vec(IDL.Tuple(IDL.Nat, DistractionLog))],
+      ['query'],
+    ),
+  'getLongestFocusStreak' : IDL.Func([], [IDL.Int], ['query']),
+  'getMostFrequentDistractions' : IDL.Func(
+      [],
+      [IDL.Vec(IDL.Tuple(IDL.Text, IDL.Nat))],
+      ['query'],
+    ),
+  'getSessionHistory' : IDL.Func(
+      [IDL.Text],
+      [IDL.Vec(SessionSummary)],
+      ['query'],
+    ),
+  'getSessionSummaries' : IDL.Func(
+      [],
+      [IDL.Vec(IDL.Tuple(IDL.Nat, SessionSummary))],
+      ['query'],
+    ),
+  'logDistraction' : IDL.Func(
+      [IDL.Text, Category, SourceType, IDL.Text],
+      [],
+      [],
+    ),
+  'recordActivitySwitch' : IDL.Func(
+      [IDL.Text, IDL.Text, Category, Category],
+      [],
+      [],
+    ),
+  'recordTimeBlock' : IDL.Func([Category, IDL.Int], [], []),
+  'setAppCategory' : IDL.Func([IDL.Text, Category], [], []),
+  'startSession' : IDL.Func([], [], []),
 });
 
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
-  const Time = IDL.Int;
-  const StreakType = IDL.Variant({
-    'deepWorkCompletion' : IDL.Null,
-    'focusStreak' : IDL.Null,
-    'distractionResistance' : IDL.Null,
-  });
-  const Achievement = IDL.Record({
-    'streakStart' : Time,
-    'isDeepWork' : IDL.Bool,
-    'streakType' : StreakType,
-    'streakEnd' : Time,
-    'milestone' : IDL.Nat,
-  });
-  const NegativePattern = IDL.Variant({
-    'distractionSpikes' : IDL.Null,
-    'lateNightFatigue' : IDL.Null,
-    'frequentSwitching' : IDL.Null,
-  });
-  const PositivePattern = IDL.Variant({
-    'reducedDistractions' : IDL.Null,
-    'workConsistency' : IDL.Null,
-    'healthyBreaks' : IDL.Null,
-  });
-  const Pattern = IDL.Variant({
-    'negative' : NegativePattern,
-    'positive' : PositivePattern,
-  });
-  const Report = IDL.Record({
-    'patterns' : IDL.Vec(Pattern),
-    'timestamp' : Time,
-  });
-  const TabType = IDL.Variant({
-    'productive' : IDL.Null,
-    'distractive' : IDL.Null,
-  });
-  const FocusSessionViolation = IDL.Record({
-    'sourceTab' : TabType,
-    'targetTab' : TabType,
-    'timestamp' : Time,
-    'violationCount' : IDL.Nat,
-  });
-  const FocusSessionData = IDL.Record({
-    'duration' : IDL.Nat,
-    'focusScore' : IDL.Nat,
-    'completed' : IDL.Bool,
-    'violations' : IDL.Vec(FocusSessionViolation),
-    'timestamp' : Time,
-  });
-  const FocusScore = IDL.Record({
-    'distractionScore' : IDL.Nat,
-    'timestamp' : Time,
-    'timeAway' : IDL.Nat,
-    'tabSwitchCount' : IDL.Nat,
-  });
-  const TimerSetting = IDL.Record({
-    'duration' : IDL.Nat,
-    'notification' : IDL.Bool,
-  });
-  const BreakType = IDL.Variant({
-    'walkBreak' : IDL.Null,
-    'deskRecovery' : IDL.Null,
-  });
-  const BreakSession = IDL.Record({
-    'startTime' : Time,
-    'timerSetting' : TimerSetting,
-    'endTime' : Time,
-    'breakType' : BreakType,
-    'isRestorative' : IDL.Bool,
-  });
-  const SessionType = IDL.Variant({
-    'focus' : IDL.Null,
-    'rest' : IDL.Null,
-    'distraction' : IDL.Null,
-  });
-  const AppCategory = IDL.Variant({
+  const Category = IDL.Variant({
     'productive' : IDL.Null,
     'distracting' : IDL.Null,
+    'neutral' : IDL.Null,
   });
-  const Session = IDL.Record({
-    'duration' : IDL.Nat,
-    'sessionType' : SessionType,
-    'appName' : IDL.Text,
-    'timestamp' : Time,
-    'category' : AppCategory,
+  const ActivitySwitch = IDL.Record({
+    'toApp' : IDL.Text,
+    'toCategory' : Category,
+    'fromCategory' : Category,
+    'fromApp' : IDL.Text,
+    'timestamp' : IDL.Int,
   });
-  const ContextSwitch = IDL.Record({
-    'sourceApp' : IDL.Text,
-    'targetApp' : IDL.Text,
-    'timestamp' : Time,
+  const SourceType = IDL.Variant({
+    'other' : IDL.Null,
+    'news' : IDL.Null,
+    'workApp' : IDL.Null,
+    'shopping' : IDL.Null,
+    'socialMedia' : IDL.Null,
+  });
+  const DistractionLog = IDL.Record({
+    'source' : IDL.Text,
+    'description' : IDL.Text,
+    'sourceType' : SourceType,
+    'timestamp' : IDL.Int,
+    'category' : Category,
+  });
+  const SessionSummary = IDL.Record({
+    'startTime' : IDL.Int,
+    'productiveTime' : IDL.Nat,
+    'endTime' : IDL.Int,
+    'totalDuration' : IDL.Int,
+    'distractingTime' : IDL.Nat,
+    'burnoutScore' : IDL.Int,
+    'sessionId' : IDL.Nat,
+    'switchesCount' : IDL.Nat,
+    'distractionsCount' : IDL.Nat,
   });
   
   return IDL.Service({
-    'addAchievement' : IDL.Func([Achievement], [], []),
-    'generateReport' : IDL.Func([IDL.Vec(Pattern)], [Report], []),
-    'getAllFocusSessions' : IDL.Func(
+    'endSession' : IDL.Func([], [], []),
+    'getActivitySwitches' : IDL.Func(
         [],
-        [IDL.Vec(FocusSessionData)],
+        [IDL.Vec(IDL.Tuple(IDL.Nat, ActivitySwitch))],
         ['query'],
       ),
-    'getAllReports' : IDL.Func([], [IDL.Vec(Report)], ['query']),
-    'getFocusScores' : IDL.Func([], [IDL.Vec(FocusScore)], ['query']),
-    'getReportById' : IDL.Func([IDL.Nat], [IDL.Opt(Report)], ['query']),
-    'recordBreak' : IDL.Func([BreakSession], [], []),
-    'recordFocusScore' : IDL.Func([IDL.Nat, IDL.Nat, IDL.Nat], [], []),
-    'recordFocusSession' : IDL.Func([IDL.Nat, IDL.Bool, IDL.Nat], [], []),
-    'recordSession' : IDL.Func([Session], [], []),
-    'recordSwitch' : IDL.Func([ContextSwitch], [], []),
-    'recordTabSwitch' : IDL.Func([TabType, TabType], [], []),
-    'startFocusSession' : IDL.Func([], [], []),
+    'getAllAppCategories' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Tuple(IDL.Text, Category))],
+        ['query'],
+      ),
+    'getAppCategory' : IDL.Func([IDL.Text], [IDL.Opt(Category)], ['query']),
+    'getCurrentSessionStats' : IDL.Func(
+        [],
+        [IDL.Nat, IDL.Nat, IDL.Int, IDL.Nat, IDL.Nat],
+        ['query'],
+      ),
+    'getDistractionLogs' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Tuple(IDL.Nat, DistractionLog))],
+        ['query'],
+      ),
+    'getLongestFocusStreak' : IDL.Func([], [IDL.Int], ['query']),
+    'getMostFrequentDistractions' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Tuple(IDL.Text, IDL.Nat))],
+        ['query'],
+      ),
+    'getSessionHistory' : IDL.Func(
+        [IDL.Text],
+        [IDL.Vec(SessionSummary)],
+        ['query'],
+      ),
+    'getSessionSummaries' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Tuple(IDL.Nat, SessionSummary))],
+        ['query'],
+      ),
+    'logDistraction' : IDL.Func(
+        [IDL.Text, Category, SourceType, IDL.Text],
+        [],
+        [],
+      ),
+    'recordActivitySwitch' : IDL.Func(
+        [IDL.Text, IDL.Text, Category, Category],
+        [],
+        [],
+      ),
+    'recordTimeBlock' : IDL.Func([Category, IDL.Int], [], []),
+    'setAppCategory' : IDL.Func([IDL.Text, Category], [], []),
+    'startSession' : IDL.Func([], [], []),
   });
 };
 

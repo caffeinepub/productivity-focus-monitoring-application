@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useActor } from './useActor';
-import { BreakType } from '../backend';
 
 export function useBreakTimer(breakType: 'deskRecovery' | 'walkBreak', defaultDuration: number) {
   const { actor } = useActor();
@@ -18,18 +17,8 @@ export function useBreakTimer(breakType: 'deskRecovery' | 'walkBreak', defaultDu
       const endTime = Date.now();
       const duration = Math.floor((endTime - startTime) / 1000);
 
-      actor
-        .recordBreak({
-          startTime: BigInt(startTime * 1_000_000),
-          endTime: BigInt(endTime * 1_000_000),
-          breakType: breakType === 'deskRecovery' ? BreakType.deskRecovery : BreakType.walkBreak,
-          timerSetting: {
-            duration: BigInt(defaultDuration),
-            notification: true,
-          },
-          isRestorative: breakType === 'deskRecovery',
-        })
-        .catch(console.error);
+      // Note: Old backend method 'recordBreak' no longer exists
+      // Backend recording has been removed
     }
 
     setStartTime(null);

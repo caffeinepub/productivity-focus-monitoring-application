@@ -1,182 +1,257 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Focus Session System with Tab Switching Tracking and Progressive Restrictions",
+  "title": "Transform focus management system into productivity timer with manual distraction logging",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Create focus session setup interface with preset and custom duration options",
+      "summary": "Remove automatic focus session start on app launch - users manually initiate sessions from dashboard",
       "acceptanceCriteria": [
-        "User can select from preset session durations or enter a custom duration",
-        "Session timer starts counting down when user begins focus session",
-        "Timer displays remaining time clearly throughout the session",
-        "User can reset or start a new session when current timer completes"
+        "App loads directly to dashboard without triggering a focus session",
+        "No automatic redirects to focus session page on launch",
+        "Users can navigate freely without being forced into a session"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useFocusSessionTimer.ts",
-          "operation": "create",
-          "description": "Create a hook to manage focus session timer state including duration selection, countdown logic, start/pause/reset controls, and completion status. Use localStorage to persist active session state across page reloads."
-        },
-        {
-          "path": "frontend/src/pages/FocusSession.tsx",
-          "operation": "create",
-          "description": "Create a focus session page that displays duration selection interface with preset buttons (25, 45, 60, 90 minutes) and custom input field. Show countdown timer when session is active with clear remaining time display. Include start, pause, and reset controls. Use the useFocusSessionTimer hook for state management and shadcn/ui Button and Input components for UI."
-        },
-        {
-          "path": "frontend/src/components/Layout.tsx",
-          "operation": "modify",
-          "description": "Add navigation link to the Focus Session page in the main navigation menu, positioned between Dashboard and Monitor links."
-        },
-        {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Register the /focus-session route in the router configuration, making it a protected route that requires authentication."
+          "description": "Remove any automatic focus session initiation logic from the root App component. Ensure the router loads to the dashboard by default without triggering session redirects or protected route enforcement that forces users into a focus session."
+        },
+        {
+          "path": "frontend/src/pages/Dashboard.tsx",
+          "operation": "modify",
+          "description": "Remove any useEffect or initialization logic that automatically starts a focus session or redirects to the FocusSession page when the dashboard loads. Ensure the dashboard displays normally without forcing session creation."
+        },
+        {
+          "path": "frontend/src/hooks/useFocusSessionTimer.ts",
+          "operation": "modify",
+          "description": "Remove any auto-start logic from the focus session timer hook. Ensure sessions only start when explicitly triggered by user action, not on hook initialization or component mount."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Implement tab switch tracking between productive and distractive sections with violation counter",
+      "summary": "Implement customizable productivity timer with preset and custom work/break intervals",
       "acceptanceCriteria": [
-        "System detects when user navigates from productive section to distractive section",
-        "Violation counter increments only for productive-to-distractive switches, not other navigation",
-        "Counter persists throughout the focus session",
-        "Counter is visible to user so they can track their violations"
+        "Users can select preset durations (15, 25, 45 minutes) or enter custom times",
+        "Timer displays countdown with start, pause, and reset controls",
+        "Clear visual indication of work session vs break time",
+        "Option to configure break length after work sessions"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useFocusSessionViolations.ts",
-          "operation": "create",
-          "description": "Create a hook to track tab switches specifically from productive to distractive sections during an active focus session. Monitor route changes and increment violation counter only for productive-to-distractive navigation. Store violations array with timestamps and current count. Integrate with useFocusSessionTimer to ensure tracking only occurs during active sessions. On session completion, call backend's recordFocusSession with violation data."
-        },
-        {
           "path": "frontend/src/pages/FocusSession.tsx",
           "operation": "modify",
-          "description": "Integrate useFocusSessionViolations hook to display current violation count prominently. Show violation counter badge or card that updates in real-time as violations occur. Display violation history list showing timestamps of each productive-to-distractive switch."
+          "description": "Add preset duration buttons for 15, 25, and 45 minutes alongside existing custom duration input. Implement break duration configuration UI (5, 10, 15 minute presets). Add visual indicators to distinguish work session mode from break mode (color scheme, labels, icons). Ensure timer controls (start, pause, reset) work correctly for both work and break phases."
         },
         {
-          "path": "frontend/src/types/index.ts",
+          "path": "frontend/src/hooks/useFocusSessionTimer.ts",
           "operation": "modify",
-          "description": "Add FocusSessionViolation and FocusSessionState type definitions including violation count, violation history array, session status, and restriction state."
+          "description": "Extend the timer hook to support both work session and break session modes. Add state to track current mode (work vs break), configured break duration, and automatic transition logic. Ensure pause/resume functionality works across both modes."
+        },
+        {
+          "path": "frontend/src/components/FocusSessionSummary.tsx",
+          "operation": "modify",
+          "description": "Update the summary component to display both work duration and break duration statistics. Show work/break cycle completion count and effectiveness metrics."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Implement three-strike grayscale warning system for distractive sections",
+      "summary": "Create manual distraction logging interface with category selection during focus sessions",
       "acceptanceCriteria": [
-        "After third violation, grayscale effect applies immediately to distractive sections only",
-        "Grayscale effect lasts exactly 2 minutes with visible countdown",
-        "Productive sections remain in full color during grayscale period",
-        "Effect is scoped to distractive content sections, not the entire app interface"
+        "Quick-access button during active focus session to log a distraction",
+        "Category picker with common distraction sources (social media, messaging, entertainment, work interruptions)",
+        "Optional notes field for additional context",
+        "Distraction entries timestamped and associated with current session",
+        "Backend stores distraction logs with category, timestamp, and session reference"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useFocusSessionViolations.ts",
-          "operation": "modify",
-          "description": "Add grayscale warning state management that triggers after third violation. Track grayscale period with 2-minute countdown timer. Store grayscale active status, remaining seconds, and which sections are affected. Ensure grayscale only applies to distractive content sections identified by route patterns."
-        },
-        {
-          "path": "frontend/src/components/DistractiveContentWrapper.tsx",
-          "operation": "create",
-          "description": "Create a wrapper component that applies conditional grayscale CSS filter to its children based on grayscale warning state from useFocusSessionViolations. Use CSS filter: grayscale(100%) only when warning is active. Display countdown timer overlay showing remaining grayscale time."
-        },
-        {
           "path": "frontend/src/pages/FocusSession.tsx",
           "operation": "modify",
-          "description": "Wrap distractive content sections with DistractiveContentWrapper component. Display prominent notification when grayscale warning is triggered showing strike count and countdown. Keep productive content sections unwrapped so they remain in full color."
+          "description": "Add a prominent 'Log Distraction' button visible during active focus sessions. When clicked, open a quick-access modal/dialog with category selection (map to existing SourceType enum: socialMedia, workApp, shopping, news, other) and optional notes textarea. On submit, call the backend logDistraction method with selected category, timestamp, and description. Close dialog after successful submission and show brief confirmation feedback."
         },
         {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Add CSS utility classes for grayscale transitions and warning visual states that can be conditionally applied to distractive sections."
+          "path": "frontend/src/components/DistractionLogModal.tsx",
+          "operation": "create",
+          "description": "Create a modal component for logging distractions. Include category picker dropdown (Social Media, Work Apps, Shopping, News, Other - map to SourceType enum), source text input (app/website name), optional notes textarea, timestamp display, and submit/cancel buttons. Use shadcn/ui Dialog and Select components for consistency."
+        },
+        {
+          "path": "frontend/src/hooks/useDistractionLogger.ts",
+          "operation": "create",
+          "description": "Create a hook that manages distraction logging state and calls the backend logDistraction method. Handle form validation, submission, loading states, and error handling. Return methods for opening/closing the log modal and submitting distraction entries."
         }
       ]
     },
     {
       "id": "REQ-4",
-      "summary": "Reset violation counter after 2-minute grayscale period and start new warning cycle",
+      "summary": "Build activity classification system for categorizing apps/websites as productive or distracting",
       "acceptanceCriteria": [
-        "Violation counter resets to 0 automatically when 2-minute grayscale period completes",
-        "User can again accumulate up to 3 violations before next grayscale period",
-        "The cycle repeats indefinitely throughout the focus session",
-        "User receives clear indication that counter has reset"
+        "Backend stores classification rules mapping apps/sites to productive or distracting categories",
+        "Users can customize classifications through settings interface",
+        "Default classifications provided for common apps (VS Code=productive, YouTube=distracting)",
+        "Classification data persists across sessions"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useFocusSessionViolations.ts",
+          "path": "frontend/src/pages/AppCategorization.tsx",
           "operation": "modify",
-          "description": "Add automatic counter reset logic that triggers when 2-minute grayscale countdown reaches zero. Clear violation count, reset grayscale state, and allow new warning cycle to begin. Track warning cycle number for user awareness. Emit notification event when reset occurs."
+          "description": "Enhance the existing app categorization page to integrate with the backend getAllAppCategories and setAppCategory methods. Load existing classifications on mount, allow users to add new apps with category assignment (productive, distracting, neutral), edit existing classifications, and persist changes to the backend. Add default classifications for common apps if none exist."
         },
         {
-          "path": "frontend/src/pages/FocusSession.tsx",
+          "path": "frontend/src/hooks/useApplications.ts",
           "operation": "modify",
-          "description": "Display toast notification using shadcn/ui Toast component when violation counter resets, clearly informing user that they have a fresh set of warnings. Show current warning cycle number in the violation counter display."
+          "description": "Refactor the hook to fetch classifications from backend using getAllAppCategories instead of localStorage. Replace the add/edit/delete CRUD operations to call backend setAppCategory method. Map the backend Category enum (productive, distracting, neutral) to frontend state."
         }
       ]
     },
     {
       "id": "REQ-5",
-      "summary": "Lock distractive sections until focus session timer completes",
+      "summary": "Implement transition tracking to record activity switch sequences and identify interruption patterns",
       "acceptanceCriteria": [
-        "During active focus session, attempts to navigate to distractive sections are blocked",
-        "User sees clear messaging explaining why access is restricted and when it will unlock",
-        "Lock remains in effect until session timer reaches zero",
-        "Productive sections remain fully accessible during the lock period"
+        "Backend records transitions as pairs: (source_activity, destination_activity, timestamp)",
+        "System identifies repeated patterns (same transition occurring 3+ times)",
+        "Dashboard displays most common interruption sources",
+        "Transition data used to calculate distraction frequency metrics"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useFocusSessionViolations.ts",
-          "operation": "modify",
-          "description": "Add lock state management that activates after repeated violations or user-initiated lockdown. Implement navigation blocking logic for distractive routes. Store locked status, lock reason, and unlock time based on remaining session duration."
-        },
-        {
-          "path": "frontend/src/components/DistractiveContentBlocker.tsx",
-          "operation": "create",
-          "description": "Create a blocking component that replaces distractive content when lock is active. Display clear message explaining restriction, show countdown to unlock based on focus session timer, and provide visual indication of locked status. Use shadcn/ui Card and Alert components for messaging."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Add route guard logic that checks lock state from useFocusSessionViolations before rendering distractive routes. Redirect attempts to access locked routes to DistractiveContentBlocker component. Ensure productive routes remain accessible."
-        },
-        {
           "path": "frontend/src/pages/FocusSession.tsx",
           "operation": "modify",
-          "description": "Display lock status indicator showing which sections are currently restricted. Provide clear countdown showing when restrictions will lift based on session timer completion."
+          "description": "When users log distractions during a focus session, capture the transition from the current activity to the distracting activity. If users are switching between productive apps, also log that transition. Call the backend recordActivitySwitch method with fromApp, toApp, fromCategory, and toCategory parameters. Maintain state of the current activity to enable transition recording."
+        },
+        {
+          "path": "frontend/src/hooks/useActivityTransitions.ts",
+          "operation": "create",
+          "description": "Create a hook that manages activity transition state and calls the backend recordActivitySwitch method. Track the current activity, previous activity, and activity history. Provide methods to record transitions and retrieve transition data from the backend using getActivitySwitches."
+        },
+        {
+          "path": "frontend/src/pages/Dashboard.tsx",
+          "operation": "modify",
+          "description": "Add a section displaying the most common interruption patterns. Fetch transition data from backend using getActivitySwitches and analyze for repeated patterns (same transition occurring 3+ times). Display top interruption sources using a card or chart component."
+        },
+        {
+          "path": "frontend/src/components/TransitionPatternsCard.tsx",
+          "operation": "create",
+          "description": "Create a card component that displays common activity transition patterns. Show source→destination pairs ranked by frequency, highlight repeated interruption patterns, and use visual indicators (arrows, frequency badges) to emphasize high-frequency transitions. Use shadcn/ui Card component."
         }
       ]
     },
     {
       "id": "REQ-6",
-      "summary": "Automatically lift all restrictions when focus session timer completes",
+      "summary": "Create session history and analytics dashboard showing distraction patterns and interruption sources over time",
       "acceptanceCriteria": [
-        "All locks and restrictions are removed when timer reaches zero",
-        "User receives completion notification indicating session is complete",
-        "User can freely access all sections after session ends",
-        "Clear option is presented to start a new focus session with fresh duration selection"
+        "History view lists all completed focus sessions with duration, distraction count, and score",
+        "Analytics section shows top distraction sources ranked by frequency",
+        "Visual charts displaying distraction trends over days/weeks",
+        "Transition matrix showing most common interruption pathways",
+        "Filterable date ranges for historical analysis"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useFocusSessionTimer.ts",
-          "operation": "modify",
-          "description": "Add completion callback that triggers when timer reaches zero. Set session completed status, emit completion event, and prepare state for new session option. Calculate final focus score based on violation count and session duration before calling backend's recordFocusSession."
+          "path": "frontend/src/pages/SessionHistory.tsx",
+          "operation": "create",
+          "description": "Create a new page that displays session history and analytics. Fetch session data using backend getSessionHistory method with sortBy parameter. Display a table/list of completed sessions showing startTime, totalDuration, distractionsCount, switchesCount, and burnoutScore. Include date range filter controls. Add an analytics section showing top distraction sources from getMostFrequentDistractions method. Include visual charts for distraction trends using Recharts library."
         },
         {
-          "path": "frontend/src/hooks/useFocusSessionViolations.ts",
-          "operation": "modify",
-          "description": "Listen for session completion event and automatically clear all lock states, grayscale effects, and violation tracking. Reset to initial state ready for new session."
+          "path": "frontend/src/hooks/useSessionHistory.ts",
+          "operation": "create",
+          "description": "Create a hook that fetches and manages session history data from the backend. Call getSessionHistory, getMostFrequentDistractions, and getDistractionLogs methods. Implement filtering, sorting, and date range selection logic. Return formatted data for display components."
         },
+        {
+          "path": "frontend/src/components/SessionHistoryTable.tsx",
+          "operation": "create",
+          "description": "Create a table component displaying completed focus sessions with columns for date, duration, distractions count, switches count, and burnout score. Support sorting and row expansion to show session details. Use shadcn/ui Table component."
+        },
+        {
+          "path": "frontend/src/components/DistractionTrendsChart.tsx",
+          "operation": "create",
+          "description": "Create a line or bar chart component showing distraction frequency trends over time (daily/weekly). Use Recharts library for visualization. Display distraction count per day/week with color coding for severity."
+        },
+        {
+          "path": "frontend/src/components/TransitionMatrix.tsx",
+          "operation": "create",
+          "description": "Create a matrix or heatmap visualization showing most common activity transitions. Display source activities on one axis and destination activities on the other, with cell intensity representing transition frequency. Use activity switch data from backend getActivitySwitches method."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add a route for the new SessionHistory page. Update the router configuration to include /session-history path. Add navigation link in the Layout component's menu."
+        },
+        {
+          "path": "frontend/src/components/Layout.tsx",
+          "operation": "modify",
+          "description": "Add a 'Session History' navigation link in the menu that routes to /session-history page."
+        }
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "summary": "Implement burnout scoring algorithm based on switching frequency with weighted penalties for context switches",
+      "acceptanceCriteria": [
+        "Backend calculates fatigue score using formula: small penalty for productive↔productive switches, large penalty for productive→distracting switches, fragmentation penalty for distracting→distracting chains",
+        "Score updates in real-time as user logs distractions",
+        "Dashboard displays current fatigue level with visual indicator (low/medium/high)",
+        "Historical burnout trends shown in chart format"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/Dashboard.tsx",
+          "operation": "modify",
+          "description": "Add a burnout score display section that fetches current session stats from backend getCurrentSessionStats method (which returns burnoutScore among other metrics). Display the burnout score with visual indicators for low/medium/high levels using color coding and icons. Update the display in real-time as users log distractions during active sessions."
+        },
+        {
+          "path": "frontend/src/components/BurnoutScoreCard.tsx",
+          "operation": "create",
+          "description": "Create a card component that displays the current burnout/fatigue score with visual severity indicators (green for low, yellow for medium, red for high). Show the numeric score, category label, and a brief explanation. Include a progress bar or gauge visualization. Use shadcn/ui Card and Progress components."
+        },
+        {
+          "path": "frontend/src/components/BurnoutTrendsChart.tsx",
+          "operation": "create",
+          "description": "Create a chart component showing historical burnout scores over time. Fetch session summaries from backend getSessionSummaries method and extract burnoutScore values. Display as a line chart with date on x-axis and burnout score on y-axis. Use Recharts library and add threshold lines for low/medium/high boundaries."
+        },
+        {
+          "path": "frontend/src/hooks/useBurnoutScore.ts",
+          "operation": "create",
+          "description": "Create a hook that fetches and manages burnout score data from the backend. Call getCurrentSessionStats for real-time score during active sessions and getSessionSummaries for historical data. Implement categorization logic (low/medium/high) and formatting for display."
+        }
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "summary": "Measure and display session duration metrics to classify activities by duration patterns",
+      "acceptanceCriteria": [
+        "Track duration for each logged activity/distraction",
+        "Classify activities by duration pattern: sustained focus (25+ min), brief browsing (5-10 min), habit checking (<1 min repeated)",
+        "Analytics show distribution of time across duration categories",
+        "Identify habitual distractions based on repeated short-duration visits"
+      ],
+      "file_operations": [
         {
           "path": "frontend/src/pages/FocusSession.tsx",
           "operation": "modify",
-          "description": "Display completion modal using shadcn/ui Dialog component when session ends, showing session summary including duration, total violations, and focus score. Provide prominent 'Start New Session' button that resets timer and returns to duration selection interface. Show celebration message acknowledging completed session."
+          "description": "Track the duration of each activity/distraction logged during a focus session. When users return from a distraction and log it, calculate the time elapsed since the distraction started. Pass this duration to the backend recordTimeBlock method with the appropriate category (productive/distracting). Store duration alongside each distraction log entry."
         },
         {
-          "path": "frontend/src/components/FocusSessionSummary.tsx",
+          "path": "frontend/src/hooks/useDistractionLogger.ts",
+          "operation": "modify",
+          "description": "Extend the distraction logger hook to capture and track activity durations. Calculate elapsed time between activity start and log submission. Call backend recordTimeBlock method with category and duration parameters."
+        },
+        {
+          "path": "frontend/src/pages/SessionHistory.tsx",
+          "operation": "modify",
+          "description": "Add a duration analysis section that classifies activities by duration patterns. Display distribution of time across categories: sustained focus (25+ min), brief browsing (5-10 min), habit checking (<1 min). Show charts and statistics for each category. Highlight habitual distractions identified by repeated short-duration visits to the same apps/sites."
+        },
+        {
+          "path": "frontend/src/components/DurationAnalysisCard.tsx",
           "operation": "create",
-          "description": "Create a summary component that displays completed session statistics including total duration, violation count, warning cycles completed, time spent locked, and calculated focus score. Use shadcn/ui Card and Progress components for visual presentation."
+          "description": "Create a card component that displays activity duration analysis. Show pie chart or bar chart with time distribution across duration categories (sustained focus, brief browsing, habit checking). Include statistics for each category and a list of habitual distractions (repeated short visits). Use Recharts for visualization."
+        },
+        {
+          "path": "frontend/src/hooks/useDurationAnalysis.ts",
+          "operation": "create",
+          "description": "Create a hook that analyzes session and distraction data to classify activities by duration patterns. Fetch data from backend using getDistractionLogs and getSessionHistory methods. Implement classification logic: sustained focus (25+ min), brief browsing (5-10 min), habit checking (<1 min repeated). Calculate distribution percentages and identify repeated short-duration patterns."
         }
       ]
     }

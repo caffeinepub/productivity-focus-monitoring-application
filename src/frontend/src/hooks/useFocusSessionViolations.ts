@@ -3,7 +3,6 @@ import { useRouterState } from '@tanstack/react-router';
 import { useApplications } from './useApplications';
 import { useFocusSessionTimer } from './useFocusSessionTimer';
 import { useActor } from './useActor';
-import { TabType } from '../backend';
 import { toast } from 'sonner';
 
 export interface Violation {
@@ -90,12 +89,8 @@ export function useFocusSessionViolations() {
           const newCount = prev.violationCount + 1;
           const newViolations = [...prev.violations, newViolation];
 
-          // Record to backend
-          if (actor) {
-            actor.recordTabSwitch(TabType.productive, TabType.distractive).catch((error) => {
-              console.error('Failed to record tab switch:', error);
-            });
-          }
+          // Note: Old backend method 'recordTabSwitch' no longer exists
+          // Backend recording has been removed
 
           // Check if we hit the threshold
           if (newCount >= VIOLATION_THRESHOLD && !prev.grayscale.isActive) {

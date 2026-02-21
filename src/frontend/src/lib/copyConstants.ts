@@ -65,4 +65,25 @@ export const COPY = {
       ],
     },
   },
+  focusGuardian: {
+    warnings: {
+      level1: {
+        title: 'Gentle Reminder',
+        message: "You've visited a few distractive sites. Let's try to stay focused on your goals.",
+      },
+      level2: {
+        title: 'Focus Check-In',
+        message: "You're getting distracted more frequently. Consider what's pulling your attention away.",
+      },
+      level3: {
+        title: 'Final Warning',
+        message: 'One more distractive visit will activate a focus lock to help you regain concentration.',
+      },
+    },
+    lock: {
+      title: 'Focus Lock Active',
+      subtitle: 'Time to reset and refocus on what matters',
+      supportMessage: "You've got this! This is an opportunity to strengthen your focus habits.",
+    },
+  },
 };

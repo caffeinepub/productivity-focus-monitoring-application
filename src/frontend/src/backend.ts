@@ -89,639 +89,435 @@ export class ExternalBlob {
         return this;
     }
 }
-export interface TimerSetting {
-    duration: bigint;
-    notification: boolean;
+export interface DistractionLog {
+    source: string;
+    description: string;
+    sourceType: SourceType;
+    timestamp: bigint;
+    category: Category;
 }
-export type Time = bigint;
-export interface FocusSessionViolation {
-    sourceTab: TabType;
-    targetTab: TabType;
-    timestamp: Time;
-    violationCount: bigint;
+export interface ActivitySwitch {
+    toApp: string;
+    toCategory: Category;
+    fromCategory: Category;
+    fromApp: string;
+    timestamp: bigint;
 }
-export interface Report {
-    patterns: Array<Pattern>;
-    timestamp: Time;
+export interface SessionSummary {
+    startTime: bigint;
+    productiveTime: bigint;
+    endTime: bigint;
+    totalDuration: bigint;
+    distractingTime: bigint;
+    burnoutScore: bigint;
+    sessionId: bigint;
+    switchesCount: bigint;
+    distractionsCount: bigint;
 }
-export interface Achievement {
-    streakStart: Time;
-    isDeepWork: boolean;
-    streakType: StreakType;
-    streakEnd: Time;
-    milestone: bigint;
-}
-export interface Session {
-    duration: bigint;
-    sessionType: SessionType;
-    appName: string;
-    timestamp: Time;
-    category: AppCategory;
-}
-export type Pattern = {
-    __kind__: "negative";
-    negative: NegativePattern;
-} | {
-    __kind__: "positive";
-    positive: PositivePattern;
-};
-export interface ContextSwitch {
-    sourceApp: string;
-    targetApp: string;
-    timestamp: Time;
-}
-export interface BreakSession {
-    startTime: Time;
-    timerSetting: TimerSetting;
-    endTime: Time;
-    breakType: BreakType;
-    isRestorative: boolean;
-}
-export interface FocusSessionData {
-    duration: bigint;
-    focusScore: bigint;
-    completed: boolean;
-    violations: Array<FocusSessionViolation>;
-    timestamp: Time;
-}
-export interface FocusScore {
-    distractionScore: bigint;
-    timestamp: Time;
-    timeAway: bigint;
-    tabSwitchCount: bigint;
-}
-export enum AppCategory {
+export enum Category {
     productive = "productive",
-    distracting = "distracting"
+    distracting = "distracting",
+    neutral = "neutral"
 }
-export enum BreakType {
-    walkBreak = "walkBreak",
-    deskRecovery = "deskRecovery"
-}
-export enum NegativePattern {
-    distractionSpikes = "distractionSpikes",
-    lateNightFatigue = "lateNightFatigue",
-    frequentSwitching = "frequentSwitching"
-}
-export enum PositivePattern {
-    reducedDistractions = "reducedDistractions",
-    workConsistency = "workConsistency",
-    healthyBreaks = "healthyBreaks"
-}
-export enum SessionType {
-    focus = "focus",
-    rest = "rest",
-    distraction = "distraction"
-}
-export enum StreakType {
-    deepWorkCompletion = "deepWorkCompletion",
-    focusStreak = "focusStreak",
-    distractionResistance = "distractionResistance"
-}
-export enum TabType {
-    productive = "productive",
-    distractive = "distractive"
+export enum SourceType {
+    other = "other",
+    news = "news",
+    workApp = "workApp",
+    shopping = "shopping",
+    socialMedia = "socialMedia"
 }
 export interface backendInterface {
-    addAchievement(achievement: Achievement): Promise<void>;
-    generateReport(patterns: Array<Pattern>): Promise<Report>;
-    getAllFocusSessions(): Promise<Array<FocusSessionData>>;
-    getAllReports(): Promise<Array<Report>>;
-    getFocusScores(): Promise<Array<FocusScore>>;
-    getReportById(reportId: bigint): Promise<Report | null>;
-    recordBreak(breakSession: BreakSession): Promise<void>;
-    recordFocusScore(distractionScore: bigint, tabSwitchCount: bigint, timeAway: bigint): Promise<void>;
-    recordFocusSession(duration: bigint, completed: boolean, focusScore: bigint): Promise<void>;
-    recordSession(session: Session): Promise<void>;
-    recordSwitch(contextSwitch: ContextSwitch): Promise<void>;
-    recordTabSwitch(sourceTab: TabType, targetTab: TabType): Promise<void>;
-    startFocusSession(): Promise<void>;
+    endSession(): Promise<void>;
+    getActivitySwitches(): Promise<Array<[bigint, ActivitySwitch]>>;
+    getAllAppCategories(): Promise<Array<[string, Category]>>;
+    getAppCategory(appName: string): Promise<Category | null>;
+    getCurrentSessionStats(): Promise<[bigint, bigint, bigint, bigint, bigint]>;
+    getDistractionLogs(): Promise<Array<[bigint, DistractionLog]>>;
+    getLongestFocusStreak(): Promise<bigint>;
+    getMostFrequentDistractions(): Promise<Array<[string, bigint]>>;
+    getSessionHistory(sortBy: string): Promise<Array<SessionSummary>>;
+    getSessionSummaries(): Promise<Array<[bigint, SessionSummary]>>;
+    logDistraction(source: string, category: Category, sourceType: SourceType, description: string): Promise<void>;
+    recordActivitySwitch(fromApp: string, toApp: string, fromCategory: Category, toCategory: Category): Promise<void>;
+    recordTimeBlock(category: Category, duration: bigint): Promise<void>;
+    setAppCategory(appName: string, category: Category): Promise<void>;
+    startSession(): Promise<void>;
 }
-import type { Achievement as _Achievement, AppCategory as _AppCategory, BreakSession as _BreakSession, BreakType as _BreakType, FocusSessionData as _FocusSessionData, FocusSessionViolation as _FocusSessionViolation, NegativePattern as _NegativePattern, Pattern as _Pattern, PositivePattern as _PositivePattern, Report as _Report, Session as _Session, SessionType as _SessionType, StreakType as _StreakType, TabType as _TabType, Time as _Time, TimerSetting as _TimerSetting } from "./declarations/backend.did.d.ts";
+import type { ActivitySwitch as _ActivitySwitch, Category as _Category, DistractionLog as _DistractionLog, SourceType as _SourceType } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
-    async addAchievement(arg0: Achievement): Promise<void> {
+    async endSession(): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.addAchievement(to_candid_Achievement_n1(this._uploadFile, this._downloadFile, arg0));
+                const result = await this.actor.endSession();
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.addAchievement(to_candid_Achievement_n1(this._uploadFile, this._downloadFile, arg0));
+            const result = await this.actor.endSession();
             return result;
         }
     }
-    async generateReport(arg0: Array<Pattern>): Promise<Report> {
+    async getActivitySwitches(): Promise<Array<[bigint, ActivitySwitch]>> {
         if (this.processError) {
             try {
-                const result = await this.actor.generateReport(to_candid_vec_n5(this._uploadFile, this._downloadFile, arg0));
-                return from_candid_Report_n12(this._uploadFile, this._downloadFile, result);
+                const result = await this.actor.getActivitySwitches();
+                return from_candid_vec_n1(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.generateReport(to_candid_vec_n5(this._uploadFile, this._downloadFile, arg0));
-            return from_candid_Report_n12(this._uploadFile, this._downloadFile, result);
+            const result = await this.actor.getActivitySwitches();
+            return from_candid_vec_n1(this._uploadFile, this._downloadFile, result);
         }
     }
-    async getAllFocusSessions(): Promise<Array<FocusSessionData>> {
+    async getAllAppCategories(): Promise<Array<[string, Category]>> {
         if (this.processError) {
             try {
-                const result = await this.actor.getAllFocusSessions();
-                return from_candid_vec_n21(this._uploadFile, this._downloadFile, result);
+                const result = await this.actor.getAllAppCategories();
+                return from_candid_vec_n7(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.getAllFocusSessions();
-            return from_candid_vec_n21(this._uploadFile, this._downloadFile, result);
+            const result = await this.actor.getAllAppCategories();
+            return from_candid_vec_n7(this._uploadFile, this._downloadFile, result);
         }
     }
-    async getAllReports(): Promise<Array<Report>> {
+    async getAppCategory(arg0: string): Promise<Category | null> {
         if (this.processError) {
             try {
-                const result = await this.actor.getAllReports();
-                return from_candid_vec_n29(this._uploadFile, this._downloadFile, result);
+                const result = await this.actor.getAppCategory(arg0);
+                return from_candid_opt_n9(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.getAllReports();
-            return from_candid_vec_n29(this._uploadFile, this._downloadFile, result);
+            const result = await this.actor.getAppCategory(arg0);
+            return from_candid_opt_n9(this._uploadFile, this._downloadFile, result);
         }
     }
-    async getFocusScores(): Promise<Array<FocusScore>> {
+    async getCurrentSessionStats(): Promise<[bigint, bigint, bigint, bigint, bigint]> {
         if (this.processError) {
             try {
-                const result = await this.actor.getFocusScores();
+                const result = await this.actor.getCurrentSessionStats();
+                return [
+                    result[0],
+                    result[1],
+                    result[2],
+                    result[3],
+                    result[4]
+                ];
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getCurrentSessionStats();
+            return [
+                result[0],
+                result[1],
+                result[2],
+                result[3],
+                result[4]
+            ];
+        }
+    }
+    async getDistractionLogs(): Promise<Array<[bigint, DistractionLog]>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getDistractionLogs();
+                return from_candid_vec_n10(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getDistractionLogs();
+            return from_candid_vec_n10(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getLongestFocusStreak(): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getLongestFocusStreak();
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.getFocusScores();
+            const result = await this.actor.getLongestFocusStreak();
             return result;
         }
     }
-    async getReportById(arg0: bigint): Promise<Report | null> {
+    async getMostFrequentDistractions(): Promise<Array<[string, bigint]>> {
         if (this.processError) {
             try {
-                const result = await this.actor.getReportById(arg0);
-                return from_candid_opt_n30(this._uploadFile, this._downloadFile, result);
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.getReportById(arg0);
-            return from_candid_opt_n30(this._uploadFile, this._downloadFile, result);
-        }
-    }
-    async recordBreak(arg0: BreakSession): Promise<void> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.recordBreak(to_candid_BreakSession_n31(this._uploadFile, this._downloadFile, arg0));
+                const result = await this.actor.getMostFrequentDistractions();
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.recordBreak(to_candid_BreakSession_n31(this._uploadFile, this._downloadFile, arg0));
+            const result = await this.actor.getMostFrequentDistractions();
             return result;
         }
     }
-    async recordFocusScore(arg0: bigint, arg1: bigint, arg2: bigint): Promise<void> {
+    async getSessionHistory(arg0: string): Promise<Array<SessionSummary>> {
         if (this.processError) {
             try {
-                const result = await this.actor.recordFocusScore(arg0, arg1, arg2);
+                const result = await this.actor.getSessionHistory(arg0);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.recordFocusScore(arg0, arg1, arg2);
+            const result = await this.actor.getSessionHistory(arg0);
             return result;
         }
     }
-    async recordFocusSession(arg0: bigint, arg1: boolean, arg2: bigint): Promise<void> {
+    async getSessionSummaries(): Promise<Array<[bigint, SessionSummary]>> {
         if (this.processError) {
             try {
-                const result = await this.actor.recordFocusSession(arg0, arg1, arg2);
+                const result = await this.actor.getSessionSummaries();
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.recordFocusSession(arg0, arg1, arg2);
+            const result = await this.actor.getSessionSummaries();
             return result;
         }
     }
-    async recordSession(arg0: Session): Promise<void> {
+    async logDistraction(arg0: string, arg1: Category, arg2: SourceType, arg3: string): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.recordSession(to_candid_Session_n35(this._uploadFile, this._downloadFile, arg0));
+                const result = await this.actor.logDistraction(arg0, to_candid_Category_n16(this._uploadFile, this._downloadFile, arg1), to_candid_SourceType_n18(this._uploadFile, this._downloadFile, arg2), arg3);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.recordSession(to_candid_Session_n35(this._uploadFile, this._downloadFile, arg0));
+            const result = await this.actor.logDistraction(arg0, to_candid_Category_n16(this._uploadFile, this._downloadFile, arg1), to_candid_SourceType_n18(this._uploadFile, this._downloadFile, arg2), arg3);
             return result;
         }
     }
-    async recordSwitch(arg0: ContextSwitch): Promise<void> {
+    async recordActivitySwitch(arg0: string, arg1: string, arg2: Category, arg3: Category): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.recordSwitch(arg0);
+                const result = await this.actor.recordActivitySwitch(arg0, arg1, to_candid_Category_n16(this._uploadFile, this._downloadFile, arg2), to_candid_Category_n16(this._uploadFile, this._downloadFile, arg3));
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.recordSwitch(arg0);
+            const result = await this.actor.recordActivitySwitch(arg0, arg1, to_candid_Category_n16(this._uploadFile, this._downloadFile, arg2), to_candid_Category_n16(this._uploadFile, this._downloadFile, arg3));
             return result;
         }
     }
-    async recordTabSwitch(arg0: TabType, arg1: TabType): Promise<void> {
+    async recordTimeBlock(arg0: Category, arg1: bigint): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.recordTabSwitch(to_candid_TabType_n41(this._uploadFile, this._downloadFile, arg0), to_candid_TabType_n41(this._uploadFile, this._downloadFile, arg1));
+                const result = await this.actor.recordTimeBlock(to_candid_Category_n16(this._uploadFile, this._downloadFile, arg0), arg1);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.recordTabSwitch(to_candid_TabType_n41(this._uploadFile, this._downloadFile, arg0), to_candid_TabType_n41(this._uploadFile, this._downloadFile, arg1));
+            const result = await this.actor.recordTimeBlock(to_candid_Category_n16(this._uploadFile, this._downloadFile, arg0), arg1);
             return result;
         }
     }
-    async startFocusSession(): Promise<void> {
+    async setAppCategory(arg0: string, arg1: Category): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.startFocusSession();
+                const result = await this.actor.setAppCategory(arg0, to_candid_Category_n16(this._uploadFile, this._downloadFile, arg1));
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.startFocusSession();
+            const result = await this.actor.setAppCategory(arg0, to_candid_Category_n16(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
+    async startSession(): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.startSession();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.startSession();
             return result;
         }
     }
 }
-function from_candid_FocusSessionData_n22(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _FocusSessionData): FocusSessionData {
-    return from_candid_record_n23(_uploadFile, _downloadFile, value);
+function from_candid_ActivitySwitch_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _ActivitySwitch): ActivitySwitch {
+    return from_candid_record_n4(_uploadFile, _downloadFile, value);
 }
-function from_candid_FocusSessionViolation_n25(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _FocusSessionViolation): FocusSessionViolation {
-    return from_candid_record_n26(_uploadFile, _downloadFile, value);
+function from_candid_Category_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _Category): Category {
+    return from_candid_variant_n6(_uploadFile, _downloadFile, value);
 }
-function from_candid_NegativePattern_n17(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _NegativePattern): NegativePattern {
-    return from_candid_variant_n18(_uploadFile, _downloadFile, value);
-}
-function from_candid_Pattern_n15(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _Pattern): Pattern {
-    return from_candid_variant_n16(_uploadFile, _downloadFile, value);
-}
-function from_candid_PositivePattern_n19(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _PositivePattern): PositivePattern {
-    return from_candid_variant_n20(_uploadFile, _downloadFile, value);
-}
-function from_candid_Report_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _Report): Report {
+function from_candid_DistractionLog_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _DistractionLog): DistractionLog {
     return from_candid_record_n13(_uploadFile, _downloadFile, value);
 }
-function from_candid_TabType_n27(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _TabType): TabType {
-    return from_candid_variant_n28(_uploadFile, _downloadFile, value);
+function from_candid_SourceType_n14(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _SourceType): SourceType {
+    return from_candid_variant_n15(_uploadFile, _downloadFile, value);
 }
-function from_candid_opt_n30(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Report]): Report | null {
-    return value.length === 0 ? null : from_candid_Report_n12(_uploadFile, _downloadFile, value[0]);
+function from_candid_opt_n9(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Category]): Category | null {
+    return value.length === 0 ? null : from_candid_Category_n5(_uploadFile, _downloadFile, value[0]);
 }
 function from_candid_record_n13(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
-    patterns: Array<_Pattern>;
-    timestamp: _Time;
+    source: string;
+    description: string;
+    sourceType: _SourceType;
+    timestamp: bigint;
+    category: _Category;
 }): {
-    patterns: Array<Pattern>;
-    timestamp: Time;
+    source: string;
+    description: string;
+    sourceType: SourceType;
+    timestamp: bigint;
+    category: Category;
 } {
     return {
-        patterns: from_candid_vec_n14(_uploadFile, _downloadFile, value.patterns),
+        source: value.source,
+        description: value.description,
+        sourceType: from_candid_SourceType_n14(_uploadFile, _downloadFile, value.sourceType),
+        timestamp: value.timestamp,
+        category: from_candid_Category_n5(_uploadFile, _downloadFile, value.category)
+    };
+}
+function from_candid_record_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    toApp: string;
+    toCategory: _Category;
+    fromCategory: _Category;
+    fromApp: string;
+    timestamp: bigint;
+}): {
+    toApp: string;
+    toCategory: Category;
+    fromCategory: Category;
+    fromApp: string;
+    timestamp: bigint;
+} {
+    return {
+        toApp: value.toApp,
+        toCategory: from_candid_Category_n5(_uploadFile, _downloadFile, value.toCategory),
+        fromCategory: from_candid_Category_n5(_uploadFile, _downloadFile, value.fromCategory),
+        fromApp: value.fromApp,
         timestamp: value.timestamp
     };
 }
-function from_candid_record_n23(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
-    duration: bigint;
-    focusScore: bigint;
-    completed: boolean;
-    violations: Array<_FocusSessionViolation>;
-    timestamp: _Time;
-}): {
-    duration: bigint;
-    focusScore: bigint;
-    completed: boolean;
-    violations: Array<FocusSessionViolation>;
-    timestamp: Time;
-} {
-    return {
-        duration: value.duration,
-        focusScore: value.focusScore,
-        completed: value.completed,
-        violations: from_candid_vec_n24(_uploadFile, _downloadFile, value.violations),
-        timestamp: value.timestamp
-    };
+function from_candid_tuple_n11(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [bigint, _DistractionLog]): [bigint, DistractionLog] {
+    return [
+        value[0],
+        from_candid_DistractionLog_n12(_uploadFile, _downloadFile, value[1])
+    ];
 }
-function from_candid_record_n26(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
-    sourceTab: _TabType;
-    targetTab: _TabType;
-    timestamp: _Time;
-    violationCount: bigint;
-}): {
-    sourceTab: TabType;
-    targetTab: TabType;
-    timestamp: Time;
-    violationCount: bigint;
-} {
-    return {
-        sourceTab: from_candid_TabType_n27(_uploadFile, _downloadFile, value.sourceTab),
-        targetTab: from_candid_TabType_n27(_uploadFile, _downloadFile, value.targetTab),
-        timestamp: value.timestamp,
-        violationCount: value.violationCount
-    };
+function from_candid_tuple_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [bigint, _ActivitySwitch]): [bigint, ActivitySwitch] {
+    return [
+        value[0],
+        from_candid_ActivitySwitch_n3(_uploadFile, _downloadFile, value[1])
+    ];
 }
-function from_candid_variant_n16(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
-    negative: _NegativePattern;
+function from_candid_tuple_n8(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [string, _Category]): [string, Category] {
+    return [
+        value[0],
+        from_candid_Category_n5(_uploadFile, _downloadFile, value[1])
+    ];
+}
+function from_candid_variant_n15(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    other: null;
 } | {
-    positive: _PositivePattern;
-}): {
-    __kind__: "negative";
-    negative: NegativePattern;
+    news: null;
 } | {
-    __kind__: "positive";
-    positive: PositivePattern;
-} {
-    return "negative" in value ? {
-        __kind__: "negative",
-        negative: from_candid_NegativePattern_n17(_uploadFile, _downloadFile, value.negative)
-    } : "positive" in value ? {
-        __kind__: "positive",
-        positive: from_candid_PositivePattern_n19(_uploadFile, _downloadFile, value.positive)
-    } : value;
-}
-function from_candid_variant_n18(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
-    distractionSpikes: null;
+    workApp: null;
 } | {
-    lateNightFatigue: null;
+    shopping: null;
 } | {
-    frequentSwitching: null;
-}): NegativePattern {
-    return "distractionSpikes" in value ? NegativePattern.distractionSpikes : "lateNightFatigue" in value ? NegativePattern.lateNightFatigue : "frequentSwitching" in value ? NegativePattern.frequentSwitching : value;
+    socialMedia: null;
+}): SourceType {
+    return "other" in value ? SourceType.other : "news" in value ? SourceType.news : "workApp" in value ? SourceType.workApp : "shopping" in value ? SourceType.shopping : "socialMedia" in value ? SourceType.socialMedia : value;
 }
-function from_candid_variant_n20(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
-    reducedDistractions: null;
-} | {
-    workConsistency: null;
-} | {
-    healthyBreaks: null;
-}): PositivePattern {
-    return "reducedDistractions" in value ? PositivePattern.reducedDistractions : "workConsistency" in value ? PositivePattern.workConsistency : "healthyBreaks" in value ? PositivePattern.healthyBreaks : value;
-}
-function from_candid_variant_n28(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
-    productive: null;
-} | {
-    distractive: null;
-}): TabType {
-    return "productive" in value ? TabType.productive : "distractive" in value ? TabType.distractive : value;
-}
-function from_candid_vec_n14(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_Pattern>): Array<Pattern> {
-    return value.map((x)=>from_candid_Pattern_n15(_uploadFile, _downloadFile, x));
-}
-function from_candid_vec_n21(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_FocusSessionData>): Array<FocusSessionData> {
-    return value.map((x)=>from_candid_FocusSessionData_n22(_uploadFile, _downloadFile, x));
-}
-function from_candid_vec_n24(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_FocusSessionViolation>): Array<FocusSessionViolation> {
-    return value.map((x)=>from_candid_FocusSessionViolation_n25(_uploadFile, _downloadFile, x));
-}
-function from_candid_vec_n29(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_Report>): Array<Report> {
-    return value.map((x)=>from_candid_Report_n12(_uploadFile, _downloadFile, x));
-}
-function to_candid_Achievement_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Achievement): _Achievement {
-    return to_candid_record_n2(_uploadFile, _downloadFile, value);
-}
-function to_candid_AppCategory_n39(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: AppCategory): _AppCategory {
-    return to_candid_variant_n40(_uploadFile, _downloadFile, value);
-}
-function to_candid_BreakSession_n31(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: BreakSession): _BreakSession {
-    return to_candid_record_n32(_uploadFile, _downloadFile, value);
-}
-function to_candid_BreakType_n33(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: BreakType): _BreakType {
-    return to_candid_variant_n34(_uploadFile, _downloadFile, value);
-}
-function to_candid_NegativePattern_n10(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: NegativePattern): _NegativePattern {
-    return to_candid_variant_n11(_uploadFile, _downloadFile, value);
-}
-function to_candid_Pattern_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Pattern): _Pattern {
-    return to_candid_variant_n7(_uploadFile, _downloadFile, value);
-}
-function to_candid_PositivePattern_n8(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: PositivePattern): _PositivePattern {
-    return to_candid_variant_n9(_uploadFile, _downloadFile, value);
-}
-function to_candid_SessionType_n37(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: SessionType): _SessionType {
-    return to_candid_variant_n38(_uploadFile, _downloadFile, value);
-}
-function to_candid_Session_n35(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Session): _Session {
-    return to_candid_record_n36(_uploadFile, _downloadFile, value);
-}
-function to_candid_StreakType_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: StreakType): _StreakType {
-    return to_candid_variant_n4(_uploadFile, _downloadFile, value);
-}
-function to_candid_TabType_n41(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: TabType): _TabType {
-    return to_candid_variant_n42(_uploadFile, _downloadFile, value);
-}
-function to_candid_record_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
-    streakStart: Time;
-    isDeepWork: boolean;
-    streakType: StreakType;
-    streakEnd: Time;
-    milestone: bigint;
-}): {
-    streakStart: _Time;
-    isDeepWork: boolean;
-    streakType: _StreakType;
-    streakEnd: _Time;
-    milestone: bigint;
-} {
-    return {
-        streakStart: value.streakStart,
-        isDeepWork: value.isDeepWork,
-        streakType: to_candid_StreakType_n3(_uploadFile, _downloadFile, value.streakType),
-        streakEnd: value.streakEnd,
-        milestone: value.milestone
-    };
-}
-function to_candid_record_n32(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
-    startTime: Time;
-    timerSetting: TimerSetting;
-    endTime: Time;
-    breakType: BreakType;
-    isRestorative: boolean;
-}): {
-    startTime: _Time;
-    timerSetting: _TimerSetting;
-    endTime: _Time;
-    breakType: _BreakType;
-    isRestorative: boolean;
-} {
-    return {
-        startTime: value.startTime,
-        timerSetting: value.timerSetting,
-        endTime: value.endTime,
-        breakType: to_candid_BreakType_n33(_uploadFile, _downloadFile, value.breakType),
-        isRestorative: value.isRestorative
-    };
-}
-function to_candid_record_n36(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
-    duration: bigint;
-    sessionType: SessionType;
-    appName: string;
-    timestamp: Time;
-    category: AppCategory;
-}): {
-    duration: bigint;
-    sessionType: _SessionType;
-    appName: string;
-    timestamp: _Time;
-    category: _AppCategory;
-} {
-    return {
-        duration: value.duration,
-        sessionType: to_candid_SessionType_n37(_uploadFile, _downloadFile, value.sessionType),
-        appName: value.appName,
-        timestamp: value.timestamp,
-        category: to_candid_AppCategory_n39(_uploadFile, _downloadFile, value.category)
-    };
-}
-function to_candid_variant_n11(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: NegativePattern): {
-    distractionSpikes: null;
-} | {
-    lateNightFatigue: null;
-} | {
-    frequentSwitching: null;
-} {
-    return value == NegativePattern.distractionSpikes ? {
-        distractionSpikes: null
-    } : value == NegativePattern.lateNightFatigue ? {
-        lateNightFatigue: null
-    } : value == NegativePattern.frequentSwitching ? {
-        frequentSwitching: null
-    } : value;
-}
-function to_candid_variant_n34(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: BreakType): {
-    walkBreak: null;
-} | {
-    deskRecovery: null;
-} {
-    return value == BreakType.walkBreak ? {
-        walkBreak: null
-    } : value == BreakType.deskRecovery ? {
-        deskRecovery: null
-    } : value;
-}
-function to_candid_variant_n38(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: SessionType): {
-    focus: null;
-} | {
-    rest: null;
-} | {
-    distraction: null;
-} {
-    return value == SessionType.focus ? {
-        focus: null
-    } : value == SessionType.rest ? {
-        rest: null
-    } : value == SessionType.distraction ? {
-        distraction: null
-    } : value;
-}
-function to_candid_variant_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: StreakType): {
-    deepWorkCompletion: null;
-} | {
-    focusStreak: null;
-} | {
-    distractionResistance: null;
-} {
-    return value == StreakType.deepWorkCompletion ? {
-        deepWorkCompletion: null
-    } : value == StreakType.focusStreak ? {
-        focusStreak: null
-    } : value == StreakType.distractionResistance ? {
-        distractionResistance: null
-    } : value;
-}
-function to_candid_variant_n40(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: AppCategory): {
+function from_candid_variant_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     productive: null;
 } | {
     distracting: null;
-} {
-    return value == AppCategory.productive ? {
-        productive: null
-    } : value == AppCategory.distracting ? {
-        distracting: null
-    } : value;
+} | {
+    neutral: null;
+}): Category {
+    return "productive" in value ? Category.productive : "distracting" in value ? Category.distracting : "neutral" in value ? Category.neutral : value;
 }
-function to_candid_variant_n42(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: TabType): {
+function from_candid_vec_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<[bigint, _ActivitySwitch]>): Array<[bigint, ActivitySwitch]> {
+    return value.map((x)=>from_candid_tuple_n2(_uploadFile, _downloadFile, x));
+}
+function from_candid_vec_n10(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<[bigint, _DistractionLog]>): Array<[bigint, DistractionLog]> {
+    return value.map((x)=>from_candid_tuple_n11(_uploadFile, _downloadFile, x));
+}
+function from_candid_vec_n7(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<[string, _Category]>): Array<[string, Category]> {
+    return value.map((x)=>from_candid_tuple_n8(_uploadFile, _downloadFile, x));
+}
+function to_candid_Category_n16(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Category): _Category {
+    return to_candid_variant_n17(_uploadFile, _downloadFile, value);
+}
+function to_candid_SourceType_n18(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: SourceType): _SourceType {
+    return to_candid_variant_n19(_uploadFile, _downloadFile, value);
+}
+function to_candid_variant_n17(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Category): {
     productive: null;
 } | {
-    distractive: null;
+    distracting: null;
+} | {
+    neutral: null;
 } {
-    return value == TabType.productive ? {
+    return value == Category.productive ? {
         productive: null
-    } : value == TabType.distractive ? {
-        distractive: null
+    } : value == Category.distracting ? {
+        distracting: null
+    } : value == Category.neutral ? {
+        neutral: null
     } : value;
 }
-function to_candid_variant_n7(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
-    __kind__: "negative";
-    negative: NegativePattern;
+function to_candid_variant_n19(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: SourceType): {
+    other: null;
 } | {
-    __kind__: "positive";
-    positive: PositivePattern;
-}): {
-    negative: _NegativePattern;
+    news: null;
 } | {
-    positive: _PositivePattern;
+    workApp: null;
+} | {
+    shopping: null;
+} | {
+    socialMedia: null;
 } {
-    return value.__kind__ === "negative" ? {
-        negative: to_candid_NegativePattern_n10(_uploadFile, _downloadFile, value.negative)
-    } : value.__kind__ === "positive" ? {
-        positive: to_candid_PositivePattern_n8(_uploadFile, _downloadFile, value.positive)
+    return value == SourceType.other ? {
+        other: null
+    } : value == SourceType.news ? {
+        news: null
+    } : value == SourceType.workApp ? {
+        workApp: null
+    } : value == SourceType.shopping ? {
+        shopping: null
+    } : value == SourceType.socialMedia ? {
+        socialMedia: null
     } : value;
-}
-function to_candid_variant_n9(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: PositivePattern): {
-    reducedDistractions: null;
-} | {
-    workConsistency: null;
-} | {
-    healthyBreaks: null;
-} {
-    return value == PositivePattern.reducedDistractions ? {
-        reducedDistractions: null
-    } : value == PositivePattern.workConsistency ? {
-        workConsistency: null
-    } : value == PositivePattern.healthyBreaks ? {
-        healthyBreaks: null
-    } : value;
-}
-function to_candid_vec_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<Pattern>): Array<_Pattern> {
-    return value.map((x)=>to_candid_Pattern_n6(_uploadFile, _downloadFile, x));
 }
 export interface CreateActorOptions {
     agent?: Agent;

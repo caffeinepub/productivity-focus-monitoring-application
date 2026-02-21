@@ -1,17 +1,16 @@
 # Specification
 
 ## Summary
-**Goal:** Implement a focus session system with time-based durations, tab switching tracking between productive and distractive sections, progressive warnings using grayscale effects, and automatic restriction lifting when the session completes.
+**Goal:** Transform the focus management system into a manual productivity timer with user-reported distraction logging, activity classification, and burnout tracking.
 
 **Planned changes:**
-- Add focus session setup interface with preset durations (25, 45, 60, 90 minutes) and custom duration input
-- Implement session timer countdown display that tracks remaining time
-- Track tab switches specifically from productive to distractive sections within the app, incrementing a violation counter
-- Apply grayscale visual effect to distractive sections only for 2 minutes after the third violation
-- Reset violation counter to zero after the 2-minute grayscale period ends, starting a new warning cycle
-- Lock and restrict access to distractive sections during active focus sessions
-- Automatically lift all restrictions when the session timer completes
-- Store focus session data (duration, violations, completion status) in the backend for historical tracking
-- Provide option to start a new focus session after current session ends
+- Remove automatic focus session start on app launch - users land on dashboard and manually start sessions
+- Implement customizable productivity timer with preset durations (15, 25, 45 minutes) or custom intervals
+- Add manual distraction logging interface with quick-access button during sessions to record and categorize interruptions
+- Build activity classification system where users define apps/websites as productive or distracting
+- Implement transition tracking to record activity switch sequences and identify interruption patterns
+- Create session history and analytics dashboard showing past sessions, distraction patterns, and top interruption sources
+- Add burnout/fatigue scoring algorithm based on switching frequency with weighted penalties for context switches
+- Display session duration metrics categorizing activities as sustained focus (25+ min), browsing (5-10 min), or habit checking (<1 min)
 
-**User-visible outcome:** Users can start timed focus sessions with their chosen duration, receive visual warnings (grayscale effects on distractive content) after switching to distractions three times, experience temporary locks on distractive sections, and have all restrictions automatically removed when their session timer completes. Users can track their violations throughout the session and start new sessions as needed.
+**User-visible outcome:** Users can start productivity timers on demand, manually log distractions during work sessions with categories, view analytics showing their most common interruption sources and patterns, see burnout scores based on switching behavior, and review historical session data to identify distraction trends over time.

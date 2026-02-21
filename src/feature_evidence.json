@@ -2,13 +2,12 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-create-a-focus-session-setup-interface-where-users-can-select-a-session-duration-time-based-before-starting-their-focus-work-with-options-for-common-durations-like-25-45-60-90-minutes-or-custom-duration-input",
-      "featureTitle": "Create a focus session setup interface where users can select a session duration (time-based) before starting their focus work, with options for common durations like 25, 45, 60, 90 minutes or custom duration input",
+      "featureId": "feature-remove-automatic-focus-session-start-on-app-launch-users-must-manually-initiate-sessions-from-the-dashboard",
+      "featureTitle": "Remove automatic focus session start on app launch - users must manually initiate sessions from the dashboard",
       "files": [
         "frontend/src/App.tsx",
-        "frontend/src/components/Layout.tsx",
         "frontend/src/hooks/useFocusSessionTimer.ts",
-        "frontend/src/pages/FocusSession.tsx"
+        "frontend/src/pages/Dashboard.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -23,12 +22,12 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-implement-tab-switch-tracking-specifically-between-productive-and-distractive-content-sections-within-the-app-incrementing-a-violation-counter-each-time-user-navigates-from-productive-to-distractive-sections",
-      "featureTitle": "Implement tab switch tracking specifically between productive and distractive content sections within the app, incrementing a violation counter each time user navigates from productive to distractive sections",
+      "featureId": "feature-implement-customizable-productivity-timer-with-preset-and-custom-work-break-intervals-pomodoro-style",
+      "featureTitle": "Implement customizable productivity timer with preset and custom work/break intervals (Pomodoro-style)",
       "files": [
-        "frontend/src/hooks/useFocusSessionViolations.ts",
-        "frontend/src/pages/FocusSession.tsx",
-        "frontend/src/types/index.ts"
+        "frontend/src/components/FocusSessionSummary.tsx",
+        "frontend/src/hooks/useFocusSessionTimer.ts",
+        "frontend/src/pages/FocusSession.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -43,11 +42,11 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-implement-a-three-strike-warning-system-that-applies-a-grayscale-visual-effect-to-distractive-content-sections-for-exactly-2-minutes-after-the-third-violation-switch-to-distractive-content",
-      "featureTitle": "Implement a three-strike warning system that applies a grayscale visual effect to distractive content sections for exactly 2 minutes after the third violation (switch to distractive content)",
+      "featureId": "feature-create-manual-distraction-logging-interface-where-users-can-record-interruptions-during-focus-sessions-and-categorize-them-by-source-youtube-instagram-work-apps-etc",
+      "featureTitle": "Create manual distraction logging interface where users can record interruptions during focus sessions and categorize them by source (YouTube, Instagram, work apps, etc.)",
       "files": [
-        "frontend/src/components/DistractiveContentWrapper.tsx",
-        "frontend/src/hooks/useFocusSessionViolations.ts",
+        "frontend/src/components/DistractionLogModal.tsx",
+        "frontend/src/hooks/useDistractionLogger.ts",
         "frontend/src/pages/FocusSession.tsx"
       ],
       "components": [
@@ -63,11 +62,11 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-after-the-2-minute-grayscale-warning-period-ends-reset-the-violation-counter-to-zero-and-start-a-new-warning-cycle-allowing-the-user-to-continue-with-a-fresh-count",
-      "featureTitle": "After the 2-minute grayscale warning period ends, reset the violation counter to zero and start a new warning cycle, allowing the user to continue with a fresh count",
+      "featureId": "feature-build-activity-classification-system-in-backend-that-categorizes-apps-websites-as-productive-or-distracting-based-on-user-defined-rules",
+      "featureTitle": "Build activity classification system in backend that categorizes apps/websites as productive or distracting based on user-defined rules",
       "files": [
-        "frontend/src/hooks/useFocusSessionViolations.ts",
-        "frontend/src/pages/FocusSession.tsx"
+        "frontend/src/hooks/useApplications.ts",
+        "frontend/src/pages/AppCategorization.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -82,12 +81,12 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-lock-and-restrict-all-access-to-distractive-content-sections-until-the-user-s-focus-session-timer-completes-preventing-navigation-to-distractive-sections-even-if-user-attempts-to-access-them",
-      "featureTitle": "Lock and restrict all access to distractive content sections until the user's focus session timer completes, preventing navigation to distractive sections even if user attempts to access them",
+      "featureId": "feature-implement-transition-tracking-to-record-sequences-of-activity-switches-e-g-vs-code-youtube-and-identify-interruption-patterns",
+      "featureTitle": "Implement transition tracking to record sequences of activity switches (e.g., VS Code → YouTube) and identify interruption patterns",
       "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/DistractiveContentBlocker.tsx",
-        "frontend/src/hooks/useFocusSessionViolations.ts",
+        "frontend/src/components/TransitionPatternsCard.tsx",
+        "frontend/src/hooks/useActivityTransitions.ts",
+        "frontend/src/pages/Dashboard.tsx",
         "frontend/src/pages/FocusSession.tsx"
       ],
       "components": [
@@ -103,13 +102,16 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-when-focus-session-timer-completes-automatically-lift-all-restrictions-and-allow-full-access-to-both-productive-and-distractive-sections-with-option-for-user-to-start-a-new-focus-session-if-needed",
-      "featureTitle": "When focus session timer completes, automatically lift all restrictions and allow full access to both productive and distractive sections, with option for user to start a new focus session if needed",
+      "featureId": "feature-create-session-history-and-analytics-dashboard-showing-past-focus-sessions-distraction-patterns-and-most-frequent-interruption-sources-over-time",
+      "featureTitle": "Create session history and analytics dashboard showing past focus sessions, distraction patterns, and most frequent interruption sources over time",
       "files": [
-        "frontend/src/components/FocusSessionSummary.tsx",
-        "frontend/src/hooks/useFocusSessionTimer.ts",
-        "frontend/src/hooks/useFocusSessionViolations.ts",
-        "frontend/src/pages/FocusSession.tsx"
+        "frontend/src/App.tsx",
+        "frontend/src/components/DistractionTrendsChart.tsx",
+        "frontend/src/components/Layout.tsx",
+        "frontend/src/components/SessionHistoryTable.tsx",
+        "frontend/src/components/TransitionMatrix.tsx",
+        "frontend/src/hooks/useSessionHistory.ts",
+        "frontend/src/pages/SessionHistory.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -120,6 +122,49 @@
       ],
       "testIds": [
         "REQ-6"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-burnout-fatigue-scoring-algorithm-based-on-switching-frequency-between-productive-and-distracting-activities-with-weighted-penalties-for-context-switches",
+      "featureTitle": "Implement burnout/fatigue scoring algorithm based on switching frequency between productive and distracting activities with weighted penalties for context switches",
+      "files": [
+        "frontend/src/components/BurnoutScoreCard.tsx",
+        "frontend/src/components/BurnoutTrendsChart.tsx",
+        "frontend/src/hooks/useBurnoutScore.ts",
+        "frontend/src/pages/Dashboard.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-7"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-measure-and-display-session-duration-metrics-to-distinguish-between-real-work-25-min-browsing-5-10-min-and-checking-habits-10-40-sec-repeated-visits",
+      "featureTitle": "Measure and display session duration metrics to distinguish between real work (25+ min), browsing (5-10 min), and checking habits (10-40 sec repeated visits)",
+      "files": [
+        "frontend/src/components/DurationAnalysisCard.tsx",
+        "frontend/src/hooks/useDistractionLogger.ts",
+        "frontend/src/hooks/useDurationAnalysis.ts",
+        "frontend/src/pages/FocusSession.tsx",
+        "frontend/src/pages/SessionHistory.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-8"
       ],
       "confidence": "high"
     }

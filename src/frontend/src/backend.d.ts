@@ -7,111 +7,57 @@ export interface None {
     __kind__: "None";
 }
 export type Option<T> = Some<T> | None;
-export interface TimerSetting {
-    duration: bigint;
-    notification: boolean;
+export interface DistractionLog {
+    source: string;
+    description: string;
+    sourceType: SourceType;
+    timestamp: bigint;
+    category: Category;
 }
-export type Time = bigint;
-export interface FocusSessionViolation {
-    sourceTab: TabType;
-    targetTab: TabType;
-    timestamp: Time;
-    violationCount: bigint;
+export interface ActivitySwitch {
+    toApp: string;
+    toCategory: Category;
+    fromCategory: Category;
+    fromApp: string;
+    timestamp: bigint;
 }
-export interface Report {
-    patterns: Array<Pattern>;
-    timestamp: Time;
+export interface SessionSummary {
+    startTime: bigint;
+    productiveTime: bigint;
+    endTime: bigint;
+    totalDuration: bigint;
+    distractingTime: bigint;
+    burnoutScore: bigint;
+    sessionId: bigint;
+    switchesCount: bigint;
+    distractionsCount: bigint;
 }
-export interface Achievement {
-    streakStart: Time;
-    isDeepWork: boolean;
-    streakType: StreakType;
-    streakEnd: Time;
-    milestone: bigint;
-}
-export interface Session {
-    duration: bigint;
-    sessionType: SessionType;
-    appName: string;
-    timestamp: Time;
-    category: AppCategory;
-}
-export type Pattern = {
-    __kind__: "negative";
-    negative: NegativePattern;
-} | {
-    __kind__: "positive";
-    positive: PositivePattern;
-};
-export interface ContextSwitch {
-    sourceApp: string;
-    targetApp: string;
-    timestamp: Time;
-}
-export interface BreakSession {
-    startTime: Time;
-    timerSetting: TimerSetting;
-    endTime: Time;
-    breakType: BreakType;
-    isRestorative: boolean;
-}
-export interface FocusSessionData {
-    duration: bigint;
-    focusScore: bigint;
-    completed: boolean;
-    violations: Array<FocusSessionViolation>;
-    timestamp: Time;
-}
-export interface FocusScore {
-    distractionScore: bigint;
-    timestamp: Time;
-    timeAway: bigint;
-    tabSwitchCount: bigint;
-}
-export enum AppCategory {
+export enum Category {
     productive = "productive",
-    distracting = "distracting"
+    distracting = "distracting",
+    neutral = "neutral"
 }
-export enum BreakType {
-    walkBreak = "walkBreak",
-    deskRecovery = "deskRecovery"
-}
-export enum NegativePattern {
-    distractionSpikes = "distractionSpikes",
-    lateNightFatigue = "lateNightFatigue",
-    frequentSwitching = "frequentSwitching"
-}
-export enum PositivePattern {
-    reducedDistractions = "reducedDistractions",
-    workConsistency = "workConsistency",
-    healthyBreaks = "healthyBreaks"
-}
-export enum SessionType {
-    focus = "focus",
-    rest = "rest",
-    distraction = "distraction"
-}
-export enum StreakType {
-    deepWorkCompletion = "deepWorkCompletion",
-    focusStreak = "focusStreak",
-    distractionResistance = "distractionResistance"
-}
-export enum TabType {
-    productive = "productive",
-    distractive = "distractive"
+export enum SourceType {
+    other = "other",
+    news = "news",
+    workApp = "workApp",
+    shopping = "shopping",
+    socialMedia = "socialMedia"
 }
 export interface backendInterface {
-    addAchievement(achievement: Achievement): Promise<void>;
-    generateReport(patterns: Array<Pattern>): Promise<Report>;
-    getAllFocusSessions(): Promise<Array<FocusSessionData>>;
-    getAllReports(): Promise<Array<Report>>;
-    getFocusScores(): Promise<Array<FocusScore>>;
-    getReportById(reportId: bigint): Promise<Report | null>;
-    recordBreak(breakSession: BreakSession): Promise<void>;
-    recordFocusScore(distractionScore: bigint, tabSwitchCount: bigint, timeAway: bigint): Promise<void>;
-    recordFocusSession(duration: bigint, completed: boolean, focusScore: bigint): Promise<void>;
-    recordSession(session: Session): Promise<void>;
-    recordSwitch(contextSwitch: ContextSwitch): Promise<void>;
-    recordTabSwitch(sourceTab: TabType, targetTab: TabType): Promise<void>;
-    startFocusSession(): Promise<void>;
+    endSession(): Promise<void>;
+    getActivitySwitches(): Promise<Array<[bigint, ActivitySwitch]>>;
+    getAllAppCategories(): Promise<Array<[string, Category]>>;
+    getAppCategory(appName: string): Promise<Category | null>;
+    getCurrentSessionStats(): Promise<[bigint, bigint, bigint, bigint, bigint]>;
+    getDistractionLogs(): Promise<Array<[bigint, DistractionLog]>>;
+    getLongestFocusStreak(): Promise<bigint>;
+    getMostFrequentDistractions(): Promise<Array<[string, bigint]>>;
+    getSessionHistory(sortBy: string): Promise<Array<SessionSummary>>;
+    getSessionSummaries(): Promise<Array<[bigint, SessionSummary]>>;
+    logDistraction(source: string, category: Category, sourceType: SourceType, description: string): Promise<void>;
+    recordActivitySwitch(fromApp: string, toApp: string, fromCategory: Category, toCategory: Category): Promise<void>;
+    recordTimeBlock(category: Category, duration: bigint): Promise<void>;
+    setAppCategory(appName: string, category: Category): Promise<void>;
+    startSession(): Promise<void>;
 }

@@ -1,156 +1,192 @@
 {
   "kind": "build_request",
-  "title": "Implement Focus Session System with Tab Switching Tracking and Progressive Restrictions",
-  "projectName": "Focus Guardian",
-  "priority": "high",
+  "title": "Transform focus management system into productivity timer with manual distraction logging",
+  "projectName": "Focus Tracker",
+  "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Create a focus session setup interface where users can select a session duration (time-based) before starting their focus work, with options for common durations like 25, 45, 60, 90 minutes or custom duration input",
+      "text": "Remove automatic focus session start on app launch - users must manually initiate sessions from the dashboard",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-recent"
+          "msg-2",
+          "msg-3"
         ],
         "quotes": [
-          "the system determine the important work is complete by the time session selected by the user"
+          "remove the Focus Session Required from the starting of app and it should not open automaticaly",
+          "Remove auto-start: the app won't automatically begin a focus session on launch"
         ]
       },
       "acceptanceCriteria": [
-        "User can select from preset session durations or enter a custom duration",
-        "Session timer starts counting down when user begins focus session",
-        "Timer displays remaining time clearly throughout the session",
-        "User can reset or start a new session when current timer completes"
+        "App loads directly to dashboard without triggering a focus session",
+        "No automatic redirects to focus session page on launch",
+        "Users can navigate freely without being forced into a session"
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Implement tab switch tracking specifically between productive and distractive content sections within the app, incrementing a violation counter each time user navigates from productive to distractive sections",
-      "target": "both",
+      "text": "Implement customizable productivity timer with preset and custom work/break intervals (Pomodoro-style)",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-recent"
+          "msg-3",
+          "msg-5"
         ],
         "quotes": [
-          "if user switches from productive app to distractive app so tab switching counting increasing accordingly"
+          "a browser-based productivity timer with distraction logging features",
+          "Productivity timer with customizable work/break intervals"
         ]
       },
       "acceptanceCriteria": [
-        "System detects when user navigates from productive section to distractive section",
-        "Violation counter increments only for productive-to-distractive switches, not other navigation",
-        "Counter persists throughout the focus session",
-        "Counter is visible to user so they can track their violations"
+        "Users can select preset durations (15, 25, 45 minutes) or enter custom times",
+        "Timer displays countdown with start, pause, and reset controls",
+        "Clear visual indication of work session vs break time",
+        "Option to configure break length after work sessions"
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Implement a three-strike warning system that applies a grayscale visual effect to distractive content sections for exactly 2 minutes after the third violation (switch to distractive content)",
-      "target": "frontend",
+      "text": "Create manual distraction logging interface where users can record interruptions during focus sessions and categorize them by source (YouTube, Instagram, work apps, etc.)",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-recent"
+          "msg-3",
+          "msg-5"
         ],
         "quotes": [
-          "after the three warning is given by you for the distractive app uses still user use distractive so you have to block or lock that distractive app",
-          "warning is given as the screen got grey scale colour for 2 minutes"
+          "Manual distraction logging - users can record when they get distracted and categorize the source",
+          "Manual distraction logging with category selection (YouTube, Instagram, productive apps, etc.)"
         ]
       },
       "acceptanceCriteria": [
-        "After third violation, grayscale effect applies immediately to distractive sections only",
-        "Grayscale effect lasts exactly 2 minutes with visible countdown",
-        "Productive sections remain in full color during grayscale period",
-        "Effect is scoped to distractive content sections, not the entire app interface"
+        "Quick-access button during active focus session to log a distraction",
+        "Category picker with common distraction sources (social media, messaging, entertainment, work interruptions)",
+        "Optional notes field for additional context",
+        "Distraction entries timestamped and associated with current session",
+        "Backend stores distraction logs with category, timestamp, and session reference"
       ]
     },
     {
       "id": "REQ-4",
-      "text": "After the 2-minute grayscale warning period ends, reset the violation counter to zero and start a new warning cycle, allowing the user to continue with a fresh count",
-      "target": "frontend",
+      "text": "Build activity classification system in backend that categorizes apps/websites as productive or distracting based on user-defined rules",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-recent"
+          "msg-1",
+          "msg-5"
         ],
         "quotes": [
-          "after two minute give another warning cycle"
+          "classification + transition tracking",
+          "Classification system: productive vs distracting activities"
         ]
       },
       "acceptanceCriteria": [
-        "Violation counter resets to 0 automatically when 2-minute grayscale period completes",
-        "User can again accumulate up to 3 violations before next grayscale period",
-        "The cycle repeats indefinitely throughout the focus session",
-        "User receives clear indication that counter has reset"
+        "Backend stores classification rules mapping apps/sites to productive or distracting categories",
+        "Users can customize classifications through settings interface",
+        "Default classifications provided for common apps (VS Code=productive, YouTube=distracting)",
+        "Classification data persists across sessions"
       ]
     },
     {
       "id": "REQ-5",
-      "text": "Lock and restrict all access to distractive content sections until the user's focus session timer completes, preventing navigation to distractive sections even if user attempts to access them",
-      "target": "frontend",
+      "text": "Implement transition tracking to record sequences of activity switches (e.g., VS Code → YouTube) and identify interruption patterns",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-recent"
+          "msg-1",
+          "msg-5"
         ],
         "quotes": [
-          "you have to block or lock that distractive app till the user important work is not complete",
-          "Lock/restrict access to distractive sections until the focus session timer completes"
+          "You see what happened before YouTube",
+          "Transition tracking: records what interrupted focused work"
         ]
       },
       "acceptanceCriteria": [
-        "During active focus session, attempts to navigate to distractive sections are blocked",
-        "User sees clear messaging explaining why access is restricted and when it will unlock",
-        "Lock remains in effect until session timer reaches zero",
-        "Productive sections remain fully accessible during the lock period"
+        "Backend records transitions as pairs: (source_activity, destination_activity, timestamp)",
+        "System identifies repeated patterns (same transition occurring 3+ times)",
+        "Dashboard displays most common interruption sources",
+        "Transition data used to calculate distraction frequency metrics"
       ]
     },
     {
       "id": "REQ-6",
-      "text": "When focus session timer completes, automatically lift all restrictions and allow full access to both productive and distractive sections, with option for user to start a new focus session if needed",
-      "target": "frontend",
+      "text": "Create session history and analytics dashboard showing past focus sessions, distraction patterns, and most frequent interruption sources over time",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-recent"
+          "msg-3",
+          "msg-5"
         ],
         "quotes": [
-          "When timer ends, work is considered complete and restrictions lift",
-          "If user needs more time, they can reset/start a new session"
+          "Session history and analytics to identify distraction patterns over time",
+          "Pattern detection to identify your most common distractions"
         ]
       },
       "acceptanceCriteria": [
-        "All locks and restrictions are removed when timer reaches zero",
-        "User receives completion notification indicating session is complete",
-        "User can freely access all sections after session ends",
-        "Clear option is presented to start a new focus session with fresh duration selection"
+        "History view lists all completed focus sessions with duration, distraction count, and score",
+        "Analytics section shows top distraction sources ranked by frequency",
+        "Visual charts displaying distraction trends over days/weeks",
+        "Transition matrix showing most common interruption pathways",
+        "Filterable date ranges for historical analysis"
       ]
     },
     {
       "id": "REQ-7",
-      "text": "Store focus session data (duration, violations, completion status) in the backend for each completed session to enable historical tracking and analytics",
-      "target": "backend",
+      "text": "Implement burnout/fatigue scoring algorithm based on switching frequency between productive and distracting activities with weighted penalties for context switches",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-recent"
+          "msg-1",
+          "msg-5"
+        ],
+        "quotes": [
+          "Calculate Burnout Effect",
+          "Burnout/fatigue scoring based on your switching behavior"
         ]
       },
       "acceptanceCriteria": [
-        "Each focus session records start time, duration, total violations, and completion status",
-        "Data persists in stable storage between canister upgrades",
-        "Backend provides query function to retrieve session history",
-        "Session data integrates with existing productivity metrics"
+        "Backend calculates fatigue score using formula: small penalty for productive↔productive switches, large penalty for productive→distracting switches, fragmentation penalty for distracting→distracting chains",
+        "Score updates in real-time as user logs distractions",
+        "Dashboard displays current fatigue level with visual indicator (low/medium/high)",
+        "Historical burnout trends shown in chart format"
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "text": "Measure and display session duration metrics to distinguish between real work (25+ min), browsing (5-10 min), and checking habits (10-40 sec repeated visits)",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Use Session Duration (Very Powerful Signal)",
+          "Measure how long they stay in that app"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Track duration for each logged activity/distraction",
+        "Classify activities by duration pattern: sustained focus (25+ min), brief browsing (5-10 min), habit checking (<1 min repeated)",
+        "Analytics show distribution of time across duration categories",
+        "Identify habitual distractions based on repeated short-duration visits"
       ]
     }
   ],
   "constraints": [
-    "Grayscale effect must apply only to distractive content sections, not the entire app",
-    "Violation counter only increments for productive-to-distractive navigation, not other switches",
-    "Session timer must be user-defined at session start",
-    "All restrictions lift automatically when session timer completes",
-    "System must work entirely within the web application without external browser control"
+    "All tracking must be self-reported by the user - no automatic browser tab monitoring or screen capture",
+    "Do not read message content, capture keystrokes, or inspect page content",
+    "Only collect: app name, domain name, time duration, and user-reported switching frequency",
+    "Preserve existing backend data structures for focus sessions and destructive visits",
+    "Do not modify immutable frontend paths: useInternetIdentity.ts, useInternetIdentity.tsx, useActor.ts, main.tsx, frontend/src/components/ui"
   ],
   "nonGoals": [
-    "Blocking browser tabs outside the application",
-    "Blocking desktop applications or other websites",
-    "Forcing grayscale on productive content sections",
-    "Automatic session creation without user initiation",
-    "Mobile app development or browser extension functionality"
+    "Automatic desktop app monitoring or system-level tracking",
+    "Browser extension that monitors active tabs without user interaction",
+    "Python desktop tracker or native OS integration",
+    "Real-time screen recording or content inspection",
+    "Reading personal data from messages, chats, or documents",
+    "Keystroke logging or password capture"
   ],
   "imageRequirements": {
     "required": [],

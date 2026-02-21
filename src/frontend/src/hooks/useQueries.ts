@@ -1,17 +1,19 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useActor } from './useActor';
+import type { SessionSummary, DistractionLog, ActivitySwitch } from '../backend';
 
-export function useGetAllReports() {
+export function useGetSessionSummaries() {
   const { actor, isFetching } = useActor();
 
   return useQuery({
-    queryKey: ['reports'],
+    queryKey: ['sessionSummaries'],
     queryFn: async () => {
       if (!actor) return [];
       try {
-        return await actor.getAllReports();
+        const summaries = await actor.getSessionSummaries();
+        return summaries.map(([_, summary]) => summary);
       } catch (error) {
-        console.error('Failed to fetch reports:', error);
+        console.error('Failed to fetch session summaries:', error);
         return [];
       }
     },
@@ -22,104 +24,112 @@ export function useGetAllReports() {
   });
 }
 
-/**
- * Hook to fetch focus scores from the backend with automatic refetching
- * Refetches every 10 seconds for real-time dashboard updates
- */
-export function useGetFocusScores() {
+export function useGetDistractionLogs() {
   const { actor, isFetching } = useActor();
 
   return useQuery({
-    queryKey: ['focusScores'],
+    queryKey: ['distractionLogs'],
     queryFn: async () => {
       if (!actor) return [];
       try {
-        return await actor.getFocusScores();
+        const logs = await actor.getDistractionLogs();
+        return logs.map(([_, log]) => log);
       } catch (error) {
-        console.error('Failed to fetch focus scores:', error);
+        console.error('Failed to fetch distraction logs:', error);
         return [];
       }
     },
     enabled: !!actor && !isFetching,
-    refetchInterval: 10000,
-    staleTime: 5000,
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     refetchOnWindowFocus: false,
   });
 }
 
-/**
- * Hook to fetch activity data for LiveMonitor with faster refetch interval
- * Refetches every 5 seconds for real-time activity display
- */
-export function useActivityData() {
+export function useGetActivitySwitches() {
   const { actor, isFetching } = useActor();
 
   return useQuery({
-    queryKey: ['activityData'],
+    queryKey: ['activitySwitches'],
     queryFn: async () => {
       if (!actor) return [];
       try {
-        return await actor.getFocusScores();
+        const switches = await actor.getActivitySwitches();
+        return switches.map(([_, sw]) => sw);
       } catch (error) {
-        console.error('Failed to fetch activity data:', error);
+        console.error('Failed to fetch activity switches:', error);
         return [];
+      }
+    },
+    enabled: !!actor && !isFetching,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    refetchOnWindowFocus: false,
+  });
+}
+
+export function useGetMostFrequentDistractions() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery({
+    queryKey: ['mostFrequentDistractions'],
+    queryFn: async () => {
+      if (!actor) return [];
+      try {
+        return await actor.getMostFrequentDistractions();
+      } catch (error) {
+        console.error('Failed to fetch frequent distractions:', error);
+        return [];
+      }
+    },
+    enabled: !!actor && !isFetching,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    refetchOnWindowFocus: false,
+  });
+}
+
+export function useGetCurrentSessionStats() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery({
+    queryKey: ['currentSessionStats'],
+    queryFn: async () => {
+      if (!actor) return null;
+      try {
+        const [productiveTime, distractingTime, startTime, distractionsCount, switchesCount] = 
+          await actor.getCurrentSessionStats();
+        return {
+          productiveTime,
+          distractingTime,
+          startTime,
+          distractionsCount,
+          switchesCount,
+        };
+      } catch (error) {
+        console.error('Failed to fetch current session stats:', error);
+        return null;
       }
     },
     enabled: !!actor && !isFetching,
     refetchInterval: 5000,
-    staleTime: 2000,
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     refetchOnWindowFocus: false,
   });
 }
 
-/**
- * Hook to record focus score data to the backend
- */
-export function useRecordFocusScore() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({
-      distractionScore,
-      tabSwitchCount,
-      timeAway,
-    }: {
-      distractionScore: bigint;
-      tabSwitchCount: bigint;
-      timeAway: bigint;
-    }) => {
-      if (!actor) throw new Error('Actor not initialized');
-      return actor.recordFocusScore(distractionScore, tabSwitchCount, timeAway);
-    },
-    onSuccess: () => {
-      // Invalidate both queries to refetch updated data
-      queryClient.invalidateQueries({ queryKey: ['focusScores'] });
-      queryClient.invalidateQueries({ queryKey: ['activityData'] });
-    },
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-  });
-}
-
-/**
- * Hook to fetch all focus sessions from the backend
- */
-export function useGetAllFocusSessions() {
+export function useGetAllAppCategories() {
   const { actor, isFetching } = useActor();
 
   return useQuery({
-    queryKey: ['focusSessions'],
+    queryKey: ['appCategories'],
     queryFn: async () => {
       if (!actor) return [];
       try {
-        return await actor.getAllFocusSessions();
+        return await actor.getAllAppCategories();
       } catch (error) {
-        console.error('Failed to fetch focus sessions:', error);
+        console.error('Failed to fetch app categories:', error);
         return [];
       }
     },

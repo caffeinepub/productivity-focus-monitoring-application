@@ -18,13 +18,14 @@ import {
 export default function AppCategorization() {
   const { applications, addApplication, updateApplication, removeApplication } = useApplications();
   const [newAppName, setNewAppName] = useState('');
-  const [newAppCategory, setNewAppCategory] = useState<'productive' | 'distracting'>('productive');
+  const [newAppCategory, setNewAppCategory] = useState<'productive' | 'distracting' | 'neutral'>('productive');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
-  const [editCategory, setEditCategory] = useState<'productive' | 'distracting'>('productive');
+  const [editCategory, setEditCategory] = useState<'productive' | 'distracting' | 'neutral'>('productive');
 
   const productiveApps = applications.filter((app) => app.category === 'productive');
   const distractingApps = applications.filter((app) => app.category === 'distracting');
+  const neutralApps = applications.filter((app) => app.category === 'neutral');
 
   const handleAdd = () => {
     if (newAppName.trim()) {
@@ -34,7 +35,7 @@ export default function AppCategorization() {
     }
   };
 
-  const startEdit = (id: string, name: string, category: 'productive' | 'distracting') => {
+  const startEdit = (id: string, name: string, category: 'productive' | 'distracting' | 'neutral') => {
     setEditingId(id);
     setEditName(name);
     setEditCategory(category);
@@ -55,27 +56,27 @@ export default function AppCategorization() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight mb-2">Application Categories</h2>
+        <h2 className="text-3xl font-bold tracking-tight mb-2">Activity Categories</h2>
         <p className="text-muted-foreground">
-          Manage which applications are productive or distracting for your workflow
+          Classify apps and websites to help track your productivity patterns
         </p>
       </div>
 
       {/* Add New Application */}
       <Card>
         <CardHeader>
-          <CardTitle>Add New Application</CardTitle>
+          <CardTitle>Add New Activity</CardTitle>
           <CardDescription>
-            Categorize applications to help Focus Guardian understand your work patterns
+            Categorize apps and websites as productive, distracting, or neutral
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
-              <Label htmlFor="app-name">Application Name</Label>
+              <Label htmlFor="app-name">App or Website Name</Label>
               <Input
                 id="app-name"
-                placeholder="e.g., Visual Studio Code"
+                placeholder="e.g., GitHub, YouTube, Slack"
                 value={newAppName}
                 onChange={(e) => setNewAppName(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
@@ -85,7 +86,7 @@ export default function AppCategorization() {
               <Label htmlFor="app-category">Category</Label>
               <Select
                 value={newAppCategory}
-                onValueChange={(value: 'productive' | 'distracting') => setNewAppCategory(value)}
+                onValueChange={(value: 'productive' | 'distracting' | 'neutral') => setNewAppCategory(value)}
               >
                 <SelectTrigger id="app-category">
                   <SelectValue />
@@ -93,6 +94,7 @@ export default function AppCategorization() {
                 <SelectContent>
                   <SelectItem value="productive">Productive</SelectItem>
                   <SelectItem value="distracting">Distracting</SelectItem>
+                  <SelectItem value="neutral">Neutral</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -115,9 +117,9 @@ export default function AppCategorization() {
               <div>
                 <CardTitle className="flex items-center gap-2">
                   <span className="text-green-600 dark:text-green-400">✓</span>
-                  Productive Apps
+                  Productive
                 </CardTitle>
-                <CardDescription>Applications that support your work</CardDescription>
+                <CardDescription>Activities that support your work</CardDescription>
               </div>
               <Badge variant="secondary">{productiveApps.length}</Badge>
             </div>
@@ -126,7 +128,7 @@ export default function AppCategorization() {
             <div className="space-y-2">
               {productiveApps.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-8">
-                  No productive apps yet. Add some above!
+                  No productive activities yet. Add some above!
                 </p>
               ) : (
                 productiveApps.map((app) => (
@@ -147,7 +149,7 @@ export default function AppCategorization() {
                           />
                           <Select
                             value={editCategory}
-                            onValueChange={(value: 'productive' | 'distracting') =>
+                            onValueChange={(value: 'productive' | 'distracting' | 'neutral') =>
                               setEditCategory(value)
                             }
                           >
@@ -157,6 +159,7 @@ export default function AppCategorization() {
                             <SelectContent>
                               <SelectItem value="productive">Productive</SelectItem>
                               <SelectItem value="distracting">Distracting</SelectItem>
+                              <SelectItem value="neutral">Neutral</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
@@ -204,9 +207,9 @@ export default function AppCategorization() {
               <div>
                 <CardTitle className="flex items-center gap-2">
                   <span className="text-amber-600 dark:text-amber-400">⚠</span>
-                  Distracting Apps
+                  Distracting
                 </CardTitle>
-                <CardDescription>Applications that may break your focus</CardDescription>
+                <CardDescription>Activities that may break your focus</CardDescription>
               </div>
               <Badge variant="secondary">{distractingApps.length}</Badge>
             </div>
@@ -215,7 +218,7 @@ export default function AppCategorization() {
             <div className="space-y-2">
               {distractingApps.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-8">
-                  No distracting apps yet. Add some above!
+                  No distracting activities yet. Add some above!
                 </p>
               ) : (
                 distractingApps.map((app) => (
@@ -236,7 +239,7 @@ export default function AppCategorization() {
                           />
                           <Select
                             value={editCategory}
-                            onValueChange={(value: 'productive' | 'distracting') =>
+                            onValueChange={(value: 'productive' | 'distracting' | 'neutral') =>
                               setEditCategory(value)
                             }
                           >
@@ -246,6 +249,7 @@ export default function AppCategorization() {
                             <SelectContent>
                               <SelectItem value="productive">Productive</SelectItem>
                               <SelectItem value="distracting">Distracting</SelectItem>
+                              <SelectItem value="neutral">Neutral</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>

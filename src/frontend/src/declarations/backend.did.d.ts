@@ -10,88 +10,64 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
-export interface Achievement {
-  'streakStart' : Time,
-  'isDeepWork' : boolean,
-  'streakType' : StreakType,
-  'streakEnd' : Time,
-  'milestone' : bigint,
+export interface ActivitySwitch {
+  'toApp' : string,
+  'toCategory' : Category,
+  'fromCategory' : Category,
+  'fromApp' : string,
+  'timestamp' : bigint,
 }
-export type AppCategory = { 'productive' : null } |
-  { 'distracting' : null };
-export interface BreakSession {
-  'startTime' : Time,
-  'timerSetting' : TimerSetting,
-  'endTime' : Time,
-  'breakType' : BreakType,
-  'isRestorative' : boolean,
+export type Category = { 'productive' : null } |
+  { 'distracting' : null } |
+  { 'neutral' : null };
+export interface DistractionLog {
+  'source' : string,
+  'description' : string,
+  'sourceType' : SourceType,
+  'timestamp' : bigint,
+  'category' : Category,
 }
-export type BreakType = { 'walkBreak' : null } |
-  { 'deskRecovery' : null };
-export interface ContextSwitch {
-  'sourceApp' : string,
-  'targetApp' : string,
-  'timestamp' : Time,
+export interface SessionSummary {
+  'startTime' : bigint,
+  'productiveTime' : bigint,
+  'endTime' : bigint,
+  'totalDuration' : bigint,
+  'distractingTime' : bigint,
+  'burnoutScore' : bigint,
+  'sessionId' : bigint,
+  'switchesCount' : bigint,
+  'distractionsCount' : bigint,
 }
-export interface FocusScore {
-  'distractionScore' : bigint,
-  'timestamp' : Time,
-  'timeAway' : bigint,
-  'tabSwitchCount' : bigint,
-}
-export interface FocusSessionData {
-  'duration' : bigint,
-  'focusScore' : bigint,
-  'completed' : boolean,
-  'violations' : Array<FocusSessionViolation>,
-  'timestamp' : Time,
-}
-export interface FocusSessionViolation {
-  'sourceTab' : TabType,
-  'targetTab' : TabType,
-  'timestamp' : Time,
-  'violationCount' : bigint,
-}
-export type NegativePattern = { 'distractionSpikes' : null } |
-  { 'lateNightFatigue' : null } |
-  { 'frequentSwitching' : null };
-export type Pattern = { 'negative' : NegativePattern } |
-  { 'positive' : PositivePattern };
-export type PositivePattern = { 'reducedDistractions' : null } |
-  { 'workConsistency' : null } |
-  { 'healthyBreaks' : null };
-export interface Report { 'patterns' : Array<Pattern>, 'timestamp' : Time }
-export interface Session {
-  'duration' : bigint,
-  'sessionType' : SessionType,
-  'appName' : string,
-  'timestamp' : Time,
-  'category' : AppCategory,
-}
-export type SessionType = { 'focus' : null } |
-  { 'rest' : null } |
-  { 'distraction' : null };
-export type StreakType = { 'deepWorkCompletion' : null } |
-  { 'focusStreak' : null } |
-  { 'distractionResistance' : null };
-export type TabType = { 'productive' : null } |
-  { 'distractive' : null };
-export type Time = bigint;
-export interface TimerSetting { 'duration' : bigint, 'notification' : boolean }
+export type SourceType = { 'other' : null } |
+  { 'news' : null } |
+  { 'workApp' : null } |
+  { 'shopping' : null } |
+  { 'socialMedia' : null };
 export interface _SERVICE {
-  'addAchievement' : ActorMethod<[Achievement], undefined>,
-  'generateReport' : ActorMethod<[Array<Pattern>], Report>,
-  'getAllFocusSessions' : ActorMethod<[], Array<FocusSessionData>>,
-  'getAllReports' : ActorMethod<[], Array<Report>>,
-  'getFocusScores' : ActorMethod<[], Array<FocusScore>>,
-  'getReportById' : ActorMethod<[bigint], [] | [Report]>,
-  'recordBreak' : ActorMethod<[BreakSession], undefined>,
-  'recordFocusScore' : ActorMethod<[bigint, bigint, bigint], undefined>,
-  'recordFocusSession' : ActorMethod<[bigint, boolean, bigint], undefined>,
-  'recordSession' : ActorMethod<[Session], undefined>,
-  'recordSwitch' : ActorMethod<[ContextSwitch], undefined>,
-  'recordTabSwitch' : ActorMethod<[TabType, TabType], undefined>,
-  'startFocusSession' : ActorMethod<[], undefined>,
+  'endSession' : ActorMethod<[], undefined>,
+  'getActivitySwitches' : ActorMethod<[], Array<[bigint, ActivitySwitch]>>,
+  'getAllAppCategories' : ActorMethod<[], Array<[string, Category]>>,
+  'getAppCategory' : ActorMethod<[string], [] | [Category]>,
+  'getCurrentSessionStats' : ActorMethod<
+    [],
+    [bigint, bigint, bigint, bigint, bigint]
+  >,
+  'getDistractionLogs' : ActorMethod<[], Array<[bigint, DistractionLog]>>,
+  'getLongestFocusStreak' : ActorMethod<[], bigint>,
+  'getMostFrequentDistractions' : ActorMethod<[], Array<[string, bigint]>>,
+  'getSessionHistory' : ActorMethod<[string], Array<SessionSummary>>,
+  'getSessionSummaries' : ActorMethod<[], Array<[bigint, SessionSummary]>>,
+  'logDistraction' : ActorMethod<
+    [string, Category, SourceType, string],
+    undefined
+  >,
+  'recordActivitySwitch' : ActorMethod<
+    [string, string, Category, Category],
+    undefined
+  >,
+  'recordTimeBlock' : ActorMethod<[Category, bigint], undefined>,
+  'setAppCategory' : ActorMethod<[string, Category], undefined>,
+  'startSession' : ActorMethod<[], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

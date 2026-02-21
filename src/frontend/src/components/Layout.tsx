@@ -1,5 +1,5 @@
 import { Link, useRouterState, useNavigate } from '@tanstack/react-router';
-import { Activity, LayoutDashboard, Settings, Award, FileText, Coffee, Wind, LogOut, User, Target } from 'lucide-react';
+import { Activity, LayoutDashboard, Settings, Award, FileText, Coffee, Wind, LogOut, User, Target, History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -21,11 +21,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   const navItems = [
     { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-    { path: '/monitor', label: 'Live Monitor', icon: Activity },
-    { path: '/focus-session', label: 'Focus Session', icon: Target },
-    { path: '/apps', label: 'Apps', icon: Settings },
-    { path: '/achievements', label: 'Achievements', icon: Award },
-    { path: '/reports', label: 'Reports', icon: FileText },
+    { path: '/focus-session', label: 'Focus Timer', icon: Target },
+    { path: '/session-history', label: 'History', icon: History },
+    { path: '/apps', label: 'Categories', icon: Settings },
   ];
 
   const quickActions = [
@@ -93,11 +91,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             {/* App branding */}
             <div className="flex items-center gap-2">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/10">
-                <Activity className="h-6 w-6 text-primary" />
+                <Target className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h1 className="text-xl font-bold tracking-tight">Focus Guardian</h1>
-                <p className="text-xs text-muted-foreground">Your productivity coach</p>
+                <h1 className="text-xl font-bold tracking-tight">Focus Tracker</h1>
+                <p className="text-xs text-muted-foreground">Productivity timer & analytics</p>
               </div>
             </div>
           </div>
@@ -144,12 +142,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
       <footer className="border-t border-border/40 bg-background/95 backdrop-blur">
         <div className="container flex h-16 items-center justify-between text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} Focus Guardian</p>
+          <p>© {new Date().getFullYear()} Focus Tracker</p>
           <p>
             Built with <span className="text-red-500">♥</span> using{' '}
             <a
               href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(
-                typeof window !== 'undefined' ? window.location.hostname : 'focus-guardian'
+                typeof window !== 'undefined' ? window.location.hostname : 'focus-tracker'
               )}`}
               target="_blank"
               rel="noopener noreferrer"

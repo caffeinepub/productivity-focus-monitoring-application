@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useFocusSessionTimer } from '../hooks/useFocusSessionTimer';
-import { useFocusSessionViolations } from '../hooks/useFocusSessionViolations';
+import { useDistractionLogger } from '../hooks/useDistractionLogger';
+import { useActivityTransitions } from '../hooks/useActivityTransitions';
 import { useActor } from '../hooks/useActor';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,11 +9,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { DistractionLogModal } from '../components/DistractionLogModal';
 import { FocusSessionSummary } from '../components/FocusSessionSummary';
-import { Clock, Play, Pause, RotateCcw, AlertTriangle, Target } from 'lucide-react';
+import { Clock, Play, Pause, RotateCcw, AlertTriangle, Coffee } from 'lucide-react';
 import { toast } from 'sonner';
 
-const PRESET_DURATIONS = [25, 45, 60, 90];
+const PRESET_WORK_DURATIONS = [15, 25, 45];
+const PRESET_BREAK_DURATIONS = [5, 10, 15];
 
 export default function FocusSession() {
   const {
@@ -21,24 +24,47 @@ export default function FocusSession() {
     isActive,
     isPaused,
     isCompleted,
-    startSession,
+    isBreakMode,
+    breakDuration,
+    startWorkSession,
+    startBreakSession,
     pauseSession,
     resumeSession,
     resetSession,
     formattedTime,
+    setBreakDuration: setBreakDurationState,
   } = useFocusSessionTimer();
 
-  const { violations, violationCount, grayscale, warningCycle } = useFocusSessionViolations();
+  const {
+    showModal,
+    openModal,
+    closeModal,
+    logDistraction,
+    distractionCount,
+  } = useDistractionLogger();
+
+  const { recordTransition, currentActivity, setCurrentActivity } = useActivityTransitions();
   const { actor } = useActor();
 
   const [customDuration, setCustomDuration] = useState<string>('');
+  const [selectedBreakDuration, setSelectedBreakDuration] = useState<number>(5);
   const [showSummary, setShowSummary] = useState(false);
+  const [sessionStartTime, setSessionStartTime] = useState<number>(0);
 
-  const handleStartSession = (minutes: number) => {
-    startSession(minutes);
-    toast.success(`Focus session started: ${minutes} minutes`, {
-      description: 'Stay focused on productive tasks!',
-    });
+  const handleStartWorkSession = async (minutes: number) => {
+    if (actor) {
+      try {
+        await actor.startSession();
+        setSessionStartTime(Date.now());
+        startWorkSession(minutes);
+        toast.success(`Work session started: ${minutes} minutes`, {
+          description: 'Stay focused! Log any distractions as they occur.',
+        });
+      } catch (error) {
+        console.error('Failed to start session:', error);
+        toast.error('Failed to start session');
+      }
+    }
   };
 
   const handleCustomStart = () => {
@@ -47,47 +73,84 @@ export default function FocusSession() {
       toast.error('Please enter a valid duration');
       return;
     }
-    handleStartSession(minutes);
+    handleStartWorkSession(minutes);
     setCustomDuration('');
   };
 
-  const handleReset = async () => {
-    if (isCompleted && actor) {
-      // Calculate focus score
-      const focusScore = Math.max(0, 100 - violationCount * 10);
+  const handleStartBreak = () => {
+    startBreakSession(selectedBreakDuration);
+    toast.success(`Break started: ${selectedBreakDuration} minutes`, {
+      description: 'Take a well-deserved break!',
+    });
+  };
 
-      // Record session to backend
+  const handleReset = async () => {
+    if (isCompleted && actor && sessionStartTime > 0) {
       try {
-        await actor.recordFocusSession(
-          BigInt(duration),
-          true,
-          BigInt(focusScore)
-        );
+        await actor.endSession();
         toast.success('Session recorded successfully!');
       } catch (error) {
-        console.error('Failed to record focus session:', error);
+        console.error('Failed to record session:', error);
         toast.error('Failed to record session');
       }
     }
 
     resetSession();
     setShowSummary(false);
+    setSessionStartTime(0);
+  };
+
+  const handleLogDistraction = async (
+    source: string,
+    category: 'productive' | 'distracting' | 'neutral',
+    sourceType: string,
+    description: string
+  ) => {
+    await logDistraction(source, category, sourceType, description);
+    
+    // Record transition if we have a current activity
+    if (currentActivity) {
+      await recordTransition(
+        currentActivity.name,
+        source,
+        currentActivity.category,
+        category
+      );
+    }
+    
+    // Update current activity
+    setCurrentActivity({ name: source, category });
+    
+    toast.success('Distraction logged', {
+      description: 'Keep going! You can do this.',
+    });
   };
 
   // Show summary when session completes
-  if (isCompleted && !showSummary) {
-    setShowSummary(true);
-  }
+  useEffect(() => {
+    if (isCompleted && !showSummary && !isBreakMode) {
+      setShowSummary(true);
+    }
+  }, [isCompleted, showSummary, isBreakMode]);
+
+  // Auto-start break after work session completes
+  useEffect(() => {
+    if (isCompleted && !isBreakMode && !showSummary) {
+      const timer = setTimeout(() => {
+        handleStartBreak();
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isCompleted, isBreakMode, showSummary]);
 
   const progress = duration > 0 ? ((duration - remainingTime) / duration) * 100 : 0;
-  const focusScore = Math.max(0, 100 - violationCount * 10);
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Focus Session</h1>
         <p className="text-muted-foreground">
-          Set a timer and stay focused on productive tasks
+          Productivity timer with manual distraction logging
         </p>
       </div>
 
@@ -95,189 +158,170 @@ export default function FocusSession() {
         <Card>
           <CardHeader>
             <CardTitle>Start a Focus Session</CardTitle>
-            <CardDescription>Choose a duration to begin your focused work session</CardDescription>
+            <CardDescription>Choose a work duration to begin your focused session</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div>
               <h3 className="text-sm font-semibold mb-3">Preset Durations</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {PRESET_DURATIONS.map((minutes) => (
+              <div className="grid grid-cols-3 gap-3">
+                {PRESET_WORK_DURATIONS.map((minutes) => (
                   <Button
                     key={minutes}
                     variant="outline"
                     size="lg"
-                    onClick={() => handleStartSession(minutes)}
+                    onClick={() => handleStartWorkSession(minutes)}
                     className="h-20 flex flex-col gap-1"
                   >
                     <Clock className="h-5 w-5" />
-                    <span className="text-lg font-bold">{minutes}</span>
-                    <span className="text-xs text-muted-foreground">minutes</span>
+                    <span className="text-lg font-bold">{minutes} min</span>
                   </Button>
                 ))}
               </div>
             </div>
 
-            <div className="space-y-3">
-              <h3 className="text-sm font-semibold">Custom Duration</h3>
-              <div className="flex gap-2">
+            <div>
+              <h3 className="text-sm font-semibold mb-3">Custom Duration</h3>
+              <div className="flex gap-3">
                 <Input
                   type="number"
                   placeholder="Enter minutes"
                   value={customDuration}
                   onChange={(e) => setCustomDuration(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleCustomStart()}
                   min="1"
-                  className="flex-1"
                 />
-                <Button onClick={handleCustomStart} size="lg">
-                  <Play className="h-4 w-4 mr-2" />
+                <Button onClick={handleCustomStart} className="gap-2">
+                  <Play className="h-4 w-4" />
                   Start
                 </Button>
               </div>
             </div>
 
-            <div className="rounded-lg bg-muted p-4 space-y-2">
-              <h4 className="font-semibold text-sm">📋 How it works</h4>
-              <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
-                <li>Navigate between productive and distractive sections</li>
-                <li>Get 3 warnings before grayscale mode activates</li>
-                <li>Grayscale lasts 2 minutes, then warnings reset</li>
-                <li>Excessive violations lock distractive content</li>
-              </ul>
+            <div>
+              <h3 className="text-sm font-semibold mb-3">Break Duration</h3>
+              <div className="grid grid-cols-3 gap-3">
+                {PRESET_BREAK_DURATIONS.map((minutes) => (
+                  <Button
+                    key={minutes}
+                    variant={selectedBreakDuration === minutes ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => {
+                      setSelectedBreakDuration(minutes);
+                      setBreakDurationState(minutes);
+                    }}
+                  >
+                    {minutes} min
+                  </Button>
+                ))}
+              </div>
             </div>
           </CardContent>
         </Card>
-      ) : (
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="h-5 w-5" />
-                Session Timer
-              </CardTitle>
-              <CardDescription>
-                {isCompleted ? 'Session completed!' : 'Time remaining in your focus session'}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="text-center">
-                <div className="text-6xl font-bold font-mono mb-2">{formattedTime}</div>
-                <Progress value={progress} className="h-2" />
-              </div>
+      ) : isActive || isPaused ? (
+        <div className="space-y-6">
+          {/* Timer Display */}
+          <Card className={isBreakMode ? 'border-green-500/50 bg-green-500/5' : 'border-primary/50 bg-primary/5'}>
+            <CardContent className="pt-6">
+              <div className="text-center space-y-4">
+                <div className="flex items-center justify-center gap-2">
+                  {isBreakMode ? (
+                    <>
+                      <Coffee className="h-6 w-6 text-green-600" />
+                      <Badge variant="outline" className="text-lg px-4 py-1 border-green-500 text-green-600">
+                        Break Time
+                      </Badge>
+                    </>
+                  ) : (
+                    <>
+                      <Clock className="h-6 w-6 text-primary" />
+                      <Badge variant="outline" className="text-lg px-4 py-1 border-primary">
+                        Work Session
+                      </Badge>
+                    </>
+                  )}
+                </div>
+                
+                <div className="text-7xl font-bold tracking-tight">
+                  {formattedTime}
+                </div>
 
-              <div className="flex gap-2 justify-center">
-                {!isCompleted && (
-                  <>
-                    {isPaused ? (
-                      <Button onClick={resumeSession} size="lg">
-                        <Play className="h-4 w-4 mr-2" />
-                        Resume
-                      </Button>
-                    ) : (
-                      <Button onClick={pauseSession} size="lg" variant="secondary">
-                        <Pause className="h-4 w-4 mr-2" />
-                        Pause
-                      </Button>
-                    )}
-                  </>
-                )}
-                <Button onClick={handleReset} size="lg" variant="outline">
-                  <RotateCcw className="h-4 w-4 mr-2" />
-                  {isCompleted ? 'Start New Session' : 'Reset'}
-                </Button>
+                <Progress value={progress} className="h-3" />
+
+                <div className="flex items-center justify-center gap-3">
+                  {isPaused ? (
+                    <Button size="lg" onClick={resumeSession} className="gap-2">
+                      <Play className="h-5 w-5" />
+                      Resume
+                    </Button>
+                  ) : (
+                    <Button size="lg" onClick={pauseSession} variant="outline" className="gap-2">
+                      <Pause className="h-5 w-5" />
+                      Pause
+                    </Button>
+                  )}
+                  <Button size="lg" onClick={handleReset} variant="destructive" className="gap-2">
+                    <RotateCcw className="h-5 w-5" />
+                    Reset
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5" />
-                Session Stats
-              </CardTitle>
-              <CardDescription>Track your focus performance</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Violations</p>
-                  <div className="flex items-center gap-2">
-                    <p className="text-3xl font-bold">{violationCount}</p>
-                    <Badge variant={violationCount >= 3 ? 'destructive' : 'secondary'}>
-                      {violationCount >= 3 ? 'High' : 'Low'}
-                    </Badge>
+          {/* Distraction Logging - Only show during work sessions */}
+          {!isBreakMode && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Log Distractions</CardTitle>
+                <CardDescription>
+                  Click below when you get distracted to track interruption patterns
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      Distractions logged this session: <span className="font-bold text-foreground">{distractionCount}</span>
+                    </p>
                   </div>
-                </div>
-
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Focus Score</p>
-                  <p className="text-3xl font-bold">{focusScore}%</p>
-                </div>
-
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Warning Cycle</p>
-                  <p className="text-3xl font-bold">{warningCycle}</p>
-                </div>
-
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Grayscale</p>
-                  <Badge variant={grayscale.isActive ? 'destructive' : 'secondary'}>
-                    {grayscale.isActive ? 'Active' : 'Inactive'}
-                  </Badge>
-                </div>
-              </div>
-
-              {grayscale.isActive && (
-                <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-3">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-destructive mb-1">
+                  <Button onClick={openModal} variant="outline" className="gap-2">
                     <AlertTriangle className="h-4 w-4" />
-                    Grayscale Warning Active
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Resets in: <span className="font-mono font-semibold">{Math.floor(grayscale.remainingSeconds / 60)}:{(grayscale.remainingSeconds % 60).toString().padStart(2, '0')}</span>
-                  </p>
+                    Log Distraction
+                  </Button>
                 </div>
-              )}
-
-              {violations.length > 0 && (
-                <div className="space-y-2">
-                  <h4 className="text-sm font-semibold">Recent Violations</h4>
-                  <div className="space-y-1 max-h-32 overflow-y-auto">
-                    {violations.slice(-5).reverse().map((violation, index) => (
-                      <div
-                        key={index}
-                        className="text-xs text-muted-foreground flex items-center justify-between py-1 px-2 rounded bg-muted"
-                      >
-                        <span>Productive → Distractive</span>
-                        <span className="font-mono">
-                          {new Date(violation.timestamp).toLocaleTimeString()}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
         </div>
-      )}
+      ) : null}
 
+      {/* Distraction Log Modal */}
+      <DistractionLogModal
+        open={showModal}
+        onClose={closeModal}
+        onSubmit={handleLogDistraction}
+      />
+
+      {/* Session Summary Dialog */}
       <Dialog open={showSummary} onOpenChange={setShowSummary}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Focus Session Complete! 🎉</DialogTitle>
+            <DialogTitle>Session Complete! 🎉</DialogTitle>
             <DialogDescription>
-              Great job completing your focus session. Here's your performance summary.
+              Great work! Here's your session summary.
             </DialogDescription>
           </DialogHeader>
           <FocusSessionSummary
             duration={duration}
-            violationCount={violationCount}
-            warningCycles={warningCycle}
-            focusScore={focusScore}
+            distractionsCount={distractionCount}
           />
-          <div className="flex justify-end gap-2">
-            <Button onClick={handleReset} size="lg">
-              Start New Session
+          <div className="flex gap-3">
+            <Button onClick={handleStartBreak} className="flex-1 gap-2">
+              <Coffee className="h-4 w-4" />
+              Take Break ({selectedBreakDuration}m)
+            </Button>
+            <Button onClick={handleReset} variant="outline" className="flex-1">
+              Finish
             </Button>
           </div>
         </DialogContent>

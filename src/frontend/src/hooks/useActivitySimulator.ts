@@ -1,18 +1,15 @@
 import { useState, useEffect } from 'react';
-import { useActor } from './useActor';
 import { useApplications } from './useApplications';
-import { AppCategory } from '../backend';
 
 const STORAGE_KEY = 'focus-guardian-activity-state';
 
 interface ActivityState {
   currentApp: string;
-  category: 'productive' | 'distracting';
+  category: 'productive' | 'distracting' | 'neutral';
   switchHistory: Array<{ app: string; timestamp: number }>;
 }
 
 export function useActivitySimulator() {
-  const { actor } = useActor();
   const { applications } = useApplications();
   
   // Initialize state from localStorage if available
@@ -29,7 +26,7 @@ export function useActivitySimulator() {
     return 'Visual Studio Code';
   });
   
-  const [category, setCategory] = useState<'productive' | 'distracting'>(() => {
+  const [category, setCategory] = useState<'productive' | 'distracting' | 'neutral'>(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
@@ -79,7 +76,6 @@ export function useActivitySimulator() {
     const interval = setInterval(() => {
       if (Math.random() > 0.7 && applications.length > 0) {
         const randomApp = applications[Math.floor(Math.random() * applications.length)];
-        const previousApp = currentApp;
 
         setCurrentApp(randomApp.name);
         setCategory(randomApp.category);
@@ -88,23 +84,12 @@ export function useActivitySimulator() {
         const now = Date.now();
         setSwitchHistory((prev) => [...prev, { app: randomApp.name, timestamp: now }]);
 
-        const timeSinceLastSwitch = (now - lastSwitchTime) / 1000;
         setLastSwitchTime(now);
-
-        if (actor) {
-          actor
-            .recordSwitch({
-              timestamp: BigInt(now * 1_000_000),
-              sourceApp: previousApp,
-              targetApp: randomApp.name,
-            })
-            .catch(console.error);
-        }
       }
     }, 8000);
 
     return () => clearInterval(interval);
-  }, [actor, applications, currentApp, lastSwitchTime]);
+  }, [applications]);
 
   useEffect(() => {
     const interval = setInterval(() => {

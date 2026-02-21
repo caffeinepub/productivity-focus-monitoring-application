@@ -9,97 +9,17 @@ import WalkBreak from './pages/WalkBreak';
 import Achievements from './pages/Achievements';
 import Reports from './pages/Reports';
 import FocusSession from './pages/FocusSession';
+import SessionHistory from './pages/SessionHistory';
 import Login from './pages/Login';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
-import { BurnoutWarning } from './components/BurnoutWarning';
-import { GreyscaleOverlay } from './components/GreyscaleOverlay';
-import { BlockScreen } from './components/BlockScreen';
-import { DistractiveContentWrapper } from './components/DistractiveContentWrapper';
-import { DistractiveContentBlocker } from './components/DistractiveContentBlocker';
-import { useBurnoutMonitor } from './hooks/useBurnoutMonitor';
-import { useBlockingLogic } from './hooks/useBlockingLogic';
-import { useFocusSessionViolations } from './hooks/useFocusSessionViolations';
 
 function RootComponent() {
-  const { burnoutLevel, burnoutIndex, dismissWarning } = useBurnoutMonitor();
-  const { isBlocked, blockTimeRemaining, completeProductiveSession, incrementWarningCount } = useBlockingLogic();
-
-  /**
-   * Handle burnout warning dismissal
-   * Increments warning count for blocking logic
-   */
-  const handleDismissWarning = () => {
-    dismissWarning();
-    incrementWarningCount();
-  };
-
-  /**
-   * Calculate grayscale intensity for overlay
-   * Maps burnout index to grayscale percentage
-   */
-  const grayscaleIntensity = burnoutIndex > 60 ? (burnoutIndex - 60) / 40 : 0;
-
   return (
     <>
       <Outlet />
-      
-      {/* Show burnout warning at medium threshold (30-60) */}
-      {burnoutLevel === 1 && (
-        <BurnoutWarning burnoutIndex={burnoutIndex} onDismiss={handleDismissWarning} />
-      )}
-      
-      {/* Show grayscale overlay at high threshold (60+) */}
-      {burnoutIndex > 60 && !isBlocked && <GreyscaleOverlay intensity={grayscaleIntensity} />}
-      
-      {/* Show block screen after 2 warning dismissals */}
-      {isBlocked && (
-        <BlockScreen
-          timeRemaining={blockTimeRemaining}
-          onComplete={completeProductiveSession}
-        />
-      )}
-      
       <Toaster />
     </>
-  );
-}
-
-// Wrapper component for achievements route
-function AchievementsRouteComponent() {
-  const { isLocked, isCurrentRouteDistractive } = useFocusSessionViolations();
-  
-  return (
-    <ProtectedRoute>
-      <Layout>
-        {isLocked && isCurrentRouteDistractive ? (
-          <DistractiveContentBlocker />
-        ) : (
-          <DistractiveContentWrapper>
-            <Achievements />
-          </DistractiveContentWrapper>
-        )}
-      </Layout>
-    </ProtectedRoute>
-  );
-}
-
-// Wrapper component for reports route
-function ReportsRouteComponent() {
-  const { isLocked, isCurrentRouteDistractive } = useFocusSessionViolations();
-  
-  return (
-    <ProtectedRoute>
-      <Layout>
-        {isLocked && isCurrentRouteDistractive ? (
-          <DistractiveContentBlocker />
-        ) : (
-          <DistractiveContentWrapper>
-            <Reports />
-          </DistractiveContentWrapper>
-        )}
-      </Layout>
-    </ProtectedRoute>
   );
 }
 
@@ -163,6 +83,18 @@ const focusSessionRoute = createRoute({
   ),
 });
 
+const sessionHistoryRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/session-history',
+  component: () => (
+    <ProtectedRoute>
+      <Layout>
+        <SessionHistory />
+      </Layout>
+    </ProtectedRoute>
+  ),
+});
+
 const deskRecoveryRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/desk-recovery',
@@ -190,13 +122,25 @@ const walkBreakRoute = createRoute({
 const achievementsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/achievements',
-  component: AchievementsRouteComponent,
+  component: () => (
+    <ProtectedRoute>
+      <Layout>
+        <Achievements />
+      </Layout>
+    </ProtectedRoute>
+  ),
 });
 
 const reportsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/reports',
-  component: ReportsRouteComponent,
+  component: () => (
+    <ProtectedRoute>
+      <Layout>
+        <Reports />
+      </Layout>
+    </ProtectedRoute>
+  ),
 });
 
 const routeTree = rootRoute.addChildren([
@@ -205,6 +149,7 @@ const routeTree = rootRoute.addChildren([
   liveMonitorRoute,
   appCategorizationRoute,
   focusSessionRoute,
+  sessionHistoryRoute,
   deskRecoveryRoute,
   walkBreakRoute,
   achievementsRoute,

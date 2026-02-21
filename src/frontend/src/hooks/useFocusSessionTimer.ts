@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 
 export interface FocusSessionTimerState {
-  duration: number; // in seconds
-  remainingTime: number; // in seconds
+  duration: number;
+  remainingTime: number;
   isActive: boolean;
   isPaused: boolean;
   isCompleted: boolean;
+  isBreakMode: boolean;
+  breakDuration: number;
 }
 
 const STORAGE_KEY = 'focus-session-timer';
@@ -26,15 +28,15 @@ export function useFocusSessionTimer() {
       isActive: false,
       isPaused: false,
       isCompleted: false,
+      isBreakMode: false,
+      breakDuration: 5,
     };
   });
 
-  // Persist state to localStorage
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state]);
 
-  // Countdown timer
   useEffect(() => {
     if (!state.isActive || state.isPaused || state.remainingTime <= 0) {
       return;
@@ -61,7 +63,7 @@ export function useFocusSessionTimer() {
     return () => clearInterval(interval);
   }, [state.isActive, state.isPaused, state.remainingTime]);
 
-  const startSession = useCallback((durationInMinutes: number) => {
+  const startWorkSession = useCallback((durationInMinutes: number) => {
     const durationInSeconds = durationInMinutes * 60;
     setState({
       duration: durationInSeconds,
@@ -69,6 +71,21 @@ export function useFocusSessionTimer() {
       isActive: true,
       isPaused: false,
       isCompleted: false,
+      isBreakMode: false,
+      breakDuration: state.breakDuration,
+    });
+  }, [state.breakDuration]);
+
+  const startBreakSession = useCallback((durationInMinutes: number) => {
+    const durationInSeconds = durationInMinutes * 60;
+    setState({
+      duration: durationInSeconds,
+      remainingTime: durationInSeconds,
+      isActive: true,
+      isPaused: false,
+      isCompleted: false,
+      isBreakMode: true,
+      breakDuration: durationInMinutes,
     });
   }, []);
 
@@ -87,8 +104,14 @@ export function useFocusSessionTimer() {
       isActive: false,
       isPaused: false,
       isCompleted: false,
+      isBreakMode: false,
+      breakDuration: 5,
     });
     localStorage.removeItem(STORAGE_KEY);
+  }, []);
+
+  const setBreakDuration = useCallback((minutes: number) => {
+    setState((prev) => ({ ...prev, breakDuration: minutes }));
   }, []);
 
   const formatTime = useCallback((seconds: number) => {
@@ -104,10 +127,12 @@ export function useFocusSessionTimer() {
 
   return {
     ...state,
-    startSession,
+    startWorkSession,
+    startBreakSession,
     pauseSession,
     resumeSession,
     resetSession,
+    setBreakDuration,
     formatTime,
     formattedTime: formatTime(state.remainingTime),
   };
