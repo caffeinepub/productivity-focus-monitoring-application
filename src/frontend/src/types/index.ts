@@ -16,3 +16,18 @@ export interface FocusSession {
   duration: number;
   switchCount: number;
 }
+
+export interface FocusSessionViolation {
+  timestamp: number;
+  violationCount: number;
+  sourceTab: 'productive' | 'distractive';
+  targetTab: 'productive' | 'distractive';
+}
+
+export interface FocusSessionState {
+  duration: number;
+  remainingTime: number;
+  isActive: boolean;
+  isPaused: boolean;
+  isCompleted: boolean;
+}

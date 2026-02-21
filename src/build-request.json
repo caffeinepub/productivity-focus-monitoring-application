@@ -1,78 +1,156 @@
 {
   "kind": "build_request",
-  "title": "Implement precise real-time tab switching metrics display for system validation",
-  "priority": "normal",
+  "title": "Implement Focus Session System with Tab Switching Tracking and Progressive Restrictions",
+  "projectName": "Focus Guardian",
+  "priority": "high",
   "requirements": [
     {
-      "id": "REQ-55",
-      "text": "Create a detailed real-time metrics display component that shows exact tab switching data including precise switch timestamps (with milliseconds), switch frequency (per minute and per hour), time away durations for each switch, current distraction score with calculation breakdown, and total switches count since session start",
+      "id": "REQ-1",
+      "text": "Create a focus session setup interface where users can select a session duration (time-based) before starting their focus work, with options for common durations like 25, 45, 60, 90 minutes or custom duration input",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-user-latest"
+          "msg-recent"
         ],
         "quotes": [
-          "we need exact tab switching real time monitor result to make sure that everything is perfect"
+          "the system determine the important work is complete by the time session selected by the user"
         ]
       },
       "acceptanceCriteria": [
-        "Display shows millisecond-precision timestamps for each tab switch event",
-        "Switch frequency metrics update in real-time showing switches per minute and per hour",
-        "Each switch event displays the exact duration user was away from the page",
-        "Distraction score calculation is visible with the formula breakdown showing how it increments",
-        "Total switch count displays cumulative switches since monitoring session began",
-        "All metrics update immediately when tab switching occurs without any delay"
+        "User can select from preset session durations or enter a custom duration",
+        "Session timer starts counting down when user begins focus session",
+        "Timer displays remaining time clearly throughout the session",
+        "User can reset or start a new session when current timer completes"
       ]
     },
     {
-      "id": "REQ-56",
-      "text": "Update LiveMonitor component in frontend/src/pages/LiveMonitor.tsx to include a dedicated 'Validation Metrics' section that displays the detailed real-time metrics component with all precise switching data visible simultaneously for system accuracy verification",
-      "target": "frontend",
+      "id": "REQ-2",
+      "text": "Implement tab switch tracking specifically between productive and distractive content sections within the app, incrementing a violation counter each time user navigates from productive to distractive sections",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-user-latest"
+          "msg-recent"
         ],
         "quotes": [
-          "we need exact tab switching real time monitor result to make sure that everything is perfect"
+          "if user switches from productive app to distractive app so tab switching counting increasing accordingly"
         ]
       },
       "acceptanceCriteria": [
-        "LiveMonitor page includes a clearly labeled 'Validation Metrics' or 'Detailed Switching Data' section",
-        "Section displays all switching metrics in an easily readable format",
-        "Metrics are visible alongside existing monitoring displays",
-        "Layout allows for easy comparison between real-time activity and raw switching data"
+        "System detects when user navigates from productive section to distractive section",
+        "Violation counter increments only for productive-to-distractive switches, not other navigation",
+        "Counter persists throughout the focus session",
+        "Counter is visible to user so they can track their violations"
       ]
     },
     {
-      "id": "REQ-57",
-      "text": "Enhance useFocusMonitor hook in frontend/src/hooks/useFocusMonitor.ts to expose a detailed switching history array containing the last 20 switch events with exact timestamps, away duration, and distraction score at time of switch for debugging and validation purposes",
+      "id": "REQ-3",
+      "text": "Implement a three-strike warning system that applies a grayscale visual effect to distractive content sections for exactly 2 minutes after the third violation (switch to distractive content)",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-user-latest"
+          "msg-recent"
         ],
         "quotes": [
-          "we need exact tab switching real time monitor result to make sure that everything is perfect"
+          "after the three warning is given by you for the distractive app uses still user use distractive so you have to block or lock that distractive app",
+          "warning is given as the screen got grey scale colour for 2 minutes"
         ]
       },
       "acceptanceCriteria": [
-        "Hook maintains a rolling array of the last 20 switch events",
-        "Each event in history includes ISO timestamp with milliseconds, duration away, and distraction score snapshot",
-        "History array is accessible to components consuming the hook",
-        "History updates immediately when new switches occur"
+        "After third violation, grayscale effect applies immediately to distractive sections only",
+        "Grayscale effect lasts exactly 2 minutes with visible countdown",
+        "Productive sections remain in full color during grayscale period",
+        "Effect is scoped to distractive content sections, not the entire app interface"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "After the 2-minute grayscale warning period ends, reset the violation counter to zero and start a new warning cycle, allowing the user to continue with a fresh count",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-recent"
+        ],
+        "quotes": [
+          "after two minute give another warning cycle"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Violation counter resets to 0 automatically when 2-minute grayscale period completes",
+        "User can again accumulate up to 3 violations before next grayscale period",
+        "The cycle repeats indefinitely throughout the focus session",
+        "User receives clear indication that counter has reset"
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Lock and restrict all access to distractive content sections until the user's focus session timer completes, preventing navigation to distractive sections even if user attempts to access them",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-recent"
+        ],
+        "quotes": [
+          "you have to block or lock that distractive app till the user important work is not complete",
+          "Lock/restrict access to distractive sections until the focus session timer completes"
+        ]
+      },
+      "acceptanceCriteria": [
+        "During active focus session, attempts to navigate to distractive sections are blocked",
+        "User sees clear messaging explaining why access is restricted and when it will unlock",
+        "Lock remains in effect until session timer reaches zero",
+        "Productive sections remain fully accessible during the lock period"
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "When focus session timer completes, automatically lift all restrictions and allow full access to both productive and distractive sections, with option for user to start a new focus session if needed",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-recent"
+        ],
+        "quotes": [
+          "When timer ends, work is considered complete and restrictions lift",
+          "If user needs more time, they can reset/start a new session"
+        ]
+      },
+      "acceptanceCriteria": [
+        "All locks and restrictions are removed when timer reaches zero",
+        "User receives completion notification indicating session is complete",
+        "User can freely access all sections after session ends",
+        "Clear option is presented to start a new focus session with fresh duration selection"
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "text": "Store focus session data (duration, violations, completion status) in the backend for each completed session to enable historical tracking and analytics",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-recent"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Each focus session records start time, duration, total violations, and completion status",
+        "Data persists in stable storage between canister upgrades",
+        "Backend provides query function to retrieve session history",
+        "Session data integrates with existing productivity metrics"
       ]
     }
   ],
   "constraints": [
-    "Do not modify the existing useFocusMonitor core tracking logic that uses Page Visibility API and focus/blur events",
-    "Do not change the backend recordFocusScore function or data schema",
-    "Maintain the existing 10-second backend transmission interval for focus monitoring data"
+    "Grayscale effect must apply only to distractive content sections, not the entire app",
+    "Violation counter only increments for productive-to-distractive navigation, not other switches",
+    "Session timer must be user-defined at session start",
+    "All restrictions lift automatically when session timer completes",
+    "System must work entirely within the web application without external browser control"
   ],
   "nonGoals": [
-    "Changing how tab switches are detected or tracked",
-    "Modifying the distraction score calculation algorithm",
-    "Adding new backend storage for switching history",
-    "Creating alerts or notifications based on the detailed metrics"
+    "Blocking browser tabs outside the application",
+    "Blocking desktop applications or other websites",
+    "Forcing grayscale on productive content sections",
+    "Automatic session creation without user initiation",
+    "Mobile app development or browser extension functionality"
   ],
   "imageRequirements": {
     "required": [],

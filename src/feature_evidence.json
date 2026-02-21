@@ -2,10 +2,13 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-create-a-detailed-real-time-metrics-display-component-that-shows-exact-tab-switching-data-including-precise-switch-timestamps-with-milliseconds-switch-frequency-per-minute-and-per-hour-time-away-durations-for-each-switch-current-distraction-score-with-calculation-breakdown-and-total-switches-count-since-session-start",
-      "featureTitle": "Create a detailed real-time metrics display component that shows exact tab switching data including precise switch timestamps (with milliseconds), switch frequency (per minute and per hour), time away durations for each switch, current distraction score with calculation breakdown, and total switches count since session start",
+      "featureId": "feature-create-a-focus-session-setup-interface-where-users-can-select-a-session-duration-time-based-before-starting-their-focus-work-with-options-for-common-durations-like-25-45-60-90-minutes-or-custom-duration-input",
+      "featureTitle": "Create a focus session setup interface where users can select a session duration (time-based) before starting their focus work, with options for common durations like 25, 45, 60, 90 minutes or custom duration input",
       "files": [
-        "frontend/src/components/ValidationMetrics.tsx"
+        "frontend/src/App.tsx",
+        "frontend/src/components/Layout.tsx",
+        "frontend/src/hooks/useFocusSessionTimer.ts",
+        "frontend/src/pages/FocusSession.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -15,15 +18,17 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-55"
+        "REQ-1"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-update-livemonitor-component-in-frontend-src-pages-livemonitor-tsx-to-include-a-dedicated-validation-metrics-section-that-displays-the-detailed-real-time-metrics-component-with-all-precise-switching-data-visible-simultaneously-for-system-accuracy-verification",
-      "featureTitle": "Update LiveMonitor component in frontend/src/pages/LiveMonitor.tsx to include a dedicated 'Validation Metrics' section that displays the detailed real-time metrics component with all precise switching data visible simultaneously for system accuracy verification",
+      "featureId": "feature-implement-tab-switch-tracking-specifically-between-productive-and-distractive-content-sections-within-the-app-incrementing-a-violation-counter-each-time-user-navigates-from-productive-to-distractive-sections",
+      "featureTitle": "Implement tab switch tracking specifically between productive and distractive content sections within the app, incrementing a violation counter each time user navigates from productive to distractive sections",
       "files": [
-        "frontend/src/pages/LiveMonitor.tsx"
+        "frontend/src/hooks/useFocusSessionViolations.ts",
+        "frontend/src/pages/FocusSession.tsx",
+        "frontend/src/types/index.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -33,15 +38,17 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-56"
+        "REQ-2"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-enhance-usefocusmonitor-hook-in-frontend-src-hooks-usefocusmonitor-ts-to-expose-a-detailed-switching-history-array-containing-the-last-20-switch-events-with-exact-timestamps-away-duration-and-distraction-score-at-time-of-switch-for-debugging-and-validation-purposes",
-      "featureTitle": "Enhance useFocusMonitor hook in frontend/src/hooks/useFocusMonitor.ts to expose a detailed switching history array containing the last 20 switch events with exact timestamps, away duration, and distraction score at time of switch for debugging and validation purposes",
+      "featureId": "feature-implement-a-three-strike-warning-system-that-applies-a-grayscale-visual-effect-to-distractive-content-sections-for-exactly-2-minutes-after-the-third-violation-switch-to-distractive-content",
+      "featureTitle": "Implement a three-strike warning system that applies a grayscale visual effect to distractive content sections for exactly 2 minutes after the third violation (switch to distractive content)",
       "files": [
-        "frontend/src/hooks/useFocusMonitor.ts"
+        "frontend/src/components/DistractiveContentWrapper.tsx",
+        "frontend/src/hooks/useFocusSessionViolations.ts",
+        "frontend/src/pages/FocusSession.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -51,7 +58,68 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-57"
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-after-the-2-minute-grayscale-warning-period-ends-reset-the-violation-counter-to-zero-and-start-a-new-warning-cycle-allowing-the-user-to-continue-with-a-fresh-count",
+      "featureTitle": "After the 2-minute grayscale warning period ends, reset the violation counter to zero and start a new warning cycle, allowing the user to continue with a fresh count",
+      "files": [
+        "frontend/src/hooks/useFocusSessionViolations.ts",
+        "frontend/src/pages/FocusSession.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-lock-and-restrict-all-access-to-distractive-content-sections-until-the-user-s-focus-session-timer-completes-preventing-navigation-to-distractive-sections-even-if-user-attempts-to-access-them",
+      "featureTitle": "Lock and restrict all access to distractive content sections until the user's focus session timer completes, preventing navigation to distractive sections even if user attempts to access them",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/DistractiveContentBlocker.tsx",
+        "frontend/src/hooks/useFocusSessionViolations.ts",
+        "frontend/src/pages/FocusSession.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-when-focus-session-timer-completes-automatically-lift-all-restrictions-and-allow-full-access-to-both-productive-and-distractive-sections-with-option-for-user-to-start-a-new-focus-session-if-needed",
+      "featureTitle": "When focus session timer completes, automatically lift all restrictions and allow full access to both productive and distractive sections, with option for user to start a new focus session if needed",
+      "files": [
+        "frontend/src/components/FocusSessionSummary.tsx",
+        "frontend/src/hooks/useFocusSessionTimer.ts",
+        "frontend/src/hooks/useFocusSessionViolations.ts",
+        "frontend/src/pages/FocusSession.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-6"
       ],
       "confidence": "high"
     }

@@ -105,3 +105,27 @@ export function useRecordFocusScore() {
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 }
+
+/**
+ * Hook to fetch all focus sessions from the backend
+ */
+export function useGetAllFocusSessions() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery({
+    queryKey: ['focusSessions'],
+    queryFn: async () => {
+      if (!actor) return [];
+      try {
+        return await actor.getAllFocusSessions();
+      } catch (error) {
+        console.error('Failed to fetch focus sessions:', error);
+        return [];
+      }
+    },
+    enabled: !!actor && !isFetching,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    refetchOnWindowFocus: false,
+  });
+}

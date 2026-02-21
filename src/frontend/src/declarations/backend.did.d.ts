@@ -39,6 +39,19 @@ export interface FocusScore {
   'timeAway' : bigint,
   'tabSwitchCount' : bigint,
 }
+export interface FocusSessionData {
+  'duration' : bigint,
+  'focusScore' : bigint,
+  'completed' : boolean,
+  'violations' : Array<FocusSessionViolation>,
+  'timestamp' : Time,
+}
+export interface FocusSessionViolation {
+  'sourceTab' : TabType,
+  'targetTab' : TabType,
+  'timestamp' : Time,
+  'violationCount' : bigint,
+}
 export type NegativePattern = { 'distractionSpikes' : null } |
   { 'lateNightFatigue' : null } |
   { 'frequentSwitching' : null };
@@ -61,19 +74,23 @@ export type SessionType = { 'focus' : null } |
 export type StreakType = { 'deepWorkCompletion' : null } |
   { 'focusStreak' : null } |
   { 'distractionResistance' : null };
+export type TabType = { 'productive' : null } |
+  { 'distractive' : null };
 export type Time = bigint;
 export interface TimerSetting { 'duration' : bigint, 'notification' : boolean }
 export interface _SERVICE {
   'addAchievement' : ActorMethod<[Achievement], undefined>,
   'generateReport' : ActorMethod<[Array<Pattern>], Report>,
+  'getAllFocusSessions' : ActorMethod<[], Array<FocusSessionData>>,
   'getAllReports' : ActorMethod<[], Array<Report>>,
   'getFocusScores' : ActorMethod<[], Array<FocusScore>>,
   'getReportById' : ActorMethod<[bigint], [] | [Report]>,
   'recordBreak' : ActorMethod<[BreakSession], undefined>,
-  'recordContextSwitch' : ActorMethod<[], undefined>,
   'recordFocusScore' : ActorMethod<[bigint, bigint, bigint], undefined>,
+  'recordFocusSession' : ActorMethod<[bigint, boolean, bigint], undefined>,
   'recordSession' : ActorMethod<[Session], undefined>,
   'recordSwitch' : ActorMethod<[ContextSwitch], undefined>,
+  'recordTabSwitch' : ActorMethod<[TabType, TabType], undefined>,
   'startFocusSession' : ActorMethod<[], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;

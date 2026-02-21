@@ -12,6 +12,12 @@ export interface TimerSetting {
     notification: boolean;
 }
 export type Time = bigint;
+export interface FocusSessionViolation {
+    sourceTab: TabType;
+    targetTab: TabType;
+    timestamp: Time;
+    violationCount: bigint;
+}
 export interface Report {
     patterns: Array<Pattern>;
     timestamp: Time;
@@ -49,6 +55,13 @@ export interface BreakSession {
     breakType: BreakType;
     isRestorative: boolean;
 }
+export interface FocusSessionData {
+    duration: bigint;
+    focusScore: bigint;
+    completed: boolean;
+    violations: Array<FocusSessionViolation>;
+    timestamp: Time;
+}
 export interface FocusScore {
     distractionScore: bigint;
     timestamp: Time;
@@ -83,16 +96,22 @@ export enum StreakType {
     focusStreak = "focusStreak",
     distractionResistance = "distractionResistance"
 }
+export enum TabType {
+    productive = "productive",
+    distractive = "distractive"
+}
 export interface backendInterface {
     addAchievement(achievement: Achievement): Promise<void>;
     generateReport(patterns: Array<Pattern>): Promise<Report>;
+    getAllFocusSessions(): Promise<Array<FocusSessionData>>;
     getAllReports(): Promise<Array<Report>>;
     getFocusScores(): Promise<Array<FocusScore>>;
     getReportById(reportId: bigint): Promise<Report | null>;
     recordBreak(breakSession: BreakSession): Promise<void>;
-    recordContextSwitch(): Promise<void>;
     recordFocusScore(distractionScore: bigint, tabSwitchCount: bigint, timeAway: bigint): Promise<void>;
+    recordFocusSession(duration: bigint, completed: boolean, focusScore: bigint): Promise<void>;
     recordSession(session: Session): Promise<void>;
     recordSwitch(contextSwitch: ContextSwitch): Promise<void>;
+    recordTabSwitch(sourceTab: TabType, targetTab: TabType): Promise<void>;
     startFocusSession(): Promise<void>;
 }

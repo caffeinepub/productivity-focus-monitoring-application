@@ -1,395 +1,61 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 15,
-  "summary": "Productivity & Focus Monitoring Application: A background productivity assistant that monitors context switching behavior to help users maintain focus, reduce distractions, and develop healthier digital work habits through gentle interventions, burnout tracking, and supportive coaching.",
+  "projectStateVersion": 3,
+  "summary": "Focus monitoring web application with productive/distractive app categorization, tab switch tracking, warning system, and session-based locking",
   "architectural_notes": [
-    "Privacy-first design: monitor application names and timing only, never record content or typed data",
-    "Context switching as primary behavioral signal for attention quality measurement",
-    "Burnout index increases based on switching type: productive→productive (small), productive→distracting (moderate), distracting→distracting (large)",
-    "Progressive intervention model: notification → greyscale → temporary blocking → productive session unlock",
-    "Non-blocking architecture: runs as background service with minimal resource usage",
-    "Break quality algorithm distinguishes restorative (walks, breathing, inactivity) from non-restorative breaks (passive browsing)",
-    "Switch frequency index: (number of window changes ÷ time interval) tracked every few seconds",
-    "Multi-threshold warning system with configurable burnout index thresholds",
-    "React-based frontend with custom hooks for focus monitoring",
-    "Motoko backend for authentication and data storage (replacing Python/Flask architecture)"
+    "Web-based focus monitoring system (cannot block external browser tabs or desktop apps)",
+    "Track navigation within app between productive/distractive content sections",
+    "Grayscale CSS filter applied only to distractive content sections during warning period",
+    "Session-based restriction system tied to user-defined timer duration"
   ],
   "known_issues": [],
-  "isFixRequest": true,
+  "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-build-application-categorization-interface-where-users-can-view-and-manage-which-applications-are-classified-as-productive-or-distracting-with-default-examples-including-coding-tools-document-editors-and-presentation-software-as-productive-and-social-media-video-platforms-and-games-as-distracting",
-      "title": "Build application categorization interface where users can view and manage which applications are classified as productive or distracting, with default examples including coding tools, document editors, and presentation software as productive, and social media, video platforms, and games as distracting",
+      "id": "feature-create-a-focus-session-setup-interface-where-users-can-select-a-session-duration-time-based-before-starting-their-focus-work-with-options-for-common-durations-like-25-45-60-90-minutes-or-custom-duration-input",
+      "title": "Create a focus session setup interface where users can select a session duration (time-based) before starting their focus work, with options for common durations like 25, 45, 60, 90 minutes or custom duration input",
       "reqIds": [
-        "REQ-7"
+        "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-create-live-monitoring-simulation-interface-that-displays-current-active-application-real-time-switching-frequency-continuous-focus-duration-and-a-visual-indicator-when-context-switches-occur",
-      "title": "Create live monitoring simulation interface that displays current active application, real-time switching frequency, continuous focus duration, and a visual indicator when context switches occur",
+      "id": "feature-implement-tab-switch-tracking-specifically-between-productive-and-distractive-content-sections-within-the-app-incrementing-a-violation-counter-each-time-user-navigates-from-productive-to-distractive-sections",
+      "title": "Implement tab switch tracking specifically between productive and distractive content sections within the app, incrementing a violation counter each time user navigates from productive to distractive sections",
       "reqIds": [
-        "REQ-8"
+        "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-implement-progressive-warning-system-ui-that-shows-non-intrusive-notifications-at-first-burnout-threshold-displaying-current-burnout-index-and-encouragement-message-then-applies-subtle-greyscale-filter-to-screen-at-second-threshold-to-reduce-visual-stimulation",
-      "title": "Implement progressive warning system UI that shows non-intrusive notifications at first burnout threshold displaying current burnout index and encouragement message, then applies subtle greyscale filter to screen at second threshold to reduce visual stimulation",
+      "id": "feature-implement-a-three-strike-warning-system-that-applies-a-grayscale-visual-effect-to-distractive-content-sections-for-exactly-2-minutes-after-the-third-violation-switch-to-distractive-content",
+      "title": "Implement a three-strike warning system that applies a grayscale visual effect to distractive content sections for exactly 2 minutes after the third violation (switch to distractive content)",
       "reqIds": [
-        "REQ-9"
+        "REQ-3"
       ],
       "version": 1
     },
     {
-      "id": "feature-build-smart-blocking-interface-that-after-two-ignored-warnings-displays-a-block-screen-for-distracting-applications-showing-required-productive-session-duration-20-25-minutes-needed-to-unlock-with-a-focus-timer-and-progress-indicator",
-      "title": "Build smart blocking interface that after two ignored warnings displays a block screen for distracting applications, showing required productive session duration (20-25 minutes) needed to unlock, with a focus timer and progress indicator",
+      "id": "feature-after-the-2-minute-grayscale-warning-period-ends-reset-the-violation-counter-to-zero-and-start-a-new-warning-cycle-allowing-the-user-to-continue-with-a-fresh-count",
+      "title": "After the 2-minute grayscale warning period ends, reset the violation counter to zero and start a new warning cycle, allowing the user to continue with a fresh count",
       "reqIds": [
-        "REQ-10"
+        "REQ-4"
       ],
       "version": 1
     },
     {
-      "id": "feature-create-desk-recovery-break-interface-with-guided-breathing-exercise-animations-calming-visual-elements-and-short-mental-reset-timer-that-can-be-completed-without-leaving-the-workspace",
-      "title": "Create desk recovery break interface with guided breathing exercise animations, calming visual elements, and short mental reset timer that can be completed without leaving the workspace",
+      "id": "feature-lock-and-restrict-all-access-to-distractive-content-sections-until-the-user-s-focus-session-timer-completes-preventing-navigation-to-distractive-sections-even-if-user-attempts-to-access-them",
+      "title": "Lock and restrict all access to distractive content sections until the user's focus session timer completes, preventing navigation to distractive sections even if user attempts to access them",
       "reqIds": [
-        "REQ-11"
+        "REQ-5"
       ],
       "version": 1
     },
     {
-      "id": "feature-implement-walk-break-timer-interface-where-users-set-break-duration-before-leaving-displays-countdown-timer-prominently-and-plays-an-alert-alarm-sound-when-time-expires-if-user-has-not-returned",
-      "title": "Implement walk break timer interface where users set break duration before leaving, displays countdown timer prominently, and plays an alert alarm sound when time expires if user has not returned",
+      "id": "feature-when-focus-session-timer-completes-automatically-lift-all-restrictions-and-allow-full-access-to-both-productive-and-distractive-sections-with-option-for-user-to-start-a-new-focus-session-if-needed",
+      "title": "When focus session timer completes, automatically lift all restrictions and allow full access to both productive and distractive sections, with option for user to start a new focus session if needed",
       "reqIds": [
-        "REQ-12"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-build-gamification-achievements-display-showing-earned-badges-for-focus-streaks-deep-work-milestones-and-distraction-resistance-with-visual-icons-unlock-dates-and-share-functionality-for-portfolio-or-interview-use",
-      "title": "Build gamification achievements display showing earned badges for focus streaks, deep work milestones, and distraction resistance with visual icons, unlock dates, and share functionality for portfolio or interview use",
-      "reqIds": [
-        "REQ-13"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-create-recovery-quality-visualization-using-a-pie-chart-that-segments-break-time-into-restorative-activities-walks-breathing-exercises-inactivity-and-non-restorative-activities-passive-browsing-social-media-with-clear-labels-and-percentages",
-      "title": "Create recovery quality visualization using a pie chart that segments break time into restorative activities (walks, breathing exercises, inactivity) and non-restorative activities (passive browsing, social media) with clear labels and percentages",
-      "reqIds": [
-        "REQ-14"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-build-comprehensive-dashboard-displaying-total-focus-time-distraction-time-switching-frequency-chart-burnout-index-trend-graph-overall-productivity-score-and-daily-personalized-recommendations-in-a-clean-visual-layout",
-      "title": "Build comprehensive dashboard displaying total focus time, distraction time, switching frequency chart, burnout index trend graph, overall productivity score, and daily personalized recommendations in a clean visual layout",
-      "reqIds": [
-        "REQ-15"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-periodic-report-view-that-displays-positive-behavioral-patterns-consistent-work-sessions-healthy-break-timing-reduced-distractions-and-negative-patterns-late-night-work-fatigue-frequent-context-switching-distraction-spikes-with-visual-indicators-and-trend-comparisons-over-time",
-      "title": "Implement periodic report view that displays positive behavioral patterns (consistent work sessions, healthy break timing, reduced distractions) and negative patterns (late-night work fatigue, frequent context switching, distraction spikes) with visual indicators and trend comparisons over time",
-      "reqIds": [
-        "REQ-16"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-design-the-application-with-a-supportive-coaching-aesthetic-using-warm-encouraging-colors-and-gentle-typography-that-conveys-non-intrusive-monitoring-privacy-respecting-tracking-and-encouragement-over-punishment-throughout-all-interfaces",
-      "title": "Design the application with a supportive coaching aesthetic using warm, encouraging colors and gentle typography that conveys non-intrusive monitoring, privacy-respecting tracking, and encouragement over punishment throughout all interfaces",
-      "reqIds": [
-        "REQ-17"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-create-a-usefocusmonitor-react-hook-that-tracks-page-visibility-changes-using-the-page-visibility-api-visibilitychange-event-and-window-focus-blur-events-window-onblur-and-window-onfocus-recording-timestamps-whenever-the-user-leaves-and-returns-to-the-page",
-      "title": "Create a useFocusMonitor React hook that tracks page visibility changes using the Page Visibility API (visibilitychange event) and window focus/blur events (window.onblur and window.onfocus), recording timestamps whenever the user leaves and returns to the page",
-      "reqIds": [
-        "REQ-18"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-in-the-usefocusmonitor-hook-calculate-how-long-the-user-stayed-away-from-the-page-by-comparing-leave-and-return-timestamps-and-count-how-many-times-the-user-switches-away-within-a-time-period-e-g-per-minute",
-      "title": "In the useFocusMonitor hook, calculate how long the user stayed away from the page by comparing leave and return timestamps, and count how many times the user switches away within a time period (e.g., per minute)",
-      "reqIds": [
-        "REQ-19"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-in-the-usefocusmonitor-hook-implement-a-distraction-score-calculation-that-updates-when-the-user-switches-tabs-frequently-e-g-more-than-5-times-in-2-minutes-incrementing-the-score-based-on-switching-frequency",
-      "title": "In the useFocusMonitor hook, implement a distraction score calculation that updates when the user switches tabs frequently (e.g., more than 5 times in 2 minutes), incrementing the score based on switching frequency",
-      "reqIds": [
-        "REQ-20"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-display-a-small-on-screen-warning-component-when-the-distraction-score-threshold-is-exceeded-showing-a-message-like-frequent-tab-switching-detected-try-focusing-for-a-few-minutes-with-dismissible-functionality",
-      "title": "Display a small on-screen warning component when the distraction score threshold is exceeded, showing a message like 'Frequent tab switching detected. Try focusing for a few minutes.' with dismissible functionality",
-      "reqIds": [
-        "REQ-21"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-send-the-distraction-score-and-switching-statistics-tab-switch-count-time-away-timestamps-to-the-backend-using-a-post-request-to-an-api-endpoint-transmitting-data-in-json-format-whenever-significant-changes-occur",
-      "title": "Send the distraction score and switching statistics (tab switch count, time away, timestamps) to the backend using a POST request to an API endpoint, transmitting data in JSON format whenever significant changes occur",
-      "reqIds": [
-        "REQ-22"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-inline-code-comments-to-the-usefocusmonitor-hook-explaining-each-section-including-event-listener-setup-timestamp-recording-duration-calculation-switch-counting-distraction-score-logic-and-api-communication-ensuring-the-code-is-beginner-friendly-and-modifiable",
-      "title": "Add inline code comments to the useFocusMonitor hook explaining each section including event listener setup, timestamp recording, duration calculation, switch counting, distraction score logic, and API communication, ensuring the code is beginner-friendly and modifiable",
-      "reqIds": [
-        "REQ-24"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-verify-that-the-usefocusmonitor-hook-in-frontend-src-hooks-usefocusmonitor-ts-correctly-implements-page-visibility-api-tracking-with-visibilitychange-event-listener-and-window-focus-blur-event-listeners-window-onblur-and-window-onfocus-ensuring-timestamps-are-captured-when-users-leave-and-return-to-the-page",
-      "title": "Verify that the useFocusMonitor hook in frontend/src/hooks/useFocusMonitor.ts correctly implements Page Visibility API tracking with visibilitychange event listener and window focus/blur event listeners (window.onblur and window.onfocus), ensuring timestamps are captured when users leave and return to the page",
-      "reqIds": [
-        "REQ-25"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-the-usefocusmonitor-hook-calculates-time-away-duration-by-comparing-leave-and-return-timestamps-and-accurately-counts-tab-switches-within-time-windows-switches-per-minute-and-per-hour",
-      "title": "Ensure the useFocusMonitor hook calculates time-away duration by comparing leave and return timestamps, and accurately counts tab switches within time windows (switches per minute and per hour)",
-      "reqIds": [
-        "REQ-26"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-verify-the-distraction-score-calculation-in-usefocusmonitor-increments-based-on-switching-frequency-thresholds-e-g-more-than-5-switches-in-2-minutes-triggers-score-increase",
-      "title": "Verify the distraction score calculation in useFocusMonitor increments based on switching frequency thresholds (e.g., more than 5 switches in 2 minutes triggers score increase)",
-      "reqIds": [
-        "REQ-27"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-confirm-that-distractionwarning-component-in-frontend-src-components-distractionwarning-tsx-displays-when-distraction-score-exceeds-threshold-showing-current-switch-count-and-an-encouraging-message-to-focus-with-dismissible-functionality",
-      "title": "Confirm that DistractionWarning component in frontend/src/components/DistractionWarning.tsx displays when distraction score exceeds threshold, showing current switch count and an encouraging message to focus, with dismissible functionality",
-      "reqIds": [
-        "REQ-28"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-verify-that-focus-session-data-distraction-score-tab-switch-count-time-away-timestamps-is-transmitted-to-the-backend-via-the-recordfocusscore-function-from-the-actor-sending-data-whenever-significant-changes-occur-or-at-regular-intervals",
-      "title": "Verify that focus session data (distraction score, tab switch count, time away, timestamps) is transmitted to the backend via the recordFocusScore function from the actor, sending data whenever significant changes occur or at regular intervals",
-      "reqIds": [
-        "REQ-29"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-all-sections-of-the-usefocusmonitor-hook-contain-inline-code-comments-explaining-event-listener-setup-timestamp-recording-duration-calculation-switch-counting-distraction-score-logic-and-backend-api-communication-for-beginner-friendly-maintainability",
-      "title": "Ensure all sections of the useFocusMonitor hook contain inline code comments explaining event listener setup, timestamp recording, duration calculation, switch counting, distraction score logic, and backend API communication for beginner-friendly maintainability",
-      "reqIds": [
-        "REQ-30"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-verify-that-the-burnout-monitoring-system-in-useburnoutmonitor-hook-accurately-tracks-burnout-index-categorizes-burnout-levels-low-medium-high-and-triggers-appropriate-warnings-based-on-calculated-thresholds",
-      "title": "Verify that the burnout monitoring system in useBurnoutMonitor hook accurately tracks burnout index, categorizes burnout levels (low/medium/high), and triggers appropriate warnings based on calculated thresholds",
-      "reqIds": [
-        "REQ-31"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-confirm-that-burnoutwarning-component-displays-non-intrusive-notifications-when-first-burnout-threshold-is-reached-showing-current-burnout-index-value-and-encouraging-message-about-taking-breaks",
-      "title": "Confirm that BurnoutWarning component displays non-intrusive notifications when first burnout threshold is reached, showing current burnout index value and encouraging message about taking breaks",
-      "reqIds": [
-        "REQ-32"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-verify-that-greyscaleoverlay-component-applies-subtle-grayscale-filter-to-screen-at-second-burnout-threshold-to-reduce-visual-stimulation-with-intensity-proportional-to-burnout-level",
-      "title": "Verify that GreyscaleOverlay component applies subtle grayscale filter to screen at second burnout threshold to reduce visual stimulation, with intensity proportional to burnout level",
-      "reqIds": [
-        "REQ-33"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-the-blocking-logic-in-useblockinglogic-hook-implements-progressive-warning-system-that-blocks-distracting-applications-after-two-ignored-warnings-requiring-a-25-minute-productive-session-to-unlock",
-      "title": "Ensure the blocking logic in useBlockingLogic hook implements progressive warning system that blocks distracting applications after two ignored warnings, requiring a 25-minute productive session to unlock",
-      "reqIds": [
-        "REQ-34"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-confirm-that-blockscreen-component-displays-full-screen-blocking-interface-showing-required-productive-session-duration-countdown-timer-showing-time-remaining-progress-bar-indicating-completion-percentage-and-motivational-productivity-tips",
-      "title": "Confirm that BlockScreen component displays full-screen blocking interface showing required productive session duration, countdown timer showing time remaining, progress bar indicating completion percentage, and motivational productivity tips",
-      "reqIds": [
-        "REQ-35"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-modify-usefocusmonitor-hook-to-implement-real-time-data-synchronization-by-reducing-the-backend-transmission-interval-from-5-minutes-to-10-seconds-ensuring-focus-monitoring-data-distraction-score-tab-switch-count-time-away-timestamps-is-sent-to-the-backend-frequently-without-requiring-page-refresh",
-      "title": "Modify useFocusMonitor hook to implement real-time data synchronization by reducing the backend transmission interval from 5 minutes to 10 seconds, ensuring focus monitoring data (distraction score, tab switch count, time away, timestamps) is sent to the backend frequently without requiring page refresh",
-      "reqIds": [
-        "REQ-37"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-dashboard-component-to-use-react-query-with-automatic-refetch-intervals-every-10-seconds-to-continuously-fetch-and-display-latest-focus-monitoring-data-from-the-backend-showing-real-time-updates-of-distraction-score-switch-count-and-activity-status",
-      "title": "Update Dashboard component to use React Query with automatic refetch intervals (every 10 seconds) to continuously fetch and display latest focus monitoring data from the backend, showing real-time updates of distraction score, switch count, and activity status",
-      "reqIds": [
-        "REQ-38"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-livemonitor-component-to-use-react-query-with-automatic-refetch-intervals-every-5-seconds-to-continuously-display-current-active-application-switching-frequency-metrics-and-focus-duration-with-real-time-updates",
-      "title": "Update LiveMonitor component to use React Query with automatic refetch intervals (every 5 seconds) to continuously display current active application, switching frequency metrics, and focus duration with real-time updates",
-      "reqIds": [
-        "REQ-39"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-data-persistence-in-usefocusmonitor-hook-by-fetching-the-latest-focus-score-from-the-backend-on-component-mount-using-the-getfocusscores-query-initializing-local-state-with-persisted-values-distraction-score-switch-count-last-activity-timestamp-instead-of-starting-from-zero",
-      "title": "Implement data persistence in useFocusMonitor hook by fetching the latest focus score from the backend on component mount using the getFocusScores query, initializing local state with persisted values (distraction score, switch count, last activity timestamp) instead of starting from zero",
-      "reqIds": [
-        "REQ-40"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-usedashboarddata-hook-to-replace-hardcoded-mock-data-with-actual-backend-queries-using-getfocusscores-and-getreport-functions-calculating-real-metrics-from-stored-focus-sessions-including-total-focus-time-distraction-time-switching-frequency-and-burnout-trends",
-      "title": "Update useDashboardData hook to replace hardcoded mock data with actual backend queries using getFocusScores and getReport functions, calculating real metrics from stored focus sessions including total focus time, distraction time, switching frequency, and burnout trends",
-      "reqIds": [
-        "REQ-41"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-useactivitysimulator-hook-to-persist-simulated-application-data-to-localstorage-and-restore-on-mount-ensuring-the-current-active-application-and-switch-history-are-maintained-across-page-refreshes",
-      "title": "Update useActivitySimulator hook to persist simulated application data to localStorage and restore on mount, ensuring the current active application and switch history are maintained across page refreshes",
-      "reqIds": [
-        "REQ-42"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-loading-states-and-error-handling-to-dashboard-and-livemonitor-components-for-real-time-data-queries-displaying-skeleton-loaders-during-data-fetch-and-error-messages-with-retry-buttons-when-queries-fail",
-      "title": "Add loading states and error handling to Dashboard and LiveMonitor components for real-time data queries, displaying skeleton loaders during data fetch and error messages with retry buttons when queries fail",
-      "reqIds": [
-        "REQ-44"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-create-a-login-signup-page-that-integrates-with-the-existing-internet-identity-authentication-system-allowing-users-to-authenticate-using-internet-identity-login-flow",
-      "title": "Create a login/signup page that integrates with the existing Internet Identity authentication system, allowing users to authenticate using Internet Identity login flow",
-      "reqIds": [
-        "REQ-45"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-profile-icon-button-in-the-top-left-corner-of-the-layout-component-header-that-shows-the-current-authentication-status-and-allows-users-to-log-out-when-clicked",
-      "title": "Add a profile icon button in the top-left corner of the Layout component header that shows the current authentication status and allows users to log out when clicked",
-      "reqIds": [
-        "REQ-46"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-create-a-route-for-the-login-signup-page-in-the-router-configuration-and-set-it-as-a-public-route-accessible-without-authentication",
-      "title": "Create a route for the login/signup page in the router configuration and set it as a public route accessible without authentication",
-      "reqIds": [
-        "REQ-47"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-authentication-guard-logic-that-redirects-unauthenticated-users-to-the-login-page-when-attempting-to-access-protected-routes-like-dashboard-livemonitor-and-other-application-pages",
-      "title": "Implement authentication guard logic that redirects unauthenticated users to the login page when attempting to access protected routes like Dashboard, LiveMonitor, and other application pages",
-      "reqIds": [
-        "REQ-48"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-usedashboarddata-hook-to-implement-comprehensive-error-handling-that-catches-backend-query-failures-and-returns-fallback-mock-data-instead-of-throwing-errors-ensuring-the-dashboard-component-always-displays-content-even-when-backend-queries-fail",
-      "title": "Update useDashboardData hook to implement comprehensive error handling that catches backend query failures and returns fallback mock data instead of throwing errors, ensuring the Dashboard component always displays content even when backend queries fail",
-      "reqIds": [
-        "REQ-49"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-usequeries-hook-to-configure-react-query-with-retry-logic-3-retries-with-exponential-backoff-and-set-refetchonwindowfocus-to-false-to-prevent-unnecessary-query-failures-during-presentation",
-      "title": "Update useQueries hook to configure React Query with retry logic (3 retries with exponential backoff) and set refetchOnWindowFocus to false to prevent unnecessary query failures during presentation",
-      "reqIds": [
-        "REQ-50"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-remove-or-suppress-error-ui-elements-in-dashboard-component-including-error-messages-retry-buttons-and-error-state-displays-so-no-error-indicators-appear-during-presentation-even-if-queries-fail",
-      "title": "Remove or suppress error UI elements in Dashboard component including error messages, retry buttons, and error state displays so no error indicators appear during presentation even if queries fail",
-      "reqIds": [
-        "REQ-51"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-remove-or-suppress-error-ui-elements-in-livemonitor-component-including-error-messages-and-retry-buttons-so-no-error-indicators-appear-during-presentation-even-if-queries-fail",
-      "title": "Remove or suppress error UI elements in LiveMonitor component including error messages and retry buttons so no error indicators appear during presentation even if queries fail",
-      "reqIds": [
-        "REQ-52"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-usefocusmonitor-hook-to-wrap-backend-transmission-calls-in-try-catch-blocks-that-silently-log-errors-to-console-without-affecting-ui-state-or-throwing-exceptions-ensuring-focus-monitoring-continues-to-track-local-metrics-even-when-backend-submissions-fail",
-      "title": "Update useFocusMonitor hook to wrap backend transmission calls in try-catch blocks that silently log errors to console without affecting UI state or throwing exceptions, ensuring focus monitoring continues to track local metrics even when backend submissions fail",
-      "reqIds": [
-        "REQ-53"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-create-a-detailed-real-time-metrics-display-component-that-shows-exact-tab-switching-data-including-precise-switch-timestamps-with-milliseconds-switch-frequency-per-minute-and-per-hour-time-away-durations-for-each-switch-current-distraction-score-with-calculation-breakdown-and-total-switches-count-since-session-start",
-      "title": "Create a detailed real-time metrics display component that shows exact tab switching data including precise switch timestamps (with milliseconds), switch frequency (per minute and per hour), time away durations for each switch, current distraction score with calculation breakdown, and total switches count since session start",
-      "reqIds": [
-        "REQ-55"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-livemonitor-component-in-frontend-src-pages-livemonitor-tsx-to-include-a-dedicated-validation-metrics-section-that-displays-the-detailed-real-time-metrics-component-with-all-precise-switching-data-visible-simultaneously-for-system-accuracy-verification",
-      "title": "Update LiveMonitor component in frontend/src/pages/LiveMonitor.tsx to include a dedicated 'Validation Metrics' section that displays the detailed real-time metrics component with all precise switching data visible simultaneously for system accuracy verification",
-      "reqIds": [
-        "REQ-56"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-enhance-usefocusmonitor-hook-in-frontend-src-hooks-usefocusmonitor-ts-to-expose-a-detailed-switching-history-array-containing-the-last-20-switch-events-with-exact-timestamps-away-duration-and-distraction-score-at-time-of-switch-for-debugging-and-validation-purposes",
-      "title": "Enhance useFocusMonitor hook in frontend/src/hooks/useFocusMonitor.ts to expose a detailed switching history array containing the last 20 switch events with exact timestamps, away duration, and distraction score at time of switch for debugging and validation purposes",
-      "reqIds": [
-        "REQ-57"
+        "REQ-6"
       ],
       "version": 1
     }
@@ -397,201 +63,56 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Background monitoring system tracking active window switches and application usage patterns",
+      "summary": "Productive and distractive app/content selection interface",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Application categorization system (productive vs distracting apps)",
+      "summary": "Tab switch tracking between productive and distractive sections",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-3",
-      "summary": "Burnout index calculation based on context switching patterns",
+      "summary": "Three-strike warning system with grayscale effect on distractive sections for 2 minutes",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-4",
-      "summary": "Progressive warning system with visual interventions (notifications, greyscale)",
+      "summary": "Warning cycle reset after 2-minute grayscale period",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-5",
-      "summary": "Smart blocking mechanism requiring productive session to unlock distracting apps",
+      "summary": "Focus session timer with user-defined duration",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-6",
-      "summary": "Break management system with desk recovery (breathing exercises) and walk breaks (timed alerts)",
+      "summary": "Lock/restrict distractive sections until session timer completes",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-7",
-      "summary": "Gamification system with focus streaks, deep work milestones, and shareable achievements",
+      "summary": "Session reset capability when timer ends or user needs more time",
       "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-8",
-      "summary": "Recovery quality visualization showing restorative vs non-restorative breaks",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-9",
-      "summary": "Dashboard displaying focus time, distraction time, switching frequency, burnout trends, and productivity score",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-10",
-      "summary": "Periodic report system analyzing positive and negative behavioral patterns",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-11",
-      "summary": "Create backend data model to store user activity sessions including timestamp, application name, application category (productive/distracting), duration, and session type (focus/distraction/break)",
-      "reqIds": [
-        "REQ-1"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-12",
-      "summary": "Implement backend burnout index calculation logic that differentiates between productive-to-productive switching (small increase), productive-to-distracting switching (moderate increase), and distracting-to-distracting switching (large increase)",
-      "reqIds": [
-        "REQ-2"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-13",
-      "summary": "Create backend endpoints to record context switches with timestamp, source application, target application, and calculated switch frequency metrics (switches per minute, switches per hour)",
-      "reqIds": [
-        "REQ-3"
-      ],
       "status": "pending"
     },
     {
       "id": "AR-14",
-      "summary": "Implement backend achievement tracking system that awards focus streak badges, deep work hour milestones, and distraction resistance awards based on user behavior patterns",
+      "summary": "Store focus session data (duration, violations, completion status) in the backend for each completed session to enable historical tracking and analytics",
       "reqIds": [
-        "REQ-4"
+        "REQ-7"
       ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-15",
-      "summary": "Create backend break session tracking that records break type (desk recovery/walk break), duration, timer settings, and break quality classification (restorative vs non-restorative based on activity during break)",
-      "reqIds": [
-        "REQ-5"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-16",
-      "summary": "Implement backend periodic report generation that analyzes positive patterns (consistent work sessions, healthy break timing, reduced distractions) and negative patterns (late-night work fatigue, frequent context switching, distraction spikes)",
-      "reqIds": [
-        "REQ-6"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-18",
-      "summary": "Browser tab switching detection using Page Visibility API and window focus/blur events",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-19",
-      "summary": "Focus monitoring data API to receive and store tab switch count, distraction score, time away, and timestamps",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-20",
-      "summary": "Dashboard API endpoints returning daily distraction score, total switches, focus time, and activity logs",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-21",
-      "summary": "React hook (useFocusMonitor) for tracking page visibility, calculating distraction scores, and displaying warnings",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-22",
-      "summary": "Demo account pre-populated with sample data for presentation purposes",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-28",
-      "summary": "Create a backend Motoko function to record focus monitoring data including distraction score, tab switch count, time away from page, and timestamp, storing this data in the existing backend storage structure",
-      "reqIds": [
-        "REQ-23"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-40",
-      "summary": "Verify that the backend recordFocusScore function in backend/main.mo correctly stores focus session data including distraction score, burnout index, switch count, and timestamp in the focusScores Map keyed by user principal",
-      "reqIds": [
-        "REQ-36"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-41",
-      "summary": "Real-time activity monitoring that continuously tracks and displays user's current application focus and switching behavior without requiring page refresh",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-42",
-      "summary": "Data persistence system that preserves focus monitoring data (distraction score, switch count, timestamps) across page refreshes using backend storage",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-49",
-      "summary": "Verify that the backend recordFocusScore function in backend/main.mo correctly handles multiple sequential data submissions from the same user within short time intervals (10 seconds), either updating existing records or appending new entries without data loss",
-      "reqIds": [
-        "REQ-43"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-50",
-      "summary": "Implement error handling and fallback UI to prevent data fetching failures from displaying errors during presentation, ensuring graceful degradation with mock/cached data when backend queries fail",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-56",
-      "summary": "Configure React Query global error handling in main.tsx QueryClient to suppress error boundaries and prevent uncaught query errors from breaking the application during presentation",
-      "reqIds": [
-        "REQ-54"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-57",
-      "summary": "Implement exact real-time tab switching monitor showing precise switching metrics, timestamps, and behavior patterns to validate system accuracy",
-      "reqIds": [],
       "status": "pending"
     }
   ],
-  "gameProjectType": "none",
-  "projectName": "Productivity & Focus Monitoring Application",
+  "projectName": "Focus Guardian",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

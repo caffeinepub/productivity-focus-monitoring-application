@@ -39,6 +39,23 @@ export const Report = IDL.Record({
   'patterns' : IDL.Vec(Pattern),
   'timestamp' : Time,
 });
+export const TabType = IDL.Variant({
+  'productive' : IDL.Null,
+  'distractive' : IDL.Null,
+});
+export const FocusSessionViolation = IDL.Record({
+  'sourceTab' : TabType,
+  'targetTab' : TabType,
+  'timestamp' : Time,
+  'violationCount' : IDL.Nat,
+});
+export const FocusSessionData = IDL.Record({
+  'duration' : IDL.Nat,
+  'focusScore' : IDL.Nat,
+  'completed' : IDL.Bool,
+  'violations' : IDL.Vec(FocusSessionViolation),
+  'timestamp' : Time,
+});
 export const FocusScore = IDL.Record({
   'distractionScore' : IDL.Nat,
   'timestamp' : Time,
@@ -85,14 +102,16 @@ export const ContextSwitch = IDL.Record({
 export const idlService = IDL.Service({
   'addAchievement' : IDL.Func([Achievement], [], []),
   'generateReport' : IDL.Func([IDL.Vec(Pattern)], [Report], []),
+  'getAllFocusSessions' : IDL.Func([], [IDL.Vec(FocusSessionData)], ['query']),
   'getAllReports' : IDL.Func([], [IDL.Vec(Report)], ['query']),
   'getFocusScores' : IDL.Func([], [IDL.Vec(FocusScore)], ['query']),
   'getReportById' : IDL.Func([IDL.Nat], [IDL.Opt(Report)], ['query']),
   'recordBreak' : IDL.Func([BreakSession], [], []),
-  'recordContextSwitch' : IDL.Func([], [], []),
   'recordFocusScore' : IDL.Func([IDL.Nat, IDL.Nat, IDL.Nat], [], []),
+  'recordFocusSession' : IDL.Func([IDL.Nat, IDL.Bool, IDL.Nat], [], []),
   'recordSession' : IDL.Func([Session], [], []),
   'recordSwitch' : IDL.Func([ContextSwitch], [], []),
+  'recordTabSwitch' : IDL.Func([TabType, TabType], [], []),
   'startFocusSession' : IDL.Func([], [], []),
 });
 
@@ -128,6 +147,23 @@ export const idlFactory = ({ IDL }) => {
   });
   const Report = IDL.Record({
     'patterns' : IDL.Vec(Pattern),
+    'timestamp' : Time,
+  });
+  const TabType = IDL.Variant({
+    'productive' : IDL.Null,
+    'distractive' : IDL.Null,
+  });
+  const FocusSessionViolation = IDL.Record({
+    'sourceTab' : TabType,
+    'targetTab' : TabType,
+    'timestamp' : Time,
+    'violationCount' : IDL.Nat,
+  });
+  const FocusSessionData = IDL.Record({
+    'duration' : IDL.Nat,
+    'focusScore' : IDL.Nat,
+    'completed' : IDL.Bool,
+    'violations' : IDL.Vec(FocusSessionViolation),
     'timestamp' : Time,
   });
   const FocusScore = IDL.Record({
@@ -176,14 +212,20 @@ export const idlFactory = ({ IDL }) => {
   return IDL.Service({
     'addAchievement' : IDL.Func([Achievement], [], []),
     'generateReport' : IDL.Func([IDL.Vec(Pattern)], [Report], []),
+    'getAllFocusSessions' : IDL.Func(
+        [],
+        [IDL.Vec(FocusSessionData)],
+        ['query'],
+      ),
     'getAllReports' : IDL.Func([], [IDL.Vec(Report)], ['query']),
     'getFocusScores' : IDL.Func([], [IDL.Vec(FocusScore)], ['query']),
     'getReportById' : IDL.Func([IDL.Nat], [IDL.Opt(Report)], ['query']),
     'recordBreak' : IDL.Func([BreakSession], [], []),
-    'recordContextSwitch' : IDL.Func([], [], []),
     'recordFocusScore' : IDL.Func([IDL.Nat, IDL.Nat, IDL.Nat], [], []),
+    'recordFocusSession' : IDL.Func([IDL.Nat, IDL.Bool, IDL.Nat], [], []),
     'recordSession' : IDL.Func([Session], [], []),
     'recordSwitch' : IDL.Func([ContextSwitch], [], []),
+    'recordTabSwitch' : IDL.Func([TabType, TabType], [], []),
     'startFocusSession' : IDL.Func([], [], []),
   });
 };

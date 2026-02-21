@@ -1,58 +1,182 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Implement precise real-time tab switching metrics display for system validation",
+  "title": "Focus Session System with Tab Switching Tracking and Progressive Restrictions",
   "requirements": [
     {
-      "id": "REQ-55",
-      "summary": "Create a detailed real-time metrics display component that shows exact tab switching data including precise switch timestamps (with milliseconds), switch frequency (per minute and per hour), time away durations for each switch, current distraction score with calculation breakdown, and total switches count since session start",
+      "id": "REQ-1",
+      "summary": "Create focus session setup interface with preset and custom duration options",
       "acceptanceCriteria": [
-        "Display shows millisecond-precision timestamps for each tab switch event",
-        "Switch frequency metrics update in real-time showing switches per minute and per hour",
-        "Each switch event displays the exact duration user was away from the page",
-        "Distraction score calculation is visible with the formula breakdown showing how it increments",
-        "Total switch count displays cumulative switches since monitoring session began",
-        "All metrics update immediately when tab switching occurs without any delay"
+        "User can select from preset session durations or enter a custom duration",
+        "Session timer starts counting down when user begins focus session",
+        "Timer displays remaining time clearly throughout the session",
+        "User can reset or start a new session when current timer completes"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/ValidationMetrics.tsx",
+          "path": "frontend/src/hooks/useFocusSessionTimer.ts",
           "operation": "create",
-          "description": "Create a new component that displays detailed real-time tab switching metrics. The component will receive switching history data from useFocusMonitor hook and render: (1) a table of the last 20 switch events with millisecond-precision ISO timestamps, away duration in seconds, and distraction score at time of switch; (2) real-time frequency metrics showing switches per minute and per hour calculated from the event history; (3) current distraction score with a breakdown showing the calculation formula (e.g., 'Score = base + (switches × multiplier) + (time_away_factor)'); (4) total switches count since session start. Use shadcn/ui Card, Table, and Badge components for consistent styling. All metrics must update immediately when new switch events occur without delay."
+          "description": "Create a hook to manage focus session timer state including duration selection, countdown logic, start/pause/reset controls, and completion status. Use localStorage to persist active session state across page reloads."
+        },
+        {
+          "path": "frontend/src/pages/FocusSession.tsx",
+          "operation": "create",
+          "description": "Create a focus session page that displays duration selection interface with preset buttons (25, 45, 60, 90 minutes) and custom input field. Show countdown timer when session is active with clear remaining time display. Include start, pause, and reset controls. Use the useFocusSessionTimer hook for state management and shadcn/ui Button and Input components for UI."
+        },
+        {
+          "path": "frontend/src/components/Layout.tsx",
+          "operation": "modify",
+          "description": "Add navigation link to the Focus Session page in the main navigation menu, positioned between Dashboard and Monitor links."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Register the /focus-session route in the router configuration, making it a protected route that requires authentication."
         }
       ]
     },
     {
-      "id": "REQ-56",
-      "summary": "Update LiveMonitor component in frontend/src/pages/LiveMonitor.tsx to include a dedicated 'Validation Metrics' section that displays the detailed real-time metrics component with all precise switching data visible simultaneously for system accuracy verification",
+      "id": "REQ-2",
+      "summary": "Implement tab switch tracking between productive and distractive sections with violation counter",
       "acceptanceCriteria": [
-        "LiveMonitor page includes a clearly labeled 'Validation Metrics' or 'Detailed Switching Data' section",
-        "Section displays all switching metrics in an easily readable format",
-        "Metrics are visible alongside existing monitoring displays",
-        "Layout allows for easy comparison between real-time activity and raw switching data"
+        "System detects when user navigates from productive section to distractive section",
+        "Violation counter increments only for productive-to-distractive switches, not other navigation",
+        "Counter persists throughout the focus session",
+        "Counter is visible to user so they can track their violations"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/LiveMonitor.tsx",
+          "path": "frontend/src/hooks/useFocusSessionViolations.ts",
+          "operation": "create",
+          "description": "Create a hook to track tab switches specifically from productive to distractive sections during an active focus session. Monitor route changes and increment violation counter only for productive-to-distractive navigation. Store violations array with timestamps and current count. Integrate with useFocusSessionTimer to ensure tracking only occurs during active sessions. On session completion, call backend's recordFocusSession with violation data."
+        },
+        {
+          "path": "frontend/src/pages/FocusSession.tsx",
           "operation": "modify",
-          "description": "Modify the LiveMonitor page to import and render the new ValidationMetrics component. Add a new section below the existing real-time monitoring displays with a clear heading 'Validation Metrics' or 'Detailed Switching Data'. Pass the switching history data from useFocusMonitor hook to the ValidationMetrics component. Ensure the layout is organized so that existing monitoring metrics (current app, focus duration, tab switches) remain visible at the top, with the detailed validation metrics displayed below for easy comparison and system accuracy verification."
+          "description": "Integrate useFocusSessionViolations hook to display current violation count prominently. Show violation counter badge or card that updates in real-time as violations occur. Display violation history list showing timestamps of each productive-to-distractive switch."
+        },
+        {
+          "path": "frontend/src/types/index.ts",
+          "operation": "modify",
+          "description": "Add FocusSessionViolation and FocusSessionState type definitions including violation count, violation history array, session status, and restriction state."
         }
       ]
     },
     {
-      "id": "REQ-57",
-      "summary": "Enhance useFocusMonitor hook in frontend/src/hooks/useFocusMonitor.ts to expose a detailed switching history array containing the last 20 switch events with exact timestamps, away duration, and distraction score at time of switch for debugging and validation purposes",
+      "id": "REQ-3",
+      "summary": "Implement three-strike grayscale warning system for distractive sections",
       "acceptanceCriteria": [
-        "Hook maintains a rolling array of the last 20 switch events",
-        "Each event in history includes ISO timestamp with milliseconds, duration away, and distraction score snapshot",
-        "History array is accessible to components consuming the hook",
-        "History updates immediately when new switches occur"
+        "After third violation, grayscale effect applies immediately to distractive sections only",
+        "Grayscale effect lasts exactly 2 minutes with visible countdown",
+        "Productive sections remain in full color during grayscale period",
+        "Effect is scoped to distractive content sections, not the entire app interface"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useFocusMonitor.ts",
+          "path": "frontend/src/hooks/useFocusSessionViolations.ts",
           "operation": "modify",
-          "description": "Enhance the useFocusMonitor hook to maintain a rolling array of the last 20 tab switch events. Add a new state variable 'switchingHistory' that stores an array of objects, each containing: (1) timestamp as ISO string with milliseconds (e.g., using new Date().toISOString()), (2) away duration in milliseconds, and (3) distraction score at the time of the switch. When a new switch event occurs (visibility change or blur event), create a history entry and add it to the array, keeping only the most recent 20 entries using array slicing. Include the switchingHistory array in the hook's return object so components can access it. Ensure the history updates immediately when switches occur. Do not modify the existing core tracking logic that uses Page Visibility API and focus/blur events."
+          "description": "Add grayscale warning state management that triggers after third violation. Track grayscale period with 2-minute countdown timer. Store grayscale active status, remaining seconds, and which sections are affected. Ensure grayscale only applies to distractive content sections identified by route patterns."
+        },
+        {
+          "path": "frontend/src/components/DistractiveContentWrapper.tsx",
+          "operation": "create",
+          "description": "Create a wrapper component that applies conditional grayscale CSS filter to its children based on grayscale warning state from useFocusSessionViolations. Use CSS filter: grayscale(100%) only when warning is active. Display countdown timer overlay showing remaining grayscale time."
+        },
+        {
+          "path": "frontend/src/pages/FocusSession.tsx",
+          "operation": "modify",
+          "description": "Wrap distractive content sections with DistractiveContentWrapper component. Display prominent notification when grayscale warning is triggered showing strike count and countdown. Keep productive content sections unwrapped so they remain in full color."
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Add CSS utility classes for grayscale transitions and warning visual states that can be conditionally applied to distractive sections."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Reset violation counter after 2-minute grayscale period and start new warning cycle",
+      "acceptanceCriteria": [
+        "Violation counter resets to 0 automatically when 2-minute grayscale period completes",
+        "User can again accumulate up to 3 violations before next grayscale period",
+        "The cycle repeats indefinitely throughout the focus session",
+        "User receives clear indication that counter has reset"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useFocusSessionViolations.ts",
+          "operation": "modify",
+          "description": "Add automatic counter reset logic that triggers when 2-minute grayscale countdown reaches zero. Clear violation count, reset grayscale state, and allow new warning cycle to begin. Track warning cycle number for user awareness. Emit notification event when reset occurs."
+        },
+        {
+          "path": "frontend/src/pages/FocusSession.tsx",
+          "operation": "modify",
+          "description": "Display toast notification using shadcn/ui Toast component when violation counter resets, clearly informing user that they have a fresh set of warnings. Show current warning cycle number in the violation counter display."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Lock distractive sections until focus session timer completes",
+      "acceptanceCriteria": [
+        "During active focus session, attempts to navigate to distractive sections are blocked",
+        "User sees clear messaging explaining why access is restricted and when it will unlock",
+        "Lock remains in effect until session timer reaches zero",
+        "Productive sections remain fully accessible during the lock period"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useFocusSessionViolations.ts",
+          "operation": "modify",
+          "description": "Add lock state management that activates after repeated violations or user-initiated lockdown. Implement navigation blocking logic for distractive routes. Store locked status, lock reason, and unlock time based on remaining session duration."
+        },
+        {
+          "path": "frontend/src/components/DistractiveContentBlocker.tsx",
+          "operation": "create",
+          "description": "Create a blocking component that replaces distractive content when lock is active. Display clear message explaining restriction, show countdown to unlock based on focus session timer, and provide visual indication of locked status. Use shadcn/ui Card and Alert components for messaging."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add route guard logic that checks lock state from useFocusSessionViolations before rendering distractive routes. Redirect attempts to access locked routes to DistractiveContentBlocker component. Ensure productive routes remain accessible."
+        },
+        {
+          "path": "frontend/src/pages/FocusSession.tsx",
+          "operation": "modify",
+          "description": "Display lock status indicator showing which sections are currently restricted. Provide clear countdown showing when restrictions will lift based on session timer completion."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Automatically lift all restrictions when focus session timer completes",
+      "acceptanceCriteria": [
+        "All locks and restrictions are removed when timer reaches zero",
+        "User receives completion notification indicating session is complete",
+        "User can freely access all sections after session ends",
+        "Clear option is presented to start a new focus session with fresh duration selection"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useFocusSessionTimer.ts",
+          "operation": "modify",
+          "description": "Add completion callback that triggers when timer reaches zero. Set session completed status, emit completion event, and prepare state for new session option. Calculate final focus score based on violation count and session duration before calling backend's recordFocusSession."
+        },
+        {
+          "path": "frontend/src/hooks/useFocusSessionViolations.ts",
+          "operation": "modify",
+          "description": "Listen for session completion event and automatically clear all lock states, grayscale effects, and violation tracking. Reset to initial state ready for new session."
+        },
+        {
+          "path": "frontend/src/pages/FocusSession.tsx",
+          "operation": "modify",
+          "description": "Display completion modal using shadcn/ui Dialog component when session ends, showing session summary including duration, total violations, and focus score. Provide prominent 'Start New Session' button that resets timer and returns to duration selection interface. Show celebration message acknowledging completed session."
+        },
+        {
+          "path": "frontend/src/components/FocusSessionSummary.tsx",
+          "operation": "create",
+          "description": "Create a summary component that displays completed session statistics including total duration, violation count, warning cycles completed, time spent locked, and calculated focus score. Use shadcn/ui Card and Progress components for visual presentation."
         }
       ]
     }

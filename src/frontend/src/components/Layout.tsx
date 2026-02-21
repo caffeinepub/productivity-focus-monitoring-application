@@ -1,5 +1,5 @@
 import { Link, useRouterState, useNavigate } from '@tanstack/react-router';
-import { Activity, LayoutDashboard, Settings, Award, FileText, Coffee, Wind, LogOut, User } from 'lucide-react';
+import { Activity, LayoutDashboard, Settings, Award, FileText, Coffee, Wind, LogOut, User, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -22,6 +22,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const navItems = [
     { path: '/', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/monitor', label: 'Live Monitor', icon: Activity },
+    { path: '/focus-session', label: 'Focus Session', icon: Target },
     { path: '/apps', label: 'Apps', icon: Settings },
     { path: '/achievements', label: 'Achievements', icon: Award },
     { path: '/reports', label: 'Reports', icon: FileText },

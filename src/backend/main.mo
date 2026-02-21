@@ -5,7 +5,9 @@ import Text "mo:core/Text";
 import Runtime "mo:core/Runtime";
 import Time "mo:core/Time";
 import Principal "mo:core/Principal";
+import Migration "migration";
 
+(with migration = Migration.run)
 actor {
   type Session = {
     timestamp : Time.Time;
@@ -93,6 +95,26 @@ actor {
     timeAway : Nat;
   };
 
+  type FocusSessionViolation = {
+    timestamp : Time.Time;
+    violationCount : Nat;
+    sourceTab : TabType;
+    targetTab : TabType;
+  };
+
+  type TabType = {
+    #productive;
+    #distractive;
+  };
+
+  type FocusSessionData = {
+    duration : Nat;
+    violations : [FocusSessionViolation];
+    completed : Bool;
+    focusScore : Nat;
+    timestamp : Time.Time;
+  };
+
   type ScoreWindow = {
     start : Time.Time;
     end : Time.Time;
@@ -104,6 +126,8 @@ actor {
   let achievements = Map.empty<Principal, List.List<Achievement>>();
   let breaks = Map.empty<Principal, List.List<BreakSession>>();
   let reports = Map.empty<Nat, Report>();
+  let focusSessionViolations = Map.empty<Principal, List.List<FocusSessionViolation>>();
+  let focusSessionData = Map.empty<Principal, List.List<FocusSessionData>>();
   let focusScores = Map.empty<Principal, List.List<FocusScore>>();
   let scoreWindows = Map.empty<Principal, ScoreWindow>();
 
@@ -157,17 +181,6 @@ actor {
     reports.values().toArray();
   };
 
-  public shared ({ caller }) func recordContextSwitch() : async () {
-    let lastApp = "App1";
-    let newApp = "App2";
-    let newSwitch : ContextSwitch = {
-      timestamp = 1718151800_00;
-      sourceApp = lastApp;
-      targetApp = newApp;
-    };
-    await recordSwitch(newSwitch);
-  };
-
   public query ({ caller }) func getReportById(reportId : Nat) : async ?Report {
     switch (reports.get(reportId)) {
       case (?report) { ?report };
@@ -202,9 +215,62 @@ actor {
     focusScores.add(caller, existingScores);
   };
 
+  public shared ({ caller }) func recordTabSwitch(sourceTab : TabType, targetTab : TabType) : async () {
+    let now = Time.now();
+    let existingViolations = switch (focusSessionViolations.get(caller)) {
+      case (?violations) { violations.size() };
+      case (null) { 0 };
+    };
+
+    let violationCount = if (sourceTab == #productive and targetTab == #distractive) {
+      existingViolations + 1;
+    } else { existingViolations };
+
+    let newViolation : FocusSessionViolation = {
+      timestamp = now;
+      violationCount;
+      sourceTab;
+      targetTab;
+    };
+
+    if (sourceTab == #productive and targetTab == #distractive) {
+      let existingViolationsList = switch (focusSessionViolations.get(caller)) {
+        case (?violations) { violations };
+        case (null) { List.empty<FocusSessionViolation>() };
+      };
+      existingViolationsList.add(newViolation);
+      focusSessionViolations.add(caller, existingViolationsList);
+    };
+  };
+
   public query ({ caller }) func getFocusScores() : async [FocusScore] {
     switch (focusScores.get(caller)) {
       case (?scores) { scores.toArray() };
+      case (null) { [] };
+    };
+  };
+
+  public shared ({ caller }) func recordFocusSession(duration : Nat, completed : Bool, focusScore : Nat) : async () {
+    let now = Time.now();
+    let newSessionData : FocusSessionData = {
+      duration;
+      violations = [];
+      completed;
+      focusScore;
+      timestamp = now;
+    };
+
+    let existingSessions = switch (focusSessionData.get(caller)) {
+      case (?sessions) { sessions };
+      case (null) { List.empty<FocusSessionData>() };
+    };
+    existingSessions.add(newSessionData);
+    focusSessionData.add(caller, existingSessions);
+  };
+
+  public query ({ caller }) func getAllFocusSessions() : async [FocusSessionData] {
+    switch (focusSessionData.get(caller)) {
+      case (?sessions) { sessions.toArray() };
       case (null) { [] };
     };
   };

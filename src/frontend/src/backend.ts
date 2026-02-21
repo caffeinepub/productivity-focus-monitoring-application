@@ -94,6 +94,12 @@ export interface TimerSetting {
     notification: boolean;
 }
 export type Time = bigint;
+export interface FocusSessionViolation {
+    sourceTab: TabType;
+    targetTab: TabType;
+    timestamp: Time;
+    violationCount: bigint;
+}
 export interface Report {
     patterns: Array<Pattern>;
     timestamp: Time;
@@ -131,6 +137,13 @@ export interface BreakSession {
     breakType: BreakType;
     isRestorative: boolean;
 }
+export interface FocusSessionData {
+    duration: bigint;
+    focusScore: bigint;
+    completed: boolean;
+    violations: Array<FocusSessionViolation>;
+    timestamp: Time;
+}
 export interface FocusScore {
     distractionScore: bigint;
     timestamp: Time;
@@ -165,20 +178,26 @@ export enum StreakType {
     focusStreak = "focusStreak",
     distractionResistance = "distractionResistance"
 }
+export enum TabType {
+    productive = "productive",
+    distractive = "distractive"
+}
 export interface backendInterface {
     addAchievement(achievement: Achievement): Promise<void>;
     generateReport(patterns: Array<Pattern>): Promise<Report>;
+    getAllFocusSessions(): Promise<Array<FocusSessionData>>;
     getAllReports(): Promise<Array<Report>>;
     getFocusScores(): Promise<Array<FocusScore>>;
     getReportById(reportId: bigint): Promise<Report | null>;
     recordBreak(breakSession: BreakSession): Promise<void>;
-    recordContextSwitch(): Promise<void>;
     recordFocusScore(distractionScore: bigint, tabSwitchCount: bigint, timeAway: bigint): Promise<void>;
+    recordFocusSession(duration: bigint, completed: boolean, focusScore: bigint): Promise<void>;
     recordSession(session: Session): Promise<void>;
     recordSwitch(contextSwitch: ContextSwitch): Promise<void>;
+    recordTabSwitch(sourceTab: TabType, targetTab: TabType): Promise<void>;
     startFocusSession(): Promise<void>;
 }
-import type { Achievement as _Achievement, AppCategory as _AppCategory, BreakSession as _BreakSession, BreakType as _BreakType, NegativePattern as _NegativePattern, Pattern as _Pattern, PositivePattern as _PositivePattern, Report as _Report, Session as _Session, SessionType as _SessionType, StreakType as _StreakType, Time as _Time, TimerSetting as _TimerSetting } from "./declarations/backend.did.d.ts";
+import type { Achievement as _Achievement, AppCategory as _AppCategory, BreakSession as _BreakSession, BreakType as _BreakType, FocusSessionData as _FocusSessionData, FocusSessionViolation as _FocusSessionViolation, NegativePattern as _NegativePattern, Pattern as _Pattern, PositivePattern as _PositivePattern, Report as _Report, Session as _Session, SessionType as _SessionType, StreakType as _StreakType, TabType as _TabType, Time as _Time, TimerSetting as _TimerSetting } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
     async addAchievement(arg0: Achievement): Promise<void> {
@@ -209,18 +228,32 @@ export class Backend implements backendInterface {
             return from_candid_Report_n12(this._uploadFile, this._downloadFile, result);
         }
     }
-    async getAllReports(): Promise<Array<Report>> {
+    async getAllFocusSessions(): Promise<Array<FocusSessionData>> {
         if (this.processError) {
             try {
-                const result = await this.actor.getAllReports();
+                const result = await this.actor.getAllFocusSessions();
                 return from_candid_vec_n21(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.getAllReports();
+            const result = await this.actor.getAllFocusSessions();
             return from_candid_vec_n21(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getAllReports(): Promise<Array<Report>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getAllReports();
+                return from_candid_vec_n29(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getAllReports();
+            return from_candid_vec_n29(this._uploadFile, this._downloadFile, result);
         }
     }
     async getFocusScores(): Promise<Array<FocusScore>> {
@@ -241,41 +274,27 @@ export class Backend implements backendInterface {
         if (this.processError) {
             try {
                 const result = await this.actor.getReportById(arg0);
-                return from_candid_opt_n22(this._uploadFile, this._downloadFile, result);
+                return from_candid_opt_n30(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getReportById(arg0);
-            return from_candid_opt_n22(this._uploadFile, this._downloadFile, result);
+            return from_candid_opt_n30(this._uploadFile, this._downloadFile, result);
         }
     }
     async recordBreak(arg0: BreakSession): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.recordBreak(to_candid_BreakSession_n23(this._uploadFile, this._downloadFile, arg0));
+                const result = await this.actor.recordBreak(to_candid_BreakSession_n31(this._uploadFile, this._downloadFile, arg0));
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.recordBreak(to_candid_BreakSession_n23(this._uploadFile, this._downloadFile, arg0));
-            return result;
-        }
-    }
-    async recordContextSwitch(): Promise<void> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.recordContextSwitch();
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.recordContextSwitch();
+            const result = await this.actor.recordBreak(to_candid_BreakSession_n31(this._uploadFile, this._downloadFile, arg0));
             return result;
         }
     }
@@ -293,17 +312,31 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async recordSession(arg0: Session): Promise<void> {
+    async recordFocusSession(arg0: bigint, arg1: boolean, arg2: bigint): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.recordSession(to_candid_Session_n27(this._uploadFile, this._downloadFile, arg0));
+                const result = await this.actor.recordFocusSession(arg0, arg1, arg2);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.recordSession(to_candid_Session_n27(this._uploadFile, this._downloadFile, arg0));
+            const result = await this.actor.recordFocusSession(arg0, arg1, arg2);
+            return result;
+        }
+    }
+    async recordSession(arg0: Session): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.recordSession(to_candid_Session_n35(this._uploadFile, this._downloadFile, arg0));
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.recordSession(to_candid_Session_n35(this._uploadFile, this._downloadFile, arg0));
             return result;
         }
     }
@@ -318,6 +351,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.recordSwitch(arg0);
+            return result;
+        }
+    }
+    async recordTabSwitch(arg0: TabType, arg1: TabType): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.recordTabSwitch(to_candid_TabType_n41(this._uploadFile, this._downloadFile, arg0), to_candid_TabType_n41(this._uploadFile, this._downloadFile, arg1));
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.recordTabSwitch(to_candid_TabType_n41(this._uploadFile, this._downloadFile, arg0), to_candid_TabType_n41(this._uploadFile, this._downloadFile, arg1));
             return result;
         }
     }
@@ -336,6 +383,12 @@ export class Backend implements backendInterface {
         }
     }
 }
+function from_candid_FocusSessionData_n22(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _FocusSessionData): FocusSessionData {
+    return from_candid_record_n23(_uploadFile, _downloadFile, value);
+}
+function from_candid_FocusSessionViolation_n25(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _FocusSessionViolation): FocusSessionViolation {
+    return from_candid_record_n26(_uploadFile, _downloadFile, value);
+}
 function from_candid_NegativePattern_n17(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _NegativePattern): NegativePattern {
     return from_candid_variant_n18(_uploadFile, _downloadFile, value);
 }
@@ -348,7 +401,10 @@ function from_candid_PositivePattern_n19(_uploadFile: (file: ExternalBlob) => Pr
 function from_candid_Report_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _Report): Report {
     return from_candid_record_n13(_uploadFile, _downloadFile, value);
 }
-function from_candid_opt_n22(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Report]): Report | null {
+function from_candid_TabType_n27(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _TabType): TabType {
+    return from_candid_variant_n28(_uploadFile, _downloadFile, value);
+}
+function from_candid_opt_n30(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Report]): Report | null {
     return value.length === 0 ? null : from_candid_Report_n12(_uploadFile, _downloadFile, value[0]);
 }
 function from_candid_record_n13(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
@@ -361,6 +417,45 @@ function from_candid_record_n13(_uploadFile: (file: ExternalBlob) => Promise<Uin
     return {
         patterns: from_candid_vec_n14(_uploadFile, _downloadFile, value.patterns),
         timestamp: value.timestamp
+    };
+}
+function from_candid_record_n23(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    duration: bigint;
+    focusScore: bigint;
+    completed: boolean;
+    violations: Array<_FocusSessionViolation>;
+    timestamp: _Time;
+}): {
+    duration: bigint;
+    focusScore: bigint;
+    completed: boolean;
+    violations: Array<FocusSessionViolation>;
+    timestamp: Time;
+} {
+    return {
+        duration: value.duration,
+        focusScore: value.focusScore,
+        completed: value.completed,
+        violations: from_candid_vec_n24(_uploadFile, _downloadFile, value.violations),
+        timestamp: value.timestamp
+    };
+}
+function from_candid_record_n26(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    sourceTab: _TabType;
+    targetTab: _TabType;
+    timestamp: _Time;
+    violationCount: bigint;
+}): {
+    sourceTab: TabType;
+    targetTab: TabType;
+    timestamp: Time;
+    violationCount: bigint;
+} {
+    return {
+        sourceTab: from_candid_TabType_n27(_uploadFile, _downloadFile, value.sourceTab),
+        targetTab: from_candid_TabType_n27(_uploadFile, _downloadFile, value.targetTab),
+        timestamp: value.timestamp,
+        violationCount: value.violationCount
     };
 }
 function from_candid_variant_n16(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
@@ -400,23 +495,36 @@ function from_candid_variant_n20(_uploadFile: (file: ExternalBlob) => Promise<Ui
 }): PositivePattern {
     return "reducedDistractions" in value ? PositivePattern.reducedDistractions : "workConsistency" in value ? PositivePattern.workConsistency : "healthyBreaks" in value ? PositivePattern.healthyBreaks : value;
 }
+function from_candid_variant_n28(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    productive: null;
+} | {
+    distractive: null;
+}): TabType {
+    return "productive" in value ? TabType.productive : "distractive" in value ? TabType.distractive : value;
+}
 function from_candid_vec_n14(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_Pattern>): Array<Pattern> {
     return value.map((x)=>from_candid_Pattern_n15(_uploadFile, _downloadFile, x));
 }
-function from_candid_vec_n21(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_Report>): Array<Report> {
+function from_candid_vec_n21(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_FocusSessionData>): Array<FocusSessionData> {
+    return value.map((x)=>from_candid_FocusSessionData_n22(_uploadFile, _downloadFile, x));
+}
+function from_candid_vec_n24(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_FocusSessionViolation>): Array<FocusSessionViolation> {
+    return value.map((x)=>from_candid_FocusSessionViolation_n25(_uploadFile, _downloadFile, x));
+}
+function from_candid_vec_n29(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_Report>): Array<Report> {
     return value.map((x)=>from_candid_Report_n12(_uploadFile, _downloadFile, x));
 }
 function to_candid_Achievement_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Achievement): _Achievement {
     return to_candid_record_n2(_uploadFile, _downloadFile, value);
 }
-function to_candid_AppCategory_n31(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: AppCategory): _AppCategory {
-    return to_candid_variant_n32(_uploadFile, _downloadFile, value);
+function to_candid_AppCategory_n39(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: AppCategory): _AppCategory {
+    return to_candid_variant_n40(_uploadFile, _downloadFile, value);
 }
-function to_candid_BreakSession_n23(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: BreakSession): _BreakSession {
-    return to_candid_record_n24(_uploadFile, _downloadFile, value);
+function to_candid_BreakSession_n31(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: BreakSession): _BreakSession {
+    return to_candid_record_n32(_uploadFile, _downloadFile, value);
 }
-function to_candid_BreakType_n25(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: BreakType): _BreakType {
-    return to_candid_variant_n26(_uploadFile, _downloadFile, value);
+function to_candid_BreakType_n33(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: BreakType): _BreakType {
+    return to_candid_variant_n34(_uploadFile, _downloadFile, value);
 }
 function to_candid_NegativePattern_n10(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: NegativePattern): _NegativePattern {
     return to_candid_variant_n11(_uploadFile, _downloadFile, value);
@@ -427,14 +535,17 @@ function to_candid_Pattern_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8
 function to_candid_PositivePattern_n8(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: PositivePattern): _PositivePattern {
     return to_candid_variant_n9(_uploadFile, _downloadFile, value);
 }
-function to_candid_SessionType_n29(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: SessionType): _SessionType {
-    return to_candid_variant_n30(_uploadFile, _downloadFile, value);
+function to_candid_SessionType_n37(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: SessionType): _SessionType {
+    return to_candid_variant_n38(_uploadFile, _downloadFile, value);
 }
-function to_candid_Session_n27(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Session): _Session {
-    return to_candid_record_n28(_uploadFile, _downloadFile, value);
+function to_candid_Session_n35(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Session): _Session {
+    return to_candid_record_n36(_uploadFile, _downloadFile, value);
 }
 function to_candid_StreakType_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: StreakType): _StreakType {
     return to_candid_variant_n4(_uploadFile, _downloadFile, value);
+}
+function to_candid_TabType_n41(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: TabType): _TabType {
+    return to_candid_variant_n42(_uploadFile, _downloadFile, value);
 }
 function to_candid_record_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     streakStart: Time;
@@ -457,7 +568,7 @@ function to_candid_record_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8A
         milestone: value.milestone
     };
 }
-function to_candid_record_n24(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+function to_candid_record_n32(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     startTime: Time;
     timerSetting: TimerSetting;
     endTime: Time;
@@ -474,11 +585,11 @@ function to_candid_record_n24(_uploadFile: (file: ExternalBlob) => Promise<Uint8
         startTime: value.startTime,
         timerSetting: value.timerSetting,
         endTime: value.endTime,
-        breakType: to_candid_BreakType_n25(_uploadFile, _downloadFile, value.breakType),
+        breakType: to_candid_BreakType_n33(_uploadFile, _downloadFile, value.breakType),
         isRestorative: value.isRestorative
     };
 }
-function to_candid_record_n28(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+function to_candid_record_n36(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     duration: bigint;
     sessionType: SessionType;
     appName: string;
@@ -493,10 +604,10 @@ function to_candid_record_n28(_uploadFile: (file: ExternalBlob) => Promise<Uint8
 } {
     return {
         duration: value.duration,
-        sessionType: to_candid_SessionType_n29(_uploadFile, _downloadFile, value.sessionType),
+        sessionType: to_candid_SessionType_n37(_uploadFile, _downloadFile, value.sessionType),
         appName: value.appName,
         timestamp: value.timestamp,
-        category: to_candid_AppCategory_n31(_uploadFile, _downloadFile, value.category)
+        category: to_candid_AppCategory_n39(_uploadFile, _downloadFile, value.category)
     };
 }
 function to_candid_variant_n11(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: NegativePattern): {
@@ -514,7 +625,7 @@ function to_candid_variant_n11(_uploadFile: (file: ExternalBlob) => Promise<Uint
         frequentSwitching: null
     } : value;
 }
-function to_candid_variant_n26(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: BreakType): {
+function to_candid_variant_n34(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: BreakType): {
     walkBreak: null;
 } | {
     deskRecovery: null;
@@ -525,7 +636,7 @@ function to_candid_variant_n26(_uploadFile: (file: ExternalBlob) => Promise<Uint
         deskRecovery: null
     } : value;
 }
-function to_candid_variant_n30(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: SessionType): {
+function to_candid_variant_n38(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: SessionType): {
     focus: null;
 } | {
     rest: null;
@@ -538,17 +649,6 @@ function to_candid_variant_n30(_uploadFile: (file: ExternalBlob) => Promise<Uint
         rest: null
     } : value == SessionType.distraction ? {
         distraction: null
-    } : value;
-}
-function to_candid_variant_n32(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: AppCategory): {
-    productive: null;
-} | {
-    distracting: null;
-} {
-    return value == AppCategory.productive ? {
-        productive: null
-    } : value == AppCategory.distracting ? {
-        distracting: null
     } : value;
 }
 function to_candid_variant_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: StreakType): {
@@ -564,6 +664,28 @@ function to_candid_variant_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8
         focusStreak: null
     } : value == StreakType.distractionResistance ? {
         distractionResistance: null
+    } : value;
+}
+function to_candid_variant_n40(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: AppCategory): {
+    productive: null;
+} | {
+    distracting: null;
+} {
+    return value == AppCategory.productive ? {
+        productive: null
+    } : value == AppCategory.distracting ? {
+        distracting: null
+    } : value;
+}
+function to_candid_variant_n42(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: TabType): {
+    productive: null;
+} | {
+    distractive: null;
+} {
+    return value == TabType.productive ? {
+        productive: null
+    } : value == TabType.distractive ? {
+        distractive: null
     } : value;
 }
 function to_candid_variant_n7(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {

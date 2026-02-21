@@ -8,14 +8,18 @@ import DeskRecovery from './pages/DeskRecovery';
 import WalkBreak from './pages/WalkBreak';
 import Achievements from './pages/Achievements';
 import Reports from './pages/Reports';
+import FocusSession from './pages/FocusSession';
 import Login from './pages/Login';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import { BurnoutWarning } from './components/BurnoutWarning';
 import { GreyscaleOverlay } from './components/GreyscaleOverlay';
 import { BlockScreen } from './components/BlockScreen';
+import { DistractiveContentWrapper } from './components/DistractiveContentWrapper';
+import { DistractiveContentBlocker } from './components/DistractiveContentBlocker';
 import { useBurnoutMonitor } from './hooks/useBurnoutMonitor';
 import { useBlockingLogic } from './hooks/useBlockingLogic';
+import { useFocusSessionViolations } from './hooks/useFocusSessionViolations';
 
 function RootComponent() {
   const { burnoutLevel, burnoutIndex, dismissWarning } = useBurnoutMonitor();
@@ -58,6 +62,44 @@ function RootComponent() {
       
       <Toaster />
     </>
+  );
+}
+
+// Wrapper component for achievements route
+function AchievementsRouteComponent() {
+  const { isLocked, isCurrentRouteDistractive } = useFocusSessionViolations();
+  
+  return (
+    <ProtectedRoute>
+      <Layout>
+        {isLocked && isCurrentRouteDistractive ? (
+          <DistractiveContentBlocker />
+        ) : (
+          <DistractiveContentWrapper>
+            <Achievements />
+          </DistractiveContentWrapper>
+        )}
+      </Layout>
+    </ProtectedRoute>
+  );
+}
+
+// Wrapper component for reports route
+function ReportsRouteComponent() {
+  const { isLocked, isCurrentRouteDistractive } = useFocusSessionViolations();
+  
+  return (
+    <ProtectedRoute>
+      <Layout>
+        {isLocked && isCurrentRouteDistractive ? (
+          <DistractiveContentBlocker />
+        ) : (
+          <DistractiveContentWrapper>
+            <Reports />
+          </DistractiveContentWrapper>
+        )}
+      </Layout>
+    </ProtectedRoute>
   );
 }
 
@@ -109,6 +151,18 @@ const appCategorizationRoute = createRoute({
   ),
 });
 
+const focusSessionRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/focus-session',
+  component: () => (
+    <ProtectedRoute>
+      <Layout>
+        <FocusSession />
+      </Layout>
+    </ProtectedRoute>
+  ),
+});
+
 const deskRecoveryRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/desk-recovery',
@@ -136,25 +190,13 @@ const walkBreakRoute = createRoute({
 const achievementsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/achievements',
-  component: () => (
-    <ProtectedRoute>
-      <Layout>
-        <Achievements />
-      </Layout>
-    </ProtectedRoute>
-  ),
+  component: AchievementsRouteComponent,
 });
 
 const reportsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/reports',
-  component: () => (
-    <ProtectedRoute>
-      <Layout>
-        <Reports />
-      </Layout>
-    </ProtectedRoute>
-  ),
+  component: ReportsRouteComponent,
 });
 
 const routeTree = rootRoute.addChildren([
@@ -162,6 +204,7 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   liveMonitorRoute,
   appCategorizationRoute,
+  focusSessionRoute,
   deskRecoveryRoute,
   walkBreakRoute,
   achievementsRoute,
