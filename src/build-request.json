@@ -1,192 +1,73 @@
 {
   "kind": "build_request",
-  "title": "Transform focus management system into productivity timer with manual distraction logging",
-  "projectName": "Focus Tracker",
+  "title": "Rename application from Focus Tracker to Focus Guardian",
+  "projectName": "Focus Guardian",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Remove automatic focus session start on app launch - users must manually initiate sessions from the dashboard",
+      "text": "Update the application name from 'Focus Tracker' to 'Focus Guardian' in the HTML document title and metadata in frontend/index.html",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-2",
-          "msg-3"
+          "msg-recent-6",
+          "msg-recent-8"
         ],
         "quotes": [
-          "remove the Focus Session Required from the starting of app and it should not open automaticaly",
-          "Remove auto-start: the app won't automatically begin a focus session on launch"
+          "change the apps name from focus Tracker to Focus Guardian"
         ]
       },
       "acceptanceCriteria": [
-        "App loads directly to dashboard without triggering a focus session",
-        "No automatic redirects to focus session page on launch",
-        "Users can navigate freely without being forced into a session"
+        "The browser tab title displays 'Focus Guardian'",
+        "HTML meta tags reference 'Focus Guardian' where applicable"
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Implement customizable productivity timer with preset and custom work/break intervals (Pomodoro-style)",
+      "text": "Update the APP_NAME constant from 'Focus Tracker' to 'Focus Guardian' in frontend/src/lib/copyConstants.ts",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-3",
-          "msg-5"
+          "msg-recent-6",
+          "msg-recent-8"
         ],
         "quotes": [
-          "a browser-based productivity timer with distraction logging features",
-          "Productivity timer with customizable work/break intervals"
+          "change the apps name from focus Tracker to Focus Guardian"
         ]
       },
       "acceptanceCriteria": [
-        "Users can select preset durations (15, 25, 45 minutes) or enter custom times",
-        "Timer displays countdown with start, pause, and reset controls",
-        "Clear visual indication of work session vs break time",
-        "Option to configure break length after work sessions"
+        "The APP_NAME constant exports 'Focus Guardian'",
+        "All components using APP_NAME display 'Focus Guardian'"
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Create manual distraction logging interface where users can record interruptions during focus sessions and categorize them by source (YouTube, Instagram, work apps, etc.)",
-      "target": "both",
+      "text": "Update any remaining hardcoded references to 'Focus Tracker' in user-facing text throughout the frontend codebase to 'Focus Guardian'",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-3",
-          "msg-5"
+          "msg-recent-6",
+          "msg-recent-8"
         ],
         "quotes": [
-          "Manual distraction logging - users can record when they get distracted and categorize the source",
-          "Manual distraction logging with category selection (YouTube, Instagram, productive apps, etc.)"
+          "change the apps name from focus Tracker to Focus Guardian"
         ]
       },
       "acceptanceCriteria": [
-        "Quick-access button during active focus session to log a distraction",
-        "Category picker with common distraction sources (social media, messaging, entertainment, work interruptions)",
-        "Optional notes field for additional context",
-        "Distraction entries timestamped and associated with current session",
-        "Backend stores distraction logs with category, timestamp, and session reference"
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "text": "Build activity classification system in backend that categorizes apps/websites as productive or distracting based on user-defined rules",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-1",
-          "msg-5"
-        ],
-        "quotes": [
-          "classification + transition tracking",
-          "Classification system: productive vs distracting activities"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Backend stores classification rules mapping apps/sites to productive or distracting categories",
-        "Users can customize classifications through settings interface",
-        "Default classifications provided for common apps (VS Code=productive, YouTube=distracting)",
-        "Classification data persists across sessions"
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "text": "Implement transition tracking to record sequences of activity switches (e.g., VS Code → YouTube) and identify interruption patterns",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-1",
-          "msg-5"
-        ],
-        "quotes": [
-          "You see what happened before YouTube",
-          "Transition tracking: records what interrupted focused work"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Backend records transitions as pairs: (source_activity, destination_activity, timestamp)",
-        "System identifies repeated patterns (same transition occurring 3+ times)",
-        "Dashboard displays most common interruption sources",
-        "Transition data used to calculate distraction frequency metrics"
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "text": "Create session history and analytics dashboard showing past focus sessions, distraction patterns, and most frequent interruption sources over time",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-3",
-          "msg-5"
-        ],
-        "quotes": [
-          "Session history and analytics to identify distraction patterns over time",
-          "Pattern detection to identify your most common distractions"
-        ]
-      },
-      "acceptanceCriteria": [
-        "History view lists all completed focus sessions with duration, distraction count, and score",
-        "Analytics section shows top distraction sources ranked by frequency",
-        "Visual charts displaying distraction trends over days/weeks",
-        "Transition matrix showing most common interruption pathways",
-        "Filterable date ranges for historical analysis"
-      ]
-    },
-    {
-      "id": "REQ-7",
-      "text": "Implement burnout/fatigue scoring algorithm based on switching frequency between productive and distracting activities with weighted penalties for context switches",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-1",
-          "msg-5"
-        ],
-        "quotes": [
-          "Calculate Burnout Effect",
-          "Burnout/fatigue scoring based on your switching behavior"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Backend calculates fatigue score using formula: small penalty for productive↔productive switches, large penalty for productive→distracting switches, fragmentation penalty for distracting→distracting chains",
-        "Score updates in real-time as user logs distractions",
-        "Dashboard displays current fatigue level with visual indicator (low/medium/high)",
-        "Historical burnout trends shown in chart format"
-      ]
-    },
-    {
-      "id": "REQ-8",
-      "text": "Measure and display session duration metrics to distinguish between real work (25+ min), browsing (5-10 min), and checking habits (10-40 sec repeated visits)",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Use Session Duration (Very Powerful Signal)",
-          "Measure how long they stay in that app"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Track duration for each logged activity/distraction",
-        "Classify activities by duration pattern: sustained focus (25+ min), brief browsing (5-10 min), habit checking (<1 min repeated)",
-        "Analytics show distribution of time across duration categories",
-        "Identify habitual distractions based on repeated short-duration visits"
+        "No instances of 'Focus Tracker' appear in the UI",
+        "All user-facing text consistently uses 'Focus Guardian'"
       ]
     }
   ],
   "constraints": [
-    "All tracking must be self-reported by the user - no automatic browser tab monitoring or screen capture",
-    "Do not read message content, capture keystrokes, or inspect page content",
-    "Only collect: app name, domain name, time duration, and user-reported switching frequency",
-    "Preserve existing backend data structures for focus sessions and destructive visits",
-    "Do not modify immutable frontend paths: useInternetIdentity.ts, useInternetIdentity.tsx, useActor.ts, main.tsx, frontend/src/components/ui"
+    "Do not modify backend logic or data structures",
+    "Preserve all existing functionality and behavior",
+    "Only update application name references, not feature names or technical terminology"
   ],
   "nonGoals": [
-    "Automatic desktop app monitoring or system-level tracking",
-    "Browser extension that monitors active tabs without user interaction",
-    "Python desktop tracker or native OS integration",
-    "Real-time screen recording or content inspection",
-    "Reading personal data from messages, chats, or documents",
-    "Keystroke logging or password capture"
+    "Changing feature names or component identifiers",
+    "Modifying backend actor names or technical identifiers",
+    "Updating project file structure or build configuration"
   ],
   "imageRequirements": {
     "required": [],

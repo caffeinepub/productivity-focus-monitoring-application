@@ -1,122 +1,39 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Web-based focus tracker with productivity timer and distraction logging features",
-  "architectural_notes": [
-    "React frontend with Motoko backend on Internet Computer",
-    "No auto-start: user manually controls session start/stop",
-    "Self-reported tracking (privacy-first, no browser monitoring)",
-    "Classification dictionary for productive vs distracting apps/sites",
-    "Pattern detection algorithm tracks transition frequency and session duration"
-  ],
+  "summary": "New project",
+  "architectural_notes": [],
   "known_issues": [],
   "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-remove-automatic-focus-session-start-on-app-launch-users-must-manually-initiate-sessions-from-the-dashboard",
-      "title": "Remove automatic focus session start on app launch - users must manually initiate sessions from the dashboard",
+      "id": "feature-update-the-application-name-from-focus-tracker-to-focus-guardian-in-the-html-document-title-and-metadata-in-frontend-index-html",
+      "title": "Update the application name from 'Focus Tracker' to 'Focus Guardian' in the HTML document title and metadata in frontend/index.html",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-implement-customizable-productivity-timer-with-preset-and-custom-work-break-intervals-pomodoro-style",
-      "title": "Implement customizable productivity timer with preset and custom work/break intervals (Pomodoro-style)",
-      "reqIds": [
-        "REQ-2"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-create-manual-distraction-logging-interface-where-users-can-record-interruptions-during-focus-sessions-and-categorize-them-by-source-youtube-instagram-work-apps-etc",
-      "title": "Create manual distraction logging interface where users can record interruptions during focus sessions and categorize them by source (YouTube, Instagram, work apps, etc.)",
+      "id": "feature-update-any-remaining-hardcoded-references-to-focus-tracker-in-user-facing-text-throughout-the-frontend-codebase-to-focus-guardian",
+      "title": "Update any remaining hardcoded references to 'Focus Tracker' in user-facing text throughout the frontend codebase to 'Focus Guardian'",
       "reqIds": [
         "REQ-3"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-build-activity-classification-system-in-backend-that-categorizes-apps-websites-as-productive-or-distracting-based-on-user-defined-rules",
-      "title": "Build activity classification system in backend that categorizes apps/websites as productive or distracting based on user-defined rules",
-      "reqIds": [
-        "REQ-4"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-transition-tracking-to-record-sequences-of-activity-switches-e-g-vs-code-youtube-and-identify-interruption-patterns",
-      "title": "Implement transition tracking to record sequences of activity switches (e.g., VS Code → YouTube) and identify interruption patterns",
-      "reqIds": [
-        "REQ-5"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-create-session-history-and-analytics-dashboard-showing-past-focus-sessions-distraction-patterns-and-most-frequent-interruption-sources-over-time",
-      "title": "Create session history and analytics dashboard showing past focus sessions, distraction patterns, and most frequent interruption sources over time",
-      "reqIds": [
-        "REQ-6"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-burnout-fatigue-scoring-algorithm-based-on-switching-frequency-between-productive-and-distracting-activities-with-weighted-penalties-for-context-switches",
-      "title": "Implement burnout/fatigue scoring algorithm based on switching frequency between productive and distracting activities with weighted penalties for context switches",
-      "reqIds": [
-        "REQ-7"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-measure-and-display-session-duration-metrics-to-distinguish-between-real-work-25-min-browsing-5-10-min-and-checking-habits-10-40-sec-repeated-visits",
-      "title": "Measure and display session duration metrics to distinguish between real work (25+ min), browsing (5-10 min), and checking habits (10-40 sec repeated visits)",
-      "reqIds": [
-        "REQ-8"
       ],
       "version": 1
     }
   ],
   "new_feature_requests": [
     {
-      "id": "AR-1",
-      "summary": "Productivity timer with customizable work/break intervals",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
       "id": "AR-2",
-      "summary": "Manual distraction logging with category selection",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-3",
-      "summary": "Activity classification system (productive vs distracting)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-4",
-      "summary": "Transition tracking to identify interruption patterns",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-5",
-      "summary": "Session history and analytics dashboard",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-6",
-      "summary": "Burnout/fatigue scoring based on switching behavior",
-      "reqIds": [],
+      "summary": "Update the APP_NAME constant from 'Focus Tracker' to 'Focus Guardian' in frontend/src/lib/copyConstants.ts",
+      "reqIds": [
+        "REQ-2"
+      ],
       "status": "pending"
     }
   ],
-  "gameProjectType": "none",
-  "projectName": "Focus Tracker",
+  "projectName": "Focus Guardian",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

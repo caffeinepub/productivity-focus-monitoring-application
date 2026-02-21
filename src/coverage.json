@@ -1,190 +1,56 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-21T04:20:15.072Z",
+  "generatedAt": "2026-02-21T04:32:34.993Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 8,
-    "implemented": 8,
+    "total": 3,
+    "implemented": 2,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Remove automatic focus session start on app launch - users must manually initiate sessions from the dashboard",
+        "summary": "Update the application name from 'Focus Tracker' to 'Focus Guardian' in the HTML document title and metadata in frontend/index.html",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/pages/Dashboard.tsx",
-          "frontend/src/hooks/useFocusSessionTimer.ts"
+          "frontend/index.html"
         ],
         "matchedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/pages/Dashboard.tsx",
-          "frontend/src/hooks/useFocusSessionTimer.ts"
+          "frontend/index.html"
         ]
       },
       {
         "id": "REQ-2",
-        "summary": "Implement customizable productivity timer with preset and custom work/break intervals (Pomodoro-style)",
-        "status": "implemented",
+        "summary": "Update the APP_NAME constant from 'Focus Tracker' to 'Focus Guardian' in frontend/src/lib/copyConstants.ts",
+        "status": "missing",
         "plannedFiles": [
-          "frontend/src/pages/FocusSession.tsx",
-          "frontend/src/hooks/useFocusSessionTimer.ts",
-          "frontend/src/components/FocusSessionSummary.tsx"
+          "frontend/src/lib/copyConstants.ts"
         ],
-        "matchedFiles": [
-          "frontend/src/pages/FocusSession.tsx",
-          "frontend/src/hooks/useFocusSessionTimer.ts",
-          "frontend/src/components/FocusSessionSummary.tsx"
-        ]
+        "matchedFiles": []
       },
       {
         "id": "REQ-3",
-        "summary": "Create manual distraction logging interface where users can record interruptions during focus sessions and categorize them by source (YouTube, Instagram, work apps, etc.)",
+        "summary": "Update any remaining hardcoded references to 'Focus Tracker' in user-facing text throughout the frontend codebase to 'Focus Guardian'",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/FocusSession.tsx",
-          "frontend/src/components/DistractionLogModal.tsx",
-          "frontend/src/hooks/useDistractionLogger.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/FocusSession.tsx",
-          "frontend/src/components/DistractionLogModal.tsx",
-          "frontend/src/hooks/useDistractionLogger.ts"
-        ]
-      },
-      {
-        "id": "REQ-4",
-        "summary": "Build activity classification system in backend that categorizes apps/websites as productive or distracting based on user-defined rules",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/AppCategorization.tsx",
-          "frontend/src/hooks/useApplications.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/AppCategorization.tsx",
-          "frontend/src/hooks/useApplications.ts"
-        ]
-      },
-      {
-        "id": "REQ-5",
-        "summary": "Implement transition tracking to record sequences of activity switches (e.g., VS Code → YouTube) and identify interruption patterns",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/FocusSession.tsx",
-          "frontend/src/hooks/useActivityTransitions.ts",
-          "frontend/src/pages/Dashboard.tsx",
-          "frontend/src/components/TransitionPatternsCard.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/FocusSession.tsx",
-          "frontend/src/hooks/useActivityTransitions.ts",
-          "frontend/src/pages/Dashboard.tsx",
-          "frontend/src/components/TransitionPatternsCard.tsx"
-        ]
-      },
-      {
-        "id": "REQ-6",
-        "summary": "Create session history and analytics dashboard showing past focus sessions, distraction patterns, and most frequent interruption sources over time",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/SessionHistory.tsx",
-          "frontend/src/hooks/useSessionHistory.ts",
-          "frontend/src/components/SessionHistoryTable.tsx",
-          "frontend/src/components/DistractionTrendsChart.tsx",
-          "frontend/src/components/TransitionMatrix.tsx",
-          "frontend/src/App.tsx",
+          "frontend/src/pages/Login.tsx",
           "frontend/src/components/Layout.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/SessionHistory.tsx",
-          "frontend/src/hooks/useSessionHistory.ts",
-          "frontend/src/components/SessionHistoryTable.tsx",
-          "frontend/src/components/DistractionTrendsChart.tsx",
-          "frontend/src/components/TransitionMatrix.tsx",
-          "frontend/src/App.tsx",
           "frontend/src/components/Layout.tsx"
-        ]
-      },
-      {
-        "id": "REQ-7",
-        "summary": "Implement burnout/fatigue scoring algorithm based on switching frequency between productive and distracting activities with weighted penalties for context switches",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/Dashboard.tsx",
-          "frontend/src/components/BurnoutScoreCard.tsx",
-          "frontend/src/components/BurnoutTrendsChart.tsx",
-          "frontend/src/hooks/useBurnoutScore.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/Dashboard.tsx",
-          "frontend/src/components/BurnoutScoreCard.tsx",
-          "frontend/src/components/BurnoutTrendsChart.tsx",
-          "frontend/src/hooks/useBurnoutScore.ts"
-        ]
-      },
-      {
-        "id": "REQ-8",
-        "summary": "Measure and display session duration metrics to distinguish between real work (25+ min), browsing (5-10 min), and checking habits (10-40 sec repeated visits)",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/FocusSession.tsx",
-          "frontend/src/hooks/useDistractionLogger.ts",
-          "frontend/src/pages/SessionHistory.tsx",
-          "frontend/src/components/DurationAnalysisCard.tsx",
-          "frontend/src/hooks/useDurationAnalysis.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/FocusSession.tsx",
-          "frontend/src/hooks/useDistractionLogger.ts",
-          "frontend/src/pages/SessionHistory.tsx",
-          "frontend/src/components/DurationAnalysisCard.tsx",
-          "frontend/src/hooks/useDurationAnalysis.ts"
         ]
       }
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/App.tsx",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
-    "frontend/src/components/BurnoutScoreCard.tsx",
-    "frontend/src/components/BurnoutTrendsChart.tsx",
-    "frontend/src/components/DistractionLogModal.tsx",
-    "frontend/src/components/DistractionTrendsChart.tsx",
-    "frontend/src/components/DurationAnalysisCard.tsx",
-    "frontend/src/components/FocusSessionSummary.tsx",
+    "frontend/index.html",
     "frontend/src/components/Layout.tsx",
-    "frontend/src/components/SessionHistoryTable.tsx",
-    "frontend/src/components/TransitionMatrix.tsx",
-    "frontend/src/components/TransitionPatternsCard.tsx",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
-    "frontend/src/hooks/useActivitySimulator.ts",
-    "frontend/src/hooks/useActivityTransitions.ts",
-    "frontend/src/hooks/useApplications.ts",
-    "frontend/src/hooks/useBurnoutScore.ts",
-    "frontend/src/hooks/useDistractionLogger.ts",
-    "frontend/src/hooks/useDistractionWarnings.ts",
-    "frontend/src/hooks/useDurationAnalysis.ts",
-    "frontend/src/hooks/useFocusLock.ts",
-    "frontend/src/hooks/useFocusSessionTimer.ts",
-    "frontend/src/hooks/useFocusStatistics.ts",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/hooks/useSessionHistory.ts",
-    "frontend/src/hooks/useSiteVisitTracking.ts",
-    "frontend/src/pages/AppCategorization.tsx",
-    "frontend/src/pages/Dashboard.tsx",
-    "frontend/src/pages/FocusSession.tsx",
-    "frontend/src/pages/SessionHistory.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

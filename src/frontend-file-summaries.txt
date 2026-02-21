@@ -1,6 +1,6 @@
 {
   "frontend/src/App.tsx": "Main application component with TanStack Router setup, removed burnout monitoring and blocking logic, added SessionHistory route, simplified to basic routing structure without auto-start features.",
-  "frontend/src/components/Layout.tsx": "Application layout component with updated navigation (Dashboard, Focus Timer, History, Categories), profile dropdown, quick action buttons for breaks, and footer with attribution.",
+  "frontend/src/components/Layout.tsx": "Application layout component with updated branding to \"Focus Guardian\" in header and footer, includes navigation, profile dropdown, quick action buttons, and attribution link.",
   "frontend/src/pages/Dashboard.tsx": "Dashboard page displaying productivity overview with burnout score, transition patterns, session metrics, and top distractions; includes quick action buttons to start focus sessions and view history.",
   "frontend/src/pages/LiveMonitor.tsx": "Live activity monitoring page showing current application with real-time switching metrics, automatic data refresh, and validation metrics section displaying detailed switching data with correct prop names (currentDistractionScore, totalSwitches, switchesPerMinute, switchesPerHour) for system accuracy verification.",
   "frontend/src/pages/AppCategorization.tsx": "Application and website categorization management page allowing users to add, edit, and remove activities with productive/distracting/neutral categories, integrated with backend storage.",
@@ -70,5 +70,6 @@
   "frontend/src/components/DistractionTrendsChart.tsx": "Line chart component visualizing average distractions per session over the last 7 days using Recharts library with daily aggregation.",
   "frontend/src/components/BurnoutTrendsChart.tsx": "Line chart component showing historical burnout scores for the last 10 sessions with reference lines for low/medium/high thresholds using Recharts.",
   "frontend/src/components/TransitionMatrix.tsx": "Matrix visualization component displaying most common activity switching pathways with intensity-based background coloring and frequency counts.",
-  "frontend/src/components/DurationAnalysisCard.tsx": "Card component with pie chart showing session duration distribution (sustained focus, brief browsing, habit checking) and list of habitual distractions using Recharts."
+  "frontend/src/components/DurationAnalysisCard.tsx": "Card component with pie chart showing session duration distribution (sustained focus, brief browsing, habit checking) and list of habitual distractions using Recharts.",
+  "frontend/index.html": "HTML entry point with updated title and meta description referencing \"Focus Guardian\" as the application name."
 }

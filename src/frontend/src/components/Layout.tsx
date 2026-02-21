@@ -94,7 +94,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <Target className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h1 className="text-xl font-bold tracking-tight">Focus Tracker</h1>
+                <h1 className="text-xl font-bold tracking-tight">Focus Guardian</h1>
                 <p className="text-xs text-muted-foreground">Productivity timer & analytics</p>
               </div>
             </div>
@@ -142,12 +142,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
       <footer className="border-t border-border/40 bg-background/95 backdrop-blur">
         <div className="container flex h-16 items-center justify-between text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} Focus Tracker</p>
+          <p>© {new Date().getFullYear()} Focus Guardian</p>
           <p>
             Built with <span className="text-red-500">♥</span> using{' '}
             <a
               href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(
-                typeof window !== 'undefined' ? window.location.hostname : 'focus-tracker'
+                typeof window !== 'undefined' ? window.location.hostname : 'focus-guardian'
               )}`}
               target="_blank"
               rel="noopener noreferrer"

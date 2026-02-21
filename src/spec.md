@@ -1,16 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Transform the focus management system into a manual productivity timer with user-reported distraction logging, activity classification, and burnout tracking.
+**Goal:** Rename the application from "Focus Tracker" to "Focus Guardian" throughout the user interface.
 
 **Planned changes:**
-- Remove automatic focus session start on app launch - users land on dashboard and manually start sessions
-- Implement customizable productivity timer with preset durations (15, 25, 45 minutes) or custom intervals
-- Add manual distraction logging interface with quick-access button during sessions to record and categorize interruptions
-- Build activity classification system where users define apps/websites as productive or distracting
-- Implement transition tracking to record activity switch sequences and identify interruption patterns
-- Create session history and analytics dashboard showing past sessions, distraction patterns, and top interruption sources
-- Add burnout/fatigue scoring algorithm based on switching frequency with weighted penalties for context switches
-- Display session duration metrics categorizing activities as sustained focus (25+ min), browsing (5-10 min), or habit checking (<1 min)
+- Update application name in HTML document title and metadata
+- Update APP_NAME constant in copyConstants.ts
+- Replace all remaining user-facing references to "Focus Tracker" with "Focus Guardian"
 
-**User-visible outcome:** Users can start productivity timers on demand, manually log distractions during work sessions with categories, view analytics showing their most common interruption sources and patterns, see burnout scores based on switching behavior, and review historical session data to identify distraction trends over time.
+**User-visible outcome:** The application displays "Focus Guardian" consistently in the browser tab, header, and all UI text instead of "Focus Tracker".

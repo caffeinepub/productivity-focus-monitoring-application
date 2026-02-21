@@ -2,12 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-remove-automatic-focus-session-start-on-app-launch-users-must-manually-initiate-sessions-from-the-dashboard",
-      "featureTitle": "Remove automatic focus session start on app launch - users must manually initiate sessions from the dashboard",
+      "featureId": "feature-update-the-application-name-from-focus-tracker-to-focus-guardian-in-the-html-document-title-and-metadata-in-frontend-index-html",
+      "featureTitle": "Update the application name from 'Focus Tracker' to 'Focus Guardian' in the HTML document title and metadata in frontend/index.html",
       "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/hooks/useFocusSessionTimer.ts",
-        "frontend/src/pages/Dashboard.tsx"
+        "frontend/index.html"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -22,32 +20,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-implement-customizable-productivity-timer-with-preset-and-custom-work-break-intervals-pomodoro-style",
-      "featureTitle": "Implement customizable productivity timer with preset and custom work/break intervals (Pomodoro-style)",
+      "featureId": "feature-update-any-remaining-hardcoded-references-to-focus-tracker-in-user-facing-text-throughout-the-frontend-codebase-to-focus-guardian",
+      "featureTitle": "Update any remaining hardcoded references to 'Focus Tracker' in user-facing text throughout the frontend codebase to 'Focus Guardian'",
       "files": [
-        "frontend/src/components/FocusSessionSummary.tsx",
-        "frontend/src/hooks/useFocusSessionTimer.ts",
-        "frontend/src/pages/FocusSession.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-2"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-create-manual-distraction-logging-interface-where-users-can-record-interruptions-during-focus-sessions-and-categorize-them-by-source-youtube-instagram-work-apps-etc",
-      "featureTitle": "Create manual distraction logging interface where users can record interruptions during focus sessions and categorize them by source (YouTube, Instagram, work apps, etc.)",
-      "files": [
-        "frontend/src/components/DistractionLogModal.tsx",
-        "frontend/src/hooks/useDistractionLogger.ts",
-        "frontend/src/pages/FocusSession.tsx"
+        "frontend/src/components/Layout.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -58,113 +34,6 @@
       ],
       "testIds": [
         "REQ-3"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-build-activity-classification-system-in-backend-that-categorizes-apps-websites-as-productive-or-distracting-based-on-user-defined-rules",
-      "featureTitle": "Build activity classification system in backend that categorizes apps/websites as productive or distracting based on user-defined rules",
-      "files": [
-        "frontend/src/hooks/useApplications.ts",
-        "frontend/src/pages/AppCategorization.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-4"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-implement-transition-tracking-to-record-sequences-of-activity-switches-e-g-vs-code-youtube-and-identify-interruption-patterns",
-      "featureTitle": "Implement transition tracking to record sequences of activity switches (e.g., VS Code → YouTube) and identify interruption patterns",
-      "files": [
-        "frontend/src/components/TransitionPatternsCard.tsx",
-        "frontend/src/hooks/useActivityTransitions.ts",
-        "frontend/src/pages/Dashboard.tsx",
-        "frontend/src/pages/FocusSession.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-5"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-create-session-history-and-analytics-dashboard-showing-past-focus-sessions-distraction-patterns-and-most-frequent-interruption-sources-over-time",
-      "featureTitle": "Create session history and analytics dashboard showing past focus sessions, distraction patterns, and most frequent interruption sources over time",
-      "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/DistractionTrendsChart.tsx",
-        "frontend/src/components/Layout.tsx",
-        "frontend/src/components/SessionHistoryTable.tsx",
-        "frontend/src/components/TransitionMatrix.tsx",
-        "frontend/src/hooks/useSessionHistory.ts",
-        "frontend/src/pages/SessionHistory.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-6"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-implement-burnout-fatigue-scoring-algorithm-based-on-switching-frequency-between-productive-and-distracting-activities-with-weighted-penalties-for-context-switches",
-      "featureTitle": "Implement burnout/fatigue scoring algorithm based on switching frequency between productive and distracting activities with weighted penalties for context switches",
-      "files": [
-        "frontend/src/components/BurnoutScoreCard.tsx",
-        "frontend/src/components/BurnoutTrendsChart.tsx",
-        "frontend/src/hooks/useBurnoutScore.ts",
-        "frontend/src/pages/Dashboard.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-7"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-measure-and-display-session-duration-metrics-to-distinguish-between-real-work-25-min-browsing-5-10-min-and-checking-habits-10-40-sec-repeated-visits",
-      "featureTitle": "Measure and display session duration metrics to distinguish between real work (25+ min), browsing (5-10 min), and checking habits (10-40 sec repeated visits)",
-      "files": [
-        "frontend/src/components/DurationAnalysisCard.tsx",
-        "frontend/src/hooks/useDistractionLogger.ts",
-        "frontend/src/hooks/useDurationAnalysis.ts",
-        "frontend/src/pages/FocusSession.tsx",
-        "frontend/src/pages/SessionHistory.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-8"
       ],
       "confidence": "high"
     }
